@@ -1,0 +1,38 @@
+# Single O — Sydney, NSW
+# https://singleo.com.au
+#
+# Single O (formerly Single Origin Roasters) is a Sydney specialty roaster
+# known for sustainability focus and transparent sourcing. Their online
+# shop uses a bespoke non-Shopify platform, so we use CSS selectors.
+# Verify selectors are current before activating.
+
+slug: single-o
+name: Single O
+state: NSW
+website: https://singleo.com.au
+active: false  # selector-based — needs verification before enabling
+
+shop_url: https://singleo.com.au/pages/coffee
+pagination_type: none
+
+strategy: selector
+
+selectors:
+  product_card: ".product-card"
+  name: ".product-card__title"
+  price: ".product-card__price"
+  origin: ".product-card__origin"
+  process: ".product-card__process"
+  roast_level: ".product-card__roast"
+  tasting_notes: ".product-card__notes"
+  product_url: "a.product-card__link"
+  image_url: "img.product-card__image"
+  in_stock: ".product-card__cta:not(.sold-out)"
+
+field_hints:
+  skip_patterns:
+    - "gift card"
+    - "merch"
+    - "equipment"
+
+rate_limit_seconds: 5

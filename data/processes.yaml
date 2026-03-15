@@ -1,0 +1,79 @@
+# Reference data: coffee process method aliases → canonical values
+# ================================================================
+# Used by internal/normalise to map raw scraped process strings.
+#
+# Canonical values: washed | natural | honey | anaerobic | wet-hulled | experimental
+#
+# Add new aliases as they are encountered in the wild.
+# Keys are lowercased for matching; the normaliser lowercases input before lookup.
+
+washed:
+  canonical: washed
+  aliases:
+    - washed
+    - wet process
+    - wet-process
+    - fully washed
+    - full washed
+    - wet processed
+    - traditional washed
+
+natural:
+  canonical: natural
+  aliases:
+    - natural
+    - naturale
+    - dry process
+    - dry-process
+    - dried natural
+    - sun dried
+    - sun-dried
+    - sun dry
+    - dry processed
+
+honey:
+  canonical: honey
+  aliases:
+    - honey
+    - pulped natural
+    - pulped
+    - semi-washed
+    - semi washed
+    - yellow honey
+    - red honey
+    - black honey
+    - white honey
+    - gold honey
+
+anaerobic:
+  canonical: anaerobic
+  aliases:
+    - anaerobic
+    - anaerobic natural
+    - anaerobic washed
+    - anaerobic fermentation
+    - extended fermentation
+    - thermal shock
+    - yeast inoculated
+
+wet-hulled:
+  canonical: wet-hulled
+  aliases:
+    - wet hulled
+    - wet-hulled
+    - giling basah
+    - semi-dry
+    - semi dry
+
+experimental:
+  canonical: experimental
+  aliases:
+    - experimental
+    - carbonic maceration
+    - carbonic
+    - lactic fermentation
+    - lactic
+    - koji
+    - turbo
+    - double fermentation
+    - triple fermentation

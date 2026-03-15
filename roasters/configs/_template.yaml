@@ -1,0 +1,158 @@
+# Roaster config template for Coffeeroasters
+# ============================================
+# Copy this file to <roaster-slug>.yaml and fill in the fields below.
+# The filename (without .yaml) must match the `slug` field.
+#
+# After filling in this file, test your config with:
+#   go run ./cmd/scrape -roaster <slug> -dry-run -include-inactive
+#
+# When it looks good, set active: true and open a PR.
+# ============================================
+
+# ---------------------------------------------------------------------------
+# Roaster identity (required)
+# ---------------------------------------------------------------------------
+
+# slug: URL-safe unique identifier. Use lowercase, hyphens only.
+# Must match this filename (without .yaml).
+# Example: "seven-seeds", "market-lane", "ona-coffee"
+slug: my-roaster-slug
+
+# name: Human-readable display name.
+name: My Roaster Name
+
+# state: Australian state or territory abbreviation.
+# Options: VIC, NSW, QLD, WA, SA, TAS, ACT, NT
+state: VIC
+
+# website: The roaster's homepage (not the shop URL — see shop_url below).
+website: https://www.example.com.au
+
+# active: Set to true once the config is tested and ready for scheduled runs.
+# Leave as false while you're developing the config.
+active: false
+
+# ---------------------------------------------------------------------------
+# Scrape target (required)
+# ---------------------------------------------------------------------------
+
+# shop_url: The URL of the page that lists all coffees for sale.
+# For Shopify stores, this is typically /collections/coffee or /collections/all.
+# For paginated stores, use the first page URL.
+shop_url: https://www.example.com.au/collections/coffee
+
+# pagination_type: How subsequent pages are accessed.
+# Options:
+#   "none"         — all products on one page (default)
+#   "query_param"  — pages are accessed via a query parameter (e.g. ?page=2)
+#   "next_button"  — a "Next" link in the HTML
+pagination_type: none
+
+# pagination_param: The query parameter name for page numbers.
+# Only used when pagination_type is "query_param".
+# Example: "page" → ?page=2, ?page=3, ...
+# pagination_param: page
+
+# max_pages: Safety cap on how many pages to scrape. Defaults to 10.
+# max_pages: 10
+
+# ---------------------------------------------------------------------------
+# Extraction strategy (required)
+# ---------------------------------------------------------------------------
+
+# strategy: How to extract product data from the page.
+# Options:
+#   "shopify"   — Use the Shopify products.json API endpoint. Best option for
+#                 Shopify stores — structured and reliable. If the store is on
+#                 Shopify, always try this first.
+#                 Test: curl https://STORE.myshopify.com/products.json | jq .
+#
+#   "jsonld"    — Parse Schema.org Product JSON-LD from the HTML <script> tags.
+#                 Many modern stores include this. Second-best option.
+#                 Test: view source, search for 'application/ld+json'.
+#
+#   "selector"  — Use CSS selectors (defined in `selectors` below).
+#                 Use this for bespoke non-Shopify sites that don't have JSON-LD.
+strategy: shopify
+
+# shopify_collection: For strategy "shopify", restrict to this collection handle.
+# Find it in the store's URL: /collections/<handle>.
+# Leave empty to scrape all products (you can use skip_patterns to filter).
+# shopify_collection: coffee
+
+# ---------------------------------------------------------------------------
+# CSS selectors (only needed for strategy: "selector")
+# ---------------------------------------------------------------------------
+# All selectors are evaluated within each product_card element.
+# Use browser devtools (right-click → Inspect) to find the right selectors.
+#
+# selectors:
+#   # REQUIRED: the container element for a single product listing.
+#   product_card: ".product-item"
+#
+#   # REQUIRED: the product name.
+#   name: "h2.product-title"
+#
+#   # REQUIRED: the price element (text content will be parsed).
+#   price: ".price"
+#
+#   # OPTIONAL: the weight/size option.
+#   weight: "select.weight option:checked"
+#
+#   # OPTIONAL: origin text.
+#   origin: ".product-meta .origin"
+#
+#   # OPTIONAL: process method.
+#   process: ".product-meta .process"
+#
+#   # OPTIONAL: roast level.
+#   roast_level: ".roast-badge"
+#
+#   # OPTIONAL: tasting notes.
+#   tasting_notes: ".tasting-notes"
+#
+#   # OPTIONAL: link to the product detail page (href attribute extracted).
+#   # Defaults to nearest ancestor <a> within product_card.
+#   product_url: "a.product-link"
+#
+#   # OPTIONAL: product image (src or data-src attribute extracted).
+#   image_url: "img.product-image"
+#
+#   # OPTIONAL: selector that, when present, indicates the product is in stock.
+#   # If this selector matches 0 elements in the card, product is out of stock.
+#   in_stock: ".add-to-cart:not([disabled])"
+
+# ---------------------------------------------------------------------------
+# Field extraction hints (optional)
+# ---------------------------------------------------------------------------
+# field_hints:
+#   # If the price is in an attribute rather than text content:
+#   # price_attribute: "data-price"
+#   # price_in_cents: true   # set if the attribute value is already in cents
+#
+#   # If the weight is already a plain number in grams (not "250g"):
+#   # weight_in_grams: true
+#
+#   # If origin is embedded in the product name (e.g. "Ethiopia Yirgacheffe — Natural"):
+#   # origin_in_title: true
+#
+#   # Products whose names contain any of these substrings (case-insensitive)
+#   # will be skipped. Use this to filter out merchandise, gift cards, etc.
+#   skip_patterns:
+#     - "gift card"
+#     - "merchandise"
+#     - "tote bag"
+#     - "subscription"
+#     - "capsule"
+
+# ---------------------------------------------------------------------------
+# Ethical scraping overrides (optional)
+# ---------------------------------------------------------------------------
+# rate_limit_seconds: Minimum seconds between requests to this domain.
+# Must be >= 2. Defaults to 3. Increase for sites with aggressive rate limiting.
+# rate_limit_seconds: 5
+
+# headers: Additional HTTP request headers (e.g. if the site requires a
+# specific Accept-Language or cookie-less session header).
+# headers:
+#   Accept-Language: "en-AU,en;q=0.9"

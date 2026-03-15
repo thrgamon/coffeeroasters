@@ -1,0 +1,31 @@
+# ONA Coffee — Canberra, ACT (with Sydney + Melbourne cafes)
+# https://onacoffee.com.au
+#
+# ONA is Australia's most decorated specialty coffee company — home to
+# multiple World Barista Championship competitors. They roast out of
+# Canberra and ship nationally. Their site is Shopify-based.
+# Note: product descriptions include detailed origin/process/variety info.
+
+slug: ona-coffee
+name: ONA Coffee
+state: ACT
+website: https://onacoffee.com.au
+active: true
+
+shop_url: https://onacoffee.com.au/collections/coffee
+pagination_type: query_param
+pagination_param: page
+max_pages: 5
+
+strategy: shopify
+shopify_collection: coffee
+
+field_hints:
+  skip_patterns:
+    - "gift card"
+    - "merchandise"
+    - "equipment"
+    - "subscription"
+    - "tasting kit"
+
+rate_limit_seconds: 4

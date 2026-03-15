@@ -1,0 +1,29 @@
+# Seven Seeds Coffee Roasters — Melbourne, VIC
+# https://sevenseeds.com.au
+#
+# Seven Seeds is one of Melbourne's most established specialty roasters,
+# founded in 2007 in Carlton. They run a Shopify store with a clean
+# /products.json endpoint.
+
+slug: seven-seeds
+name: Seven Seeds
+state: VIC
+website: https://sevenseeds.com.au
+active: true
+
+shop_url: https://sevenseeds.com.au/collections/coffee
+pagination_type: query_param
+pagination_param: page
+max_pages: 5
+
+strategy: shopify
+shopify_collection: coffee
+
+field_hints:
+  skip_patterns:
+    - "gift card"
+    - "merchandise"
+    - "brewing equipment"
+    - "subscription"
+
+rate_limit_seconds: 4

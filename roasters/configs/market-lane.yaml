@@ -1,0 +1,30 @@
+# Market Lane Coffee — Melbourne, VIC
+# https://marketlane.com.au
+#
+# Market Lane is a Melbourne institution with cafes in Prahran, Carlton,
+# and the Queen Victoria Market. Their online shop uses Shopify.
+# They focus on single origins and tend to have well-structured product
+# listings with clear origin/process/tasting-notes metadata.
+
+slug: market-lane
+name: Market Lane Coffee
+state: VIC
+website: https://marketlane.com.au
+active: true
+
+shop_url: https://marketlane.com.au/collections/coffee-to-buy-online
+pagination_type: none
+max_pages: 3
+
+strategy: shopify
+shopify_collection: coffee-to-buy-online
+
+field_hints:
+  skip_patterns:
+    - "gift card"
+    - "tote"
+    - "subscription"
+    - "equipment"
+    - "merchandise"
+
+rate_limit_seconds: 4
