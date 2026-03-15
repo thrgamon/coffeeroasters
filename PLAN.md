@@ -1,6 +1,6 @@
 # Coffeeroasters — Implementation Plan
 
-A meta aggregator for specialty coffee roasters: discover them, scrape their offerings, normalise the data, and present it in a clean UI.
+A meta aggregator for **Australian indie coffee roasters**: discover them, scrape their offerings, normalise the data, and present it in a clean UI.
 
 ---
 
@@ -9,10 +9,11 @@ A meta aggregator for specialty coffee roasters: discover them, scrape their off
 **Goal:** Compile a seed list of roasters to track.
 
 ### Sources
-- Curated directories: [Roast Magazine](https://roastmagazine.com), [Coffee Review](https://coffeereview.com), [Perfect Daily Grind](https://perfectdailygrind.com)
-- Community lists: Reddit r/coffee wikis, specialty coffee forums, Instagram hashtags
-- Barista competition sponsors and entrants
-- Existing open datasets (e.g. OpenStreetMap `craft=coffee_roasters`)
+- Australian specialty coffee directories: [Melbourne Coffee Review](https://melbournecoffeereview.com.au), [I Need Coffee AU](https://ineedcoffee.com.au), [Specialty Coffee Association of Australia](https://www.scaa.asn.au)
+- Community lists: Reddit r/australia + r/coffee, Facebook coffee groups, Instagram hashtags (#australiancoffee, #specialtycoffeeaustralia)
+- Barista competition entrants: Australian Barista Championship, World Barista Championship AU qualifiers
+- Existing open datasets (e.g. OpenStreetMap `craft=coffee_roasters` filtered to AU)
+- State-based directories (VIC, NSW, QLD, WA, SA roaster guides)
 
 ### Approach
 - Manual seed list in a YAML/CSV file to bootstrap (`roasters.yaml`)
@@ -112,35 +113,35 @@ GET  /api/search?q=             # full-text search
 
 ---
 
-## Phase 5: SvelteKit Frontend
+## Phase 5: Next.js Frontend
 
 **Goal:** A fast, clean UI for browsing and discovering coffees.
 
 ### Pages
 - `/` — landing / featured roasters + coffees
-- `/roasters` — browse all roasters (filter by country/region)
+- `/roasters` — browse all roasters (filter by AU state/region)
 - `/roasters/[slug]` — roaster profile + their current offerings
 - `/coffees` — search & filter all coffees
 - `/origins/[country]` — coffees by origin country
 - `/about` — project info, data sources, ethical notes
 
 ### Features
-- Filter sidebar: origin, process, roast level, price, in-stock only
+- Filter sidebar: origin, process, roast level, price, in-stock only, AU state
 - Full-text search with instant results
 - Coffee cards with tasting notes tags, roast level badge
-- Roaster cards with country flag, region
+- Roaster cards with AU state badge, founded year
 - Responsive, mobile-first design
 - Light/dark mode
 
 ### Tech
-- SvelteKit with server-side rendering
+- Next.js (App Router) with server-side rendering
 - Tailwind CSS for styling
-- `@tanstack/svelte-query` for data fetching / caching
-- Deployed to Fly.io or Vercel
+- TanStack Query for client-side data fetching / caching
+- Deployed to Vercel or Fly.io
 
 ### Deliverables
-- Full SvelteKit app in `frontend/`
-- Storybook component library (optional)
+- Full Next.js app in `src/`
+- Shared component library under `src/components/`
 - E2E tests with Playwright
 
 ---
@@ -198,7 +199,7 @@ GET  /api/search?q=             # full-text search
 |---|-----------|--------|
 | 1 | Repo setup, schema, seed list | Week 1 |
 | 2 | 10 working scrapers, data in DB | Week 3 |
-| 3 | Basic API + SvelteKit UI live | Week 5 |
+| 3 | Basic API + Next.js UI live | Week 5 |
 | 4 | 50+ roasters, normalisation | Week 7 |
 | 5 | Scheduled updates, alerts | Week 9 |
 | 6 | Public launch | Week 12 |
