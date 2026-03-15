@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/thrgamon/project-template/internal/auth"
-	"github.com/thrgamon/project-template/internal/config"
-	"github.com/thrgamon/project-template/internal/domain"
+	"github.com/thrgamon/coffeeroasters/internal/auth"
+	"github.com/thrgamon/coffeeroasters/internal/config"
+	"github.com/thrgamon/coffeeroasters/internal/domain"
 )
 
 type HandlerConfig struct {

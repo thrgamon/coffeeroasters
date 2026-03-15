@@ -10,9 +10,9 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/thrgamon/project-template/internal/config"
-	"github.com/thrgamon/project-template/internal/db"
-	"github.com/thrgamon/project-template/internal/domain"
+	"github.com/thrgamon/coffeeroasters/internal/config"
+	"github.com/thrgamon/coffeeroasters/internal/db"
+	"github.com/thrgamon/coffeeroasters/internal/domain"
 )
 
 type Service struct {

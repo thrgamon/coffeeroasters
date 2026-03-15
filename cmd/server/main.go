@@ -12,12 +12,12 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/thrgamon/project-template/internal/api"
-	"github.com/thrgamon/project-template/internal/auth"
-	"github.com/thrgamon/project-template/internal/config"
-	"github.com/thrgamon/project-template/internal/db"
-	"github.com/thrgamon/project-template/internal/server"
-	"github.com/thrgamon/project-template/internal/telemetry"
+	"github.com/thrgamon/coffeeroasters/internal/api"
+	"github.com/thrgamon/coffeeroasters/internal/auth"
+	"github.com/thrgamon/coffeeroasters/internal/config"
+	"github.com/thrgamon/coffeeroasters/internal/db"
+	"github.com/thrgamon/coffeeroasters/internal/server"
+	"github.com/thrgamon/coffeeroasters/internal/telemetry"
 )
 
 // @title My App API

@@ -10,9 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
-	"github.com/thrgamon/project-template/internal/api"
-	"github.com/thrgamon/project-template/internal/config"
-	"github.com/thrgamon/project-template/internal/middleware"
+	"github.com/thrgamon/coffeeroasters/internal/api"
+	"github.com/thrgamon/coffeeroasters/internal/config"
+	"github.com/thrgamon/coffeeroasters/internal/middleware"
 )
 
 type Options struct {

@@ -1,4 +1,4 @@
-module github.com/thrgamon/project-template
+module github.com/thrgamon/coffeeroasters
 
 go 1.25.0
 
