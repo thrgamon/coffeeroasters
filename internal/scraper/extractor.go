@@ -29,19 +29,30 @@ type BatchExtraction struct {
 	Products []BatchProduct `json:"products"`
 }
 
+// BlendComponent represents one origin component of a blend coffee, as
+// extracted by the LLM.
+type BlendComponent struct {
+	Origin     *string `json:"origin" jsonschema:"description=Country of origin for this blend component. Null if not stated."`
+	Region     *string `json:"region" jsonschema:"description=Growing region for this blend component. Null if not stated."`
+	Variety    *string `json:"variety" jsonschema:"description=Coffee variety for this blend component. Null if not stated."`
+	Percentage *int    `json:"percentage" jsonschema:"description=Percentage of this component in the blend. Null if not stated."`
+}
+
 // BatchProduct pairs an index with the extracted coffee data. The index
 // corresponds to the position in the input descriptions array.
 type BatchProduct struct {
-	Index        int     `json:"index" jsonschema:"description=Zero-based index matching the input description array"`
-	IsCoffee     bool    `json:"is_coffee" jsonschema:"description=True only if this is a single purchasable bag of coffee beans or ground coffee. False for subscriptions and recurring plans and sample packs and bundles and gift cards and equipment and merchandise and tea and vouchers and courses and accessories."`
-	Name         string  `json:"name" jsonschema:"description=Product name"`
-	Origin       *string `json:"origin" jsonschema:"description=Country or region of origin. Null if not stated."`
-	Region       *string `json:"region" jsonschema:"description=Specific growing region. Null if not stated."`
-	Process      *string `json:"process" jsonschema:"description=Processing method. Null if not stated."`
-	RoastLevel   *string `json:"roast_level" jsonschema:"description=Roast level. Null if not stated."`
-	TastingNotes *string `json:"tasting_notes" jsonschema:"description=Comma-separated tasting notes. Null if not stated."`
-	Variety      *string `json:"variety" jsonschema:"description=Coffee variety. Null if not stated."`
-	Producer     *string `json:"producer" jsonschema:"description=Farm, estate, cooperative, or washing station name. Null if not stated."`
+	Index           int              `json:"index" jsonschema:"description=Zero-based index matching the input description array"`
+	IsCoffee        bool             `json:"is_coffee" jsonschema:"description=True only if this is a single purchasable bag of coffee beans or ground coffee. False for subscriptions and recurring plans and sample packs and bundles and gift cards and equipment and merchandise and tea and vouchers and courses and accessories."`
+	Name            string           `json:"name" jsonschema:"description=Product name"`
+	Origin          *string          `json:"origin" jsonschema:"description=Country or region of origin. Null if not stated. For blends with multiple origins use the blend_components array instead."`
+	Region          *string          `json:"region" jsonschema:"description=Specific growing region. Null if not stated."`
+	Process         *string          `json:"process" jsonschema:"description=Processing method. Null if not stated."`
+	RoastLevel      *string          `json:"roast_level" jsonschema:"description=Roast level. Null if not stated."`
+	TastingNotes    *string          `json:"tasting_notes" jsonschema:"description=Comma-separated tasting notes. Null if not stated."`
+	Variety         *string          `json:"variety" jsonschema:"description=Coffee variety. Null if not stated."`
+	Producer        *string          `json:"producer" jsonschema:"description=Farm, estate, cooperative, or washing station name. Null if not stated."`
+	IsBlend         bool             `json:"is_blend" jsonschema:"description=True if this coffee is a blend of beans from multiple origins or farms."`
+	BlendComponents []BlendComponent `json:"blend_components" jsonschema:"description=For blends only: the individual origin components. Empty array if not a blend or components are not stated."`
 }
 
 // PageExtraction is the structured output for extracting coffees from a
@@ -53,19 +64,21 @@ type PageExtraction struct {
 // PageProduct extends CoffeeProduct with pricing and URL data that must
 // be extracted from the HTML (since there is no Shopify JSON to provide it).
 type PageProduct struct {
-	IsCoffee     bool    `json:"is_coffee" jsonschema:"description=True only if this is a single purchasable bag of coffee beans or ground coffee. False for subscriptions and recurring plans and sample packs and bundles and gift cards and equipment and merchandise and tea and vouchers and courses and accessories."`
-	Name         string  `json:"name" jsonschema:"description=Product name"`
-	Origin       *string `json:"origin" jsonschema:"description=Country or region of origin. Null if not stated."`
-	Region       *string `json:"region" jsonschema:"description=Specific growing region. Null if not stated."`
-	Process      *string `json:"process" jsonschema:"description=Processing method. Null if not stated."`
-	RoastLevel   *string `json:"roast_level" jsonschema:"description=Roast level. Null if not stated."`
-	TastingNotes *string `json:"tasting_notes" jsonschema:"description=Comma-separated tasting notes. Null if not stated."`
-	Variety      *string `json:"variety" jsonschema:"description=Coffee variety. Null if not stated."`
-	Producer     *string `json:"producer" jsonschema:"description=Farm, estate, cooperative, or washing station name. Null if not stated."`
-	PriceText    *string `json:"price_text" jsonschema:"description=Price as displayed (e.g. $32.00). Null if not found."`
-	WeightText   *string `json:"weight_text" jsonschema:"description=Weight as displayed (e.g. 250g). Null if not found."`
-	InStock      bool    `json:"in_stock" jsonschema:"description=Whether the product appears to be in stock"`
-	ProductURL   *string `json:"product_url" jsonschema:"description=URL or relative path to the product page. Null if not found."`
+	IsCoffee        bool             `json:"is_coffee" jsonschema:"description=True only if this is a single purchasable bag of coffee beans or ground coffee. False for subscriptions and recurring plans and sample packs and bundles and gift cards and equipment and merchandise and tea and vouchers and courses and accessories."`
+	Name            string           `json:"name" jsonschema:"description=Product name"`
+	Origin          *string          `json:"origin" jsonschema:"description=Country or region of origin. Null if not stated. For blends with multiple origins use the blend_components array instead."`
+	Region          *string          `json:"region" jsonschema:"description=Specific growing region. Null if not stated."`
+	Process         *string          `json:"process" jsonschema:"description=Processing method. Null if not stated."`
+	RoastLevel      *string          `json:"roast_level" jsonschema:"description=Roast level. Null if not stated."`
+	TastingNotes    *string          `json:"tasting_notes" jsonschema:"description=Comma-separated tasting notes. Null if not stated."`
+	Variety         *string          `json:"variety" jsonschema:"description=Coffee variety. Null if not stated."`
+	Producer        *string          `json:"producer" jsonschema:"description=Farm, estate, cooperative, or washing station name. Null if not stated."`
+	PriceText       *string          `json:"price_text" jsonschema:"description=Price as displayed (e.g. $32.00). Null if not found."`
+	WeightText      *string          `json:"weight_text" jsonschema:"description=Weight as displayed (e.g. 250g). Null if not found."`
+	InStock         bool             `json:"in_stock" jsonschema:"description=Whether the product appears to be in stock"`
+	ProductURL      *string          `json:"product_url" jsonschema:"description=URL or relative path to the product page. Null if not found."`
+	IsBlend         bool             `json:"is_blend" jsonschema:"description=True if this coffee is a blend of beans from multiple origins or farms."`
+	BlendComponents []BlendComponent `json:"blend_components" jsonschema:"description=For blends only: the individual origin components. Empty array if not a blend or components are not stated."`
 }
 
 // ProductDescription is an input to the batch extraction: a Shopify product
@@ -95,13 +108,17 @@ Set is_coffee=true for these. Set is_coffee=false for everything else including:
 
 For each coffee product, extract:
 - name: the product name
-- origin: country or region of origin
+- origin: country or region of origin (for single-origin coffees)
 - region: specific growing region within the country
 - process: processing method (Washed, Natural, Honey, Anaerobic, etc.)
 - roast_level: roast profile (Light, Medium, Filter, Espresso, etc.)
 - tasting_notes: comma-separated flavour descriptors
 - variety: coffee cultivar/variety
 - producer: farm, estate, cooperative, or washing station name
+- is_blend: true if the coffee is a blend of beans from multiple origins or farms
+- blend_components: for blends, list each origin component with country, region, variety, and percentage if stated
+
+For blends (e.g. "Seasonal Espresso Blend" with origins "Colombia, Brazil, Guatemala"), set is_blend=true and populate blend_components with each origin. Leave the top-level origin field null for blends.
 
 Use null for any field where the information is not clearly stated. Do not guess.
 Prices are in AUD unless stated otherwise.`
@@ -112,7 +129,7 @@ This is a single product page, not a listing of many products. Extract as much d
 
 For the coffee product on this page, extract:
 - name: the product name
-- origin: country of origin (e.g. Colombia, Ethiopia, Kenya)
+- origin: country of origin (e.g. Colombia, Ethiopia, Kenya). For blends with multiple origins, leave null and use blend_components instead.
 - region: specific growing region within the country (e.g. Huila, Yirgacheffe, Nyeri)
 - process: processing method (e.g. Washed, Natural, Honey, Anaerobic)
 - roast_level: roast profile (e.g. Light, Medium, Filter, Espresso, Omni)
@@ -122,6 +139,8 @@ For the coffee product on this page, extract:
 - price_text: the displayed price (e.g. "$32.00")
 - weight_text: the displayed weight (e.g. "250g")
 - in_stock: whether it appears available for purchase
+- is_blend: true if the coffee is a blend of beans from multiple origins or farms
+- blend_components: for blends, list each origin component with country, region, variety, and percentage if stated
 
 Use null for any field where the information is not clearly stated. Do not guess.
 Only extract if this is a single purchasable bag of coffee beans or ground coffee. Set is_coffee=true for these.
@@ -136,6 +155,10 @@ For each coffee product you find on the page, extract:
 - weight_text: the displayed weight (e.g. "250g")
 - in_stock: whether it appears available for purchase
 - product_url: the link to the product page (relative or absolute URL)
+- is_blend: true if the coffee is a blend of beans from multiple origins or farms
+- blend_components: for blends, list each origin component with country, region, variety, and percentage if stated
+
+For blends, leave the top-level origin field null and populate blend_components instead.
 
 Use null for any field where the information is not clearly stated. Do not guess.
 Only extract products that are a single purchasable bag of coffee beans or ground coffee. Set is_coffee=true for these.

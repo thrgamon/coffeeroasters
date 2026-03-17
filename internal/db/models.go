@@ -11,6 +11,16 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type BlendComponent struct {
+	ID          int32       `json:"id"`
+	CoffeeID    int32       `json:"coffee_id"`
+	CountryCode pgtype.Text `json:"country_code"`
+	RegionID    pgtype.Int4 `json:"region_id"`
+	Variety     pgtype.Text `json:"variety"`
+	Percentage  pgtype.Int4 `json:"percentage"`
+	CreatedAt   time.Time   `json:"created_at"`
+}
+
 type Coffee struct {
 	ID              int64       `json:"id"`
 	RoasterID       int32       `json:"roaster_id"`
@@ -44,6 +54,9 @@ type Coffee struct {
 	ProducerRaw     pgtype.Text `json:"producer_raw"`
 	Variety         pgtype.Text `json:"variety"`
 	Species         pgtype.Text `json:"species"`
+	PricePer100gMin pgtype.Int4 `json:"price_per_100g_min"`
+	PricePer100gMax pgtype.Int4 `json:"price_per_100g_max"`
+	IsBlend         bool        `json:"is_blend"`
 }
 
 type Country struct {

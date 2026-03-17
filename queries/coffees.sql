@@ -7,6 +7,7 @@ INSERT INTO coffees (
     process, roast_level, tasting_notes, price_cents, weight_grams,
     country_code, region_id, producer_id, producer_raw,
     variety, species,
+    price_per_100g_min, price_per_100g_max, is_blend,
     last_seen_at
 )
 VALUES (
@@ -16,6 +17,7 @@ VALUES (
     $15, $16, $17, $18, $19,
     $20, $21, $22, $23,
     $24, $25,
+    $26, $27, $28,
     now()
 )
 ON CONFLICT (roaster_id, name) DO UPDATE SET
@@ -42,6 +44,9 @@ ON CONFLICT (roaster_id, name) DO UPDATE SET
     producer_raw = EXCLUDED.producer_raw,
     variety = EXCLUDED.variety,
     species = EXCLUDED.species,
+    price_per_100g_min = EXCLUDED.price_per_100g_min,
+    price_per_100g_max = EXCLUDED.price_per_100g_max,
+    is_blend = EXCLUDED.is_blend,
     last_seen_at = now(),
     last_changed_at = CASE
         WHEN coffees.price_cents IS DISTINCT FROM EXCLUDED.price_cents
@@ -50,7 +55,7 @@ ON CONFLICT (roaster_id, name) DO UPDATE SET
         ELSE coffees.last_changed_at
     END,
     updated_at = now()
-RETURNING (xmax = 0) AS is_new;
+RETURNING (xmax = 0) AS is_new, id;
 
 -- name: ListCoffees :many
 SELECT
@@ -58,6 +63,7 @@ SELECT
     c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
@@ -85,6 +91,7 @@ SELECT
     c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
@@ -105,6 +112,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.producer_raw, c.region_id, c.producer_id,
     c.variety, c.species,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
     c.first_seen_at, c.last_seen_at,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
@@ -123,6 +131,7 @@ SELECT
     c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
@@ -144,6 +153,7 @@ SELECT
     c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
@@ -154,7 +164,10 @@ LEFT JOIN countries co ON co.code = c.country_code
 LEFT JOIN regions reg ON reg.id = c.region_id
 LEFT JOIN producers p ON p.id = c.producer_id
 WHERE r.opted_out = false
-    AND ($1::text IS NULL OR c.country_code = $1)
+    AND ($1::text IS NULL OR c.country_code = $1
+        OR (c.is_blend AND EXISTS (
+            SELECT 1 FROM blend_components bc
+            WHERE bc.coffee_id = c.id AND bc.country_code = $1)))
     AND ($2::text IS NULL OR c.process = $2)
     AND ($3::text IS NULL OR c.roast_level = $3)
     AND ($4::boolean IS NULL OR c.in_stock = $4)
@@ -174,6 +187,7 @@ SELECT
     c.country_code, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
@@ -183,7 +197,11 @@ JOIN roasters r ON r.id = c.roaster_id
 LEFT JOIN countries co ON co.code = c.country_code
 LEFT JOIN regions reg ON reg.id = c.region_id
 LEFT JOIN producers p ON p.id = c.producer_id
-WHERE c.country_code = $1 AND r.opted_out = false
+WHERE r.opted_out = false
+    AND (c.country_code = $1
+        OR (c.is_blend AND EXISTS (
+            SELECT 1 FROM blend_components bc
+            WHERE bc.coffee_id = c.id AND bc.country_code = $1)))
 ORDER BY c.name;
 
 -- name: ListCoffeesByRegion :many
@@ -192,6 +210,7 @@ SELECT
     c.country_code, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
@@ -210,6 +229,7 @@ SELECT
     c.country_code, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,

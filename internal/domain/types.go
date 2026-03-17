@@ -62,34 +62,49 @@ type RoasterResponse struct {
 }
 
 type CoffeeResponse struct {
-	ID           int64    `json:"id"`
-	RoasterID    int32    `json:"roaster_id"`
-	RoasterName  string   `json:"roaster_name,omitempty"`
-	RoasterSlug  string   `json:"roaster_slug,omitempty"`
-	Name         string   `json:"name"`
-	ProductURL   string   `json:"product_url,omitempty"`
-	ImageURL     string   `json:"image_url,omitempty"`
-	CountryCode  string   `json:"country_code,omitempty"`
-	CountryName  string   `json:"country_name,omitempty"`
-	RegionID     int32    `json:"region_id,omitempty"`
-	RegionName   string   `json:"region_name,omitempty"`
-	ProducerID   int32    `json:"producer_id,omitempty"`
-	ProducerName string   `json:"producer_name,omitempty"`
-	Process      string   `json:"process,omitempty"`
-	RoastLevel   string   `json:"roast_level,omitempty"`
-	TastingNotes []string `json:"tasting_notes,omitempty"`
-	Variety      string   `json:"variety,omitempty"`
-	Species      string   `json:"species,omitempty"`
-	PriceCents   int32    `json:"price_cents,omitempty"`
-	WeightGrams  int32    `json:"weight_grams,omitempty"`
+	ID              int64    `json:"id"`
+	RoasterID       int32    `json:"roaster_id"`
+	RoasterName     string   `json:"roaster_name,omitempty"`
+	RoasterSlug     string   `json:"roaster_slug,omitempty"`
+	Name            string   `json:"name"`
+	ProductURL      string   `json:"product_url,omitempty"`
+	ImageURL        string   `json:"image_url,omitempty"`
+	CountryCode     string   `json:"country_code,omitempty"`
+	CountryName     string   `json:"country_name,omitempty"`
+	RegionID        int32    `json:"region_id,omitempty"`
+	RegionName      string   `json:"region_name,omitempty"`
+	ProducerID      int32    `json:"producer_id,omitempty"`
+	ProducerName    string   `json:"producer_name,omitempty"`
+	Process         string   `json:"process,omitempty"`
+	RoastLevel      string   `json:"roast_level,omitempty"`
+	TastingNotes    []string `json:"tasting_notes,omitempty"`
+	Variety         string   `json:"variety,omitempty"`
+	Species         string   `json:"species,omitempty"`
+	PriceCents      int32    `json:"price_cents,omitempty"`
+	WeightGrams     int32    `json:"weight_grams,omitempty"`
+	PricePer100gMin int32    `json:"price_per_100g_min,omitempty"`
+	PricePer100gMax int32    `json:"price_per_100g_max,omitempty"`
+	IsBlend         bool     `json:"is_blend"`
 	InStock         bool     `json:"in_stock"`
 	SimilarityScore float64  `json:"similarity_score,omitempty"`
 }
 
-// CoffeeDetailResponse wraps a CoffeeResponse with similar coffees.
+// BlendComponentResponse represents a single origin component of a blend.
+type BlendComponentResponse struct {
+	CountryCode string `json:"country_code,omitempty"`
+	CountryName string `json:"country_name,omitempty"`
+	RegionID    int32  `json:"region_id,omitempty"`
+	RegionName  string `json:"region_name,omitempty"`
+	Variety     string `json:"variety,omitempty"`
+	Percentage  int32  `json:"percentage,omitempty"`
+}
+
+// CoffeeDetailResponse wraps a CoffeeResponse with similar coffees and
+// blend components for blend coffees.
 type CoffeeDetailResponse struct {
 	CoffeeResponse
-	SimilarCoffees []SimilarCoffee `json:"similar_coffees,omitempty"`
+	BlendComponents []BlendComponentResponse `json:"blend_components,omitempty"`
+	SimilarCoffees  []SimilarCoffee          `json:"similar_coffees,omitempty"`
 }
 
 // SimilarCoffee is a lightweight coffee representation for the similar coffees section.

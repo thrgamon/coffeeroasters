@@ -1,6 +1,6 @@
 'use client';
 
-import { Bean, Droplets, Flame, Globe, Grape, Sprout } from 'lucide-react';
+import { Bean, Droplets, Flame, Globe, Grape, Layers, Sprout } from 'lucide-react';
 import Link from 'next/link';
 import { use } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -78,6 +78,12 @@ export default function CoffeeDetailPage({ params }: { params: Promise<{ id: str
 									{coffee.species}
 								</Badge>
 							)}
+							{coffee.is_blend && (
+								<Badge variant="outline" className="gap-1">
+									<Layers className="size-3" />
+									Blend
+								</Badge>
+							)}
 							{!coffee.in_stock && <Badge variant="destructive">Out of stock</Badge>}
 						</div>
 					</div>
@@ -106,11 +112,56 @@ export default function CoffeeDetailPage({ params }: { params: Promise<{ id: str
 					</div>
 				)}
 
+				{coffee.blend_components && coffee.blend_components.length > 0 && (
+					<div>
+						<h3 className="mb-1 text-sm font-medium">Blend components</h3>
+						<div className="space-y-1">
+							{coffee.blend_components.map((comp, i) => (
+								<div key={i} className="flex items-center gap-2 text-sm">
+									{comp.country_name && (
+										<Link href={`/countries/${comp.country_code}`}>
+											<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent">
+												<Globe className="size-3" />
+												{comp.country_name}
+											</Badge>
+										</Link>
+									)}
+									{comp.region_name && comp.region_id && (
+										<Link href={`/regions/${comp.region_id}`}>
+											<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent">
+												<Globe className="size-3" />
+												{comp.region_name}
+											</Badge>
+										</Link>
+									)}
+									{comp.variety && (
+										<Badge variant="outline" className="gap-1">
+											<Bean className="size-3" />
+											{comp.variety}
+										</Badge>
+									)}
+									{comp.percentage ? (
+										<span className="text-muted-foreground">{comp.percentage}%</span>
+									) : null}
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+
 				<div className="flex items-center gap-4 text-sm">
-					{coffee.price_cents ? (
+					{coffee.price_per_100g_min ? (
+						<span className="text-lg font-medium">
+							{coffee.price_per_100g_min === coffee.price_per_100g_max
+								? `$${(coffee.price_per_100g_min / 100).toFixed(2)} / 100g`
+								: `$${(coffee.price_per_100g_min / 100).toFixed(2)} - $${((coffee.price_per_100g_max ?? coffee.price_per_100g_min) / 100).toFixed(2)} / 100g`}
+						</span>
+					) : coffee.price_cents ? (
 						<span className="text-lg font-medium">${(coffee.price_cents / 100).toFixed(2)}</span>
 					) : null}
-					{coffee.weight_grams ? <span className="text-muted-foreground">{coffee.weight_grams}g</span> : null}
+					{coffee.price_cents ? (
+						<span className="text-muted-foreground">${(coffee.price_cents / 100).toFixed(2)} / {coffee.weight_grams}g</span>
+					) : null}
 				</div>
 
 				{coffee.product_url && (

@@ -540,9 +540,38 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.BlendComponentResponse": {
+            "type": "object",
+            "properties": {
+                "country_code": {
+                    "type": "string"
+                },
+                "country_name": {
+                    "type": "string"
+                },
+                "percentage": {
+                    "type": "integer"
+                },
+                "region_id": {
+                    "type": "integer"
+                },
+                "region_name": {
+                    "type": "string"
+                },
+                "variety": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.CoffeeDetailResponse": {
             "type": "object",
             "properties": {
+                "blend_components": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.BlendComponentResponse"
+                    }
+                },
                 "country_code": {
                     "type": "string"
                 },
@@ -558,10 +587,19 @@ const docTemplate = `{
                 "in_stock": {
                     "type": "boolean"
                 },
+                "is_blend": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
                 "price_cents": {
+                    "type": "integer"
+                },
+                "price_per_100g_max": {
+                    "type": "integer"
+                },
+                "price_per_100g_min": {
                     "type": "integer"
                 },
                 "process": {
@@ -658,10 +696,19 @@ const docTemplate = `{
                 "in_stock": {
                     "type": "boolean"
                 },
+                "is_blend": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
                 "price_cents": {
+                    "type": "integer"
+                },
+                "price_per_100g_max": {
+                    "type": "integer"
+                },
+                "price_per_100g_min": {
                     "type": "integer"
                 },
                 "process": {

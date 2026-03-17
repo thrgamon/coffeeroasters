@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/thrgamon/coffeeroasters/internal/domain"
+	"github.com/thrgamon/coffeeroasters/internal/normalise"
 )
 
 // shopifyProduct mirrors the relevant fields from Shopify's /products.json.
@@ -167,12 +169,52 @@ func FetchShopify(ctx context.Context, cfg domain.RoasterConfig, client *http.Cl
 				raw.ImageURL = sp.Images[0].Src
 			}
 
-			// Price and stock from Shopify JSON (most reliable source)
+			// Price, stock, and per-100g from Shopify JSON variants
 			if len(sp.Variants) > 0 {
-				v := sp.Variants[0]
-				raw.PriceRaw = v.Price
-				raw.InStock = v.Available
-				raw.WeightRaw = shopifyWeight(v)
+				var bestPer100g int64 = math.MaxInt64
+				var anyInStock bool
+				var minPer100g, maxPer100g int64
+
+				for _, v := range sp.Variants {
+					if v.Available {
+						anyInStock = true
+					}
+
+					priceCents, priceOK := normalise.NormalisePriceAUD(v.Price)
+					weightGrams, weightOK := normalise.NormaliseWeightGrams(shopifyWeight(v))
+					if !priceOK || !weightOK || weightGrams <= 0 {
+						continue
+					}
+
+					per100g := normalise.PricePer100g(priceCents, weightGrams)
+					if per100g <= 0 {
+						continue
+					}
+
+					if minPer100g == 0 || per100g < minPer100g {
+						minPer100g = per100g
+					}
+					if per100g > maxPer100g {
+						maxPer100g = per100g
+					}
+
+					if per100g < bestPer100g {
+						bestPer100g = per100g
+						raw.PriceRaw = v.Price
+						raw.WeightRaw = shopifyWeight(v)
+					}
+				}
+
+				raw.InStock = anyInStock
+				raw.PricePer100gMin = minPer100g
+				raw.PricePer100gMax = maxPer100g
+
+				// Fallback: if no variant had valid price+weight, use first variant
+				if bestPer100g == math.MaxInt64 {
+					raw.PriceRaw = sp.Variants[0].Price
+					raw.WeightRaw = shopifyWeight(sp.Variants[0])
+					raw.InStock = sp.Variants[0].Available
+				}
 			}
 
 			// Origin, process, tasting notes from LLM
@@ -196,6 +238,26 @@ func FetchShopify(ctx context.Context, cfg domain.RoasterConfig, client *http.Cl
 			}
 			if ep.Producer != nil {
 				raw.ProducerRaw = *ep.Producer
+			}
+
+			raw.IsBlend = ep.IsBlend
+			if ep.IsBlend && len(ep.BlendComponents) > 0 {
+				for _, bc := range ep.BlendComponents {
+					comp := RawBlendComponent{}
+					if bc.Origin != nil {
+						comp.Origin = *bc.Origin
+					}
+					if bc.Region != nil {
+						comp.Region = *bc.Region
+					}
+					if bc.Variety != nil {
+						comp.Variety = *bc.Variety
+					}
+					if bc.Percentage != nil {
+						comp.Percentage = *bc.Percentage
+					}
+					raw.BlendComponents = append(raw.BlendComponents, comp)
+				}
 			}
 
 			allCoffees = append(allCoffees, raw)

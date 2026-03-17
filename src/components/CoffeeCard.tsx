@@ -1,4 +1,4 @@
-import { Bean, Droplets, Flame, Globe, Grape } from 'lucide-react';
+import { Bean, Droplets, Flame, Globe, Grape, Layers } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,6 +58,12 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 							{coffee.variety}
 						</Badge>
 					)}
+					{coffee.is_blend && (
+						<Badge variant="outline" className="gap-1">
+							<Layers className="size-3" />
+							Blend
+						</Badge>
+					)}
 					{!coffee.in_stock && <Badge variant="destructive">Out of stock</Badge>}
 				</div>
 				{coffee.producer_name && coffee.producer_id && (
@@ -79,11 +85,17 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 					</div>
 				)}
 				<div className="flex items-center justify-between text-sm">
-					{coffee.price_cents ? (
-						<span className="font-medium">${(coffee.price_cents / 100).toFixed(2)}</span>
-					) : (
-						<span />
-					)}
+					<div className="flex items-baseline gap-2">
+						{coffee.price_per_100g_min ? (
+							<span className="font-medium">
+								{coffee.price_per_100g_min === coffee.price_per_100g_max
+									? `$${(coffee.price_per_100g_min / 100).toFixed(2)} / 100g`
+									: `$${(coffee.price_per_100g_min / 100).toFixed(2)} - $${((coffee.price_per_100g_max ?? coffee.price_per_100g_min) / 100).toFixed(2)} / 100g`}
+							</span>
+						) : coffee.price_cents ? (
+							<span className="font-medium">${(coffee.price_cents / 100).toFixed(2)}</span>
+						) : null}
+					</div>
 					{coffee.weight_grams ? <span className="text-muted-foreground">{coffee.weight_grams}g</span> : null}
 				</div>
 				<div className="flex items-center gap-3">

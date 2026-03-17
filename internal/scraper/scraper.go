@@ -31,13 +31,28 @@ type RawCoffee struct {
 	TastingNotes string // e.g. "Blueberry, dark chocolate, jasmine"
 
 	// Pricing
-	PriceRaw    string // e.g. "$32.00", "32", "32.00"
-	Currency    string // e.g. "AUD" — default to AUD if empty
-	WeightRaw   string // e.g. "250g", "1kg", "250"
-	InStock     bool
+	PriceRaw        string // e.g. "$32.00", "32", "32.00"
+	Currency        string // e.g. "AUD" — default to AUD if empty
+	WeightRaw       string // e.g. "250g", "1kg", "250"
+	InStock         bool
+	PricePer100gMin int64 // cents per 100g, computed from variants
+	PricePer100gMax int64
+
+	// Blend info
+	IsBlend         bool
+	BlendComponents []RawBlendComponent
 
 	// Metadata
 	ScrapedAt time.Time
+}
+
+// RawBlendComponent represents one origin component of a blend, as extracted
+// by the LLM.
+type RawBlendComponent struct {
+	Origin     string
+	Region     string
+	Variety    string
+	Percentage int
 }
 
 // RawRoaster is the unprocessed data for a roaster discovered via the

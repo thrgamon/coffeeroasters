@@ -108,6 +108,26 @@ func FetchHTMLPage(ctx context.Context, cfg domain.RoasterConfig, client *http.C
 			raw.ProducerRaw = *p.Producer
 		}
 
+		raw.IsBlend = p.IsBlend
+		if p.IsBlend && len(p.BlendComponents) > 0 {
+			for _, bc := range p.BlendComponents {
+				comp := RawBlendComponent{}
+				if bc.Origin != nil {
+					comp.Origin = *bc.Origin
+				}
+				if bc.Region != nil {
+					comp.Region = *bc.Region
+				}
+				if bc.Variety != nil {
+					comp.Variety = *bc.Variety
+				}
+				if bc.Percentage != nil {
+					comp.Percentage = *bc.Percentage
+				}
+				raw.BlendComponents = append(raw.BlendComponents, comp)
+			}
+		}
+
 		coffees = append(coffees, raw)
 	}
 

@@ -119,6 +119,15 @@ var roastAliases = map[string]string{
 	"italian roast": RoastDark,
 }
 
+// PricePer100g calculates the per-100g price in cents from a total price in
+// cents and a weight in grams. Returns 0 if weight is zero or negative.
+func PricePer100g(priceCents int64, weightGrams int) int64 {
+	if weightGrams <= 0 || priceCents <= 0 {
+		return 0
+	}
+	return priceCents * 100 / int64(weightGrams)
+}
+
 // NormaliseProcess maps a raw process string to a canonical value.
 // Returns ProcessUnknown ("") if no match is found.
 func NormaliseProcess(raw string) string {

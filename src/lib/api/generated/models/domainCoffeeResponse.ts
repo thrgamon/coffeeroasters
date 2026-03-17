@@ -11,8 +11,11 @@ export interface DomainCoffeeResponse {
   id?: number;
   image_url?: string;
   in_stock?: boolean;
+  is_blend?: boolean;
   name?: string;
   price_cents?: number;
+  price_per_100g_max?: number;
+  price_per_100g_min?: number;
   process?: string;
   producer_id?: number;
   producer_name?: string;

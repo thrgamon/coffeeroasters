@@ -7,8 +7,27 @@ definitions:
     required:
     - user
     type: object
+  domain.BlendComponentResponse:
+    properties:
+      country_code:
+        type: string
+      country_name:
+        type: string
+      percentage:
+        type: integer
+      region_id:
+        type: integer
+      region_name:
+        type: string
+      variety:
+        type: string
+    type: object
   domain.CoffeeDetailResponse:
     properties:
+      blend_components:
+        items:
+          $ref: '#/definitions/domain.BlendComponentResponse'
+        type: array
       country_code:
         type: string
       country_name:
@@ -19,9 +38,15 @@ definitions:
         type: string
       in_stock:
         type: boolean
+      is_blend:
+        type: boolean
       name:
         type: string
       price_cents:
+        type: integer
+      price_per_100g_max:
+        type: integer
+      price_per_100g_min:
         type: integer
       process:
         type: string
@@ -85,9 +110,15 @@ definitions:
         type: string
       in_stock:
         type: boolean
+      is_blend:
+        type: boolean
       name:
         type: string
       price_cents:
+        type: integer
+      price_per_100g_max:
+        type: integer
+      price_per_100g_min:
         type: integer
       process:
         type: string

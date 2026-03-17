@@ -239,8 +239,21 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 		priceCents, _ := normalise.NormalisePriceAUD(raw.PriceRaw)
 		weightGrams, _ := normalise.NormaliseWeightGrams(raw.WeightRaw)
 
-		// Origin normalisation
-		countryCode, regionName := normalise.NormaliseOrigin(raw.OriginRaw, raw.RegionRaw)
+		// Per-100g pricing: use pre-computed values from Shopify variants,
+		// or compute from single price/weight for HTML paths.
+		per100gMin := raw.PricePer100gMin
+		per100gMax := raw.PricePer100gMax
+		if per100gMin == 0 && priceCents > 0 && weightGrams > 0 {
+			p := normalise.PricePer100g(priceCents, weightGrams)
+			per100gMin = p
+			per100gMax = p
+		}
+
+		// Origin normalisation (skip for blends)
+		var countryCode, regionName string
+		if !raw.IsBlend {
+			countryCode, regionName = normalise.NormaliseOrigin(raw.OriginRaw, raw.RegionRaw)
+		}
 
 		// Variety normalisation
 		variety, species := normalise.NormaliseVariety(raw.VarietyRaw)
@@ -272,7 +285,7 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 			}
 		}
 
-		isNew, err := r.queries.UpsertCoffee(ctx, db.UpsertCoffeeParams{
+		upsertResult, err := r.queries.UpsertCoffee(ctx, db.UpsertCoffeeParams{
 			RoasterID:       roasterID,
 			Name:            raw.Name,
 			ProductUrl:      textVal(raw.ProductURL),
@@ -298,12 +311,52 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 			ProducerRaw:     textVal(raw.ProducerRaw),
 			Variety:         textVal(variety),
 			Species:         textVal(species),
+			PricePer100gMin: int4Val(int32(per100gMin)),
+			PricePer100gMax: int4Val(int32(per100gMax)),
+			IsBlend:         raw.IsBlend,
 		})
 		if err != nil {
 			slog.Warn("upsert coffee failed", "name", raw.Name, "error", err)
 			continue
 		}
-		if isNew {
+
+		coffeeID := upsertResult.ID
+
+		// Handle blend components: clean re-insert each scrape
+		if raw.IsBlend && len(raw.BlendComponents) > 0 {
+			if err := r.queries.DeleteBlendComponents(ctx, int32(coffeeID)); err != nil {
+				slog.Warn("delete blend components failed", "coffee", raw.Name, "error", err)
+			}
+
+			for _, comp := range raw.BlendComponents {
+				compCountry, compRegion := normalise.NormaliseOrigin(comp.Origin, comp.Region)
+
+				var compRegionID pgtype.Int4
+				if compCountry != "" && compRegion != "" {
+					rid, err := r.queries.GetOrCreateRegion(ctx, db.GetOrCreateRegionParams{
+						CountryCode: compCountry,
+						Name:        compRegion,
+					})
+					if err != nil {
+						slog.Warn("get-or-create blend component region failed", "country", compCountry, "region", compRegion, "error", err)
+					} else {
+						compRegionID = int4Val(rid)
+					}
+				}
+
+				if err := r.queries.InsertBlendComponent(ctx, db.InsertBlendComponentParams{
+					CoffeeID:    int32(coffeeID),
+					CountryCode: textVal(compCountry),
+					RegionID:    compRegionID,
+					Variety:     textVal(comp.Variety),
+					Percentage:  int4Val(int32(comp.Percentage)),
+				}); err != nil {
+					slog.Warn("insert blend component failed", "coffee", raw.Name, "error", err)
+				}
+			}
+		}
+
+		if upsertResult.IsNew {
 			added++
 		} else {
 			updated++

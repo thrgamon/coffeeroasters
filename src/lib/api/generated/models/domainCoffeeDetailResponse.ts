@@ -4,16 +4,21 @@
  * Coffeeroasters API
  * OpenAPI spec version: 1.0
  */
+import type { DomainBlendComponentResponse } from './domainBlendComponentResponse';
 import type { DomainSimilarCoffee } from './domainSimilarCoffee';
 
 export interface DomainCoffeeDetailResponse {
+  blend_components?: DomainBlendComponentResponse[];
   country_code?: string;
   country_name?: string;
   id?: number;
   image_url?: string;
   in_stock?: boolean;
+  is_blend?: boolean;
   name?: string;
   price_cents?: number;
+  price_per_100g_max?: number;
+  price_per_100g_min?: number;
   process?: string;
   producer_id?: number;
   producer_name?: string;
