@@ -69,4 +69,5 @@ roasters:
     shop_url: https://www.smallbatch.com.au/shop/
     state: VIC
     fetch_method: html
+    content_selector: "li.product_item"
     active: true

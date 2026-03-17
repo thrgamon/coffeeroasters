@@ -40,7 +40,7 @@ func FetchHTMLPage(ctx context.Context, cfg domain.RoasterConfig, client *http.C
 		return nil, fmt.Errorf("read body: %w", err)
 	}
 
-	cleaned, err := CleanHTML(string(body))
+	cleaned, err := CleanHTML(string(body), cfg.ContentSelector)
 	if err != nil {
 		return nil, fmt.Errorf("clean HTML: %w", err)
 	}
@@ -50,6 +50,17 @@ func FetchHTMLPage(ctx context.Context, cfg domain.RoasterConfig, client *http.C
 	products, err := extractor.ExtractFromPage(ctx, cleaned)
 	if err != nil {
 		return nil, fmt.Errorf("page extraction: %w", err)
+	}
+
+	var skipped int
+	for _, p := range products {
+		if !p.IsCoffee {
+			skipped++
+			slog.Debug("skipped non-coffee product", "roaster", cfg.Slug, "name", p.Name)
+		}
+	}
+	if skipped > 0 {
+		slog.Info("filtered non-coffee products", "roaster", cfg.Slug, "total", len(products), "skipped", skipped)
 	}
 
 	baseURL, _ := url.Parse(cfg.ShopURL)

@@ -38,9 +38,10 @@ type RoasterConfig struct {
 	Website     string      `yaml:"website"`
 	ShopURL     string      `yaml:"shop_url"`
 	State       string      `yaml:"state"`
-	FetchMethod FetchMethod `yaml:"fetch_method"`
-	ProductType string      `yaml:"product_type,omitempty"` // Shopify product_type filter
-	Active      bool        `yaml:"active"`
+	FetchMethod     FetchMethod `yaml:"fetch_method"`
+	ProductType     string      `yaml:"product_type,omitempty"` // Shopify product_type filter
+	ContentSelector string      `yaml:"content_selector,omitempty"` // CSS selector for product listing area (HTML fetch)
+	Active          bool        `yaml:"active"`
 }
 
 // RoastersFile is the top-level structure of roasters.yaml.

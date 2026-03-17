@@ -197,8 +197,10 @@ func (e *Extractor) ExtractFromPage(ctx context.Context, cleanedHTML string) ([]
 		return nil, fmt.Errorf("openai returned no choices")
 	}
 
+	raw := resp.Choices[0].Message.Content
+
 	var result PageExtraction
-	if err := json.Unmarshal([]byte(resp.Choices[0].Message.Content), &result); err != nil {
+	if err := json.Unmarshal([]byte(raw), &result); err != nil {
 		return nil, fmt.Errorf("parse page extraction response: %w", err)
 	}
 
