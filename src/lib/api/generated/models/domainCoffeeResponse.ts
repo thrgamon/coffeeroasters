@@ -23,6 +23,7 @@ export interface DomainCoffeeResponse {
   roaster_id?: number;
   roaster_name?: string;
   roaster_slug?: string;
+  similarity_score?: number;
   species?: string;
   tasting_notes?: string[];
   variety?: string;

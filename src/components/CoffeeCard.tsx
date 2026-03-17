@@ -61,16 +61,27 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 					)}
 					{coffee.weight_grams ? <span className="text-muted-foreground">{coffee.weight_grams}g</span> : null}
 				</div>
-				{coffee.product_url && (
-					<a
-						href={coffee.product_url}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-sm text-primary hover:underline"
+				<div className="flex items-center gap-3">
+					{coffee.product_url && (
+						<a
+							href={coffee.product_url}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-sm text-primary hover:underline"
+						>
+							View on roaster site
+						</a>
+					)}
+					<Link
+						href={`/coffees?similar_to=${coffee.id}`}
+						className="text-sm text-muted-foreground hover:text-foreground"
 					>
-						View on roaster site
-					</a>
-				)}
+						Find similar
+					</Link>
+				</div>
+				{coffee.similarity_score ? (
+					<p className="text-xs text-muted-foreground">{Math.round(coffee.similarity_score * 100)}% match</p>
+				) : null}
 			</CardContent>
 		</Card>
 	);

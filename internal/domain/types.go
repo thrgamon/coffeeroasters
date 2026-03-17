@@ -80,7 +80,8 @@ type CoffeeResponse struct {
 	Species      string   `json:"species,omitempty"`
 	PriceCents   int32    `json:"price_cents,omitempty"`
 	WeightGrams  int32    `json:"weight_grams,omitempty"`
-	InStock      bool     `json:"in_stock"`
+	InStock         bool     `json:"in_stock"`
+	SimilarityScore float64  `json:"similarity_score,omitempty"`
 }
 
 // CoffeeDetailResponse wraps a CoffeeResponse with similar coffees.

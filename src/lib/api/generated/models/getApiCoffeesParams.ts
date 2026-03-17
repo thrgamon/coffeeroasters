@@ -31,6 +31,10 @@ variety?: string;
  */
 in_stock?: boolean;
 /**
+ * Coffee ID to find similar coffees for
+ */
+similar_to?: number;
+/**
  * Page number (default 1)
  */
 page?: number;

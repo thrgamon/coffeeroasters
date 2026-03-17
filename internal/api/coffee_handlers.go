@@ -116,6 +116,7 @@ func (h *Handler) GetRoaster(c *gin.Context) {
 // @Param roast query string false "Filter by roast level"
 // @Param variety query string false "Filter by variety"
 // @Param in_stock query boolean false "Filter by stock status"
+// @Param similar_to query int false "Coffee ID to find similar coffees for"
 // @Param page query int false "Page number (default 1)"
 // @Param page_size query int false "Page size (default 20, max 100)"
 // @Success 200 {object} domain.CoffeeListResponse
@@ -136,10 +137,16 @@ func (h *Handler) ListCoffees(c *gin.Context) {
 	roast := c.Query("roast")
 	varietyFilter := c.Query("variety")
 	inStockStr := c.Query("in_stock")
+	similarToStr := c.Query("similar_to")
 
 	var resp domain.CoffeeListResponse
 	resp.Page = int32(page)
 	resp.PageSize = int32(pageSize)
+
+	if similarToStr != "" {
+		h.listSimilarCoffees(c, similarToStr, pageSize, offset)
+		return
+	}
 
 	if q != "" {
 		// Full-text search
@@ -157,8 +164,8 @@ func (h *Handler) ListCoffees(c *gin.Context) {
 		}
 		resp.TotalCount = int64(len(rows)) // approximate for search
 	} else if origin != "" || process != "" || roast != "" || varietyFilter != "" || inStockStr != "" {
-		// Filter
-		var inStock pgtype.Bool
+		// Filter (default to in-stock only unless explicitly set)
+		inStock := pgtype.Bool{Bool: true, Valid: true}
 		if inStockStr != "" {
 			v, _ := strconv.ParseBool(inStockStr)
 			inStock = pgtype.Bool{Bool: v, Valid: true}
@@ -201,6 +208,94 @@ func (h *Handler) ListCoffees(c *gin.Context) {
 	if resp.Coffees == nil {
 		resp.Coffees = []domain.CoffeeResponse{}
 	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
+// listSimilarCoffees returns coffees ranked by similarity to a source coffee.
+func (h *Handler) listSimilarCoffees(c *gin.Context, similarToStr string, pageSize, offset int) {
+	ctx := c.Request.Context()
+
+	sourceID, err := strconv.ParseInt(similarToStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid similar_to ID"})
+		return
+	}
+
+	sourceRow, err := h.queries.GetCoffeeByID(ctx, sourceID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "source coffee not found"})
+		return
+	}
+
+	simRows, err := h.queries.ListCoffeesForSimilarity(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load coffees"})
+		return
+	}
+
+	source := similarity.CoffeeAttrs{
+		CoffeeID:     sourceRow.ID,
+		TastingNotes: sourceRow.TastingNotes,
+		Process:      sourceRow.Process.String,
+		RoastLevel:   sourceRow.RoastLevel.String,
+		Variety:      sourceRow.Variety.String,
+	}
+	if sourceRow.RegionID.Valid {
+		source.RegionID = &sourceRow.RegionID.Int32
+	}
+
+	candidateIndex := make(map[int64]db.ListCoffeesForSimilarityRow, len(simRows))
+	candidates := make([]similarity.CoffeeAttrs, 0, len(simRows))
+	for _, sr := range simRows {
+		candidateIndex[sr.ID] = sr
+		attrs := similarity.CoffeeAttrs{
+			CoffeeID:     sr.ID,
+			TastingNotes: sr.TastingNotes,
+			Process:      sr.Process.String,
+			RoastLevel:   sr.RoastLevel.String,
+			Variety:      sr.Variety.String,
+		}
+		if sr.RegionID.Valid {
+			attrs.RegionID = &sr.RegionID.Int32
+		}
+		if sr.Latitude.Valid {
+			attrs.Latitude = &sr.Latitude.Float64
+		}
+		if sr.Longitude.Valid {
+			attrs.Longitude = &sr.Longitude.Float64
+		}
+		candidates = append(candidates, attrs)
+	}
+
+	ranked := similarity.Rank(source, candidates, pageSize+offset)
+
+	// Paginate the ranked results
+	if offset > len(ranked) {
+		ranked = nil
+	} else if offset+pageSize > len(ranked) {
+		ranked = ranked[offset:]
+	} else {
+		ranked = ranked[offset : offset+pageSize]
+	}
+
+	var resp domain.CoffeeListResponse
+	resp.Page = int32(offset/pageSize + 1)
+	resp.PageSize = int32(pageSize)
+
+	coffees := make([]domain.CoffeeResponse, 0, len(ranked))
+	for _, sc := range ranked {
+		fullRow, err := h.queries.GetCoffeeByID(ctx, sc.CoffeeID)
+		if err != nil {
+			continue
+		}
+		coffee := coffeeDetailRowToResponse(fullRow)
+		coffee.SimilarityScore = sc.Score
+		coffees = append(coffees, coffee)
+	}
+
+	resp.Coffees = coffees
+	resp.TotalCount = int64(len(candidates) - 1) // exclude source
 
 	c.JSON(http.StatusOK, resp)
 }

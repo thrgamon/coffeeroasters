@@ -197,6 +197,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "description": "Coffee ID to find similar coffees for",
+                        "name": "similar_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
                         "description": "Page number (default 1)",
                         "name": "page",
                         "in": "query"
@@ -594,6 +600,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/domain.SimilarCoffee"
                     }
                 },
+                "similarity_score": {
+                    "type": "number"
+                },
                 "species": {
                     "type": "string"
                 },
@@ -684,6 +693,9 @@ const docTemplate = `{
                 },
                 "roaster_slug": {
                     "type": "string"
+                },
+                "similarity_score": {
+                    "type": "number"
                 },
                 "species": {
                     "type": "string"

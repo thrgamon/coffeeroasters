@@ -68,6 +68,7 @@ LEFT JOIN countries co ON co.code = c.country_code
 LEFT JOIN regions reg ON reg.id = c.region_id
 LEFT JOIN producers p ON p.id = c.producer_id
 WHERE r.opted_out = false
+    AND c.in_stock = true
 ORDER BY c.name
 LIMIT $1 OFFSET $2;
 
@@ -75,7 +76,8 @@ LIMIT $1 OFFSET $2;
 SELECT count(*)
 FROM coffees c
 JOIN roasters r ON r.id = c.roaster_id
-WHERE r.opted_out = false;
+WHERE r.opted_out = false
+    AND c.in_stock = true;
 
 -- name: ListCoffeesByRoaster :many
 SELECT
@@ -131,6 +133,7 @@ LEFT JOIN countries co ON co.code = c.country_code
 LEFT JOIN regions reg ON reg.id = c.region_id
 LEFT JOIN producers p ON p.id = c.producer_id
 WHERE r.opted_out = false
+    AND c.in_stock = true
     AND c.search_vector @@ plainto_tsquery('english', $1)
 ORDER BY ts_rank(c.search_vector, plainto_tsquery('english', $1)) DESC
 LIMIT $2 OFFSET $3;

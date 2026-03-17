@@ -47,6 +47,8 @@ definitions:
         items:
           $ref: '#/definitions/domain.SimilarCoffee'
         type: array
+      similarity_score:
+        type: number
       species:
         type: string
       tasting_notes:
@@ -107,6 +109,8 @@ definitions:
         type: string
       roaster_slug:
         type: string
+      similarity_score:
+        type: number
       species:
         type: string
       tasting_notes:
@@ -428,6 +432,10 @@ paths:
         in: query
         name: in_stock
         type: boolean
+      - description: Coffee ID to find similar coffees for
+        in: query
+        name: similar_to
+        type: integer
       - description: Page number (default 1)
         in: query
         name: page

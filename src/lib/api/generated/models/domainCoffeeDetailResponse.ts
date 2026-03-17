@@ -25,6 +25,7 @@ export interface DomainCoffeeDetailResponse {
   roaster_name?: string;
   roaster_slug?: string;
   similar_coffees?: DomainSimilarCoffee[];
+  similarity_score?: number;
   species?: string;
   tasting_notes?: string[];
   variety?: string;
