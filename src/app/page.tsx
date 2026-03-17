@@ -3,6 +3,8 @@ import CoffeeCard from '@/components/CoffeeCard';
 import type { DomainCoffeeListResponse, DomainStatsResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
 	const [stats, coffees] = await Promise.all([
 		apiFetch<DomainStatsResponse>('/api/stats'),

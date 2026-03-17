@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DomainCountryListResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CountriesPage() {
 	const data = await apiFetch<DomainCountryListResponse>('/api/countries');
 
