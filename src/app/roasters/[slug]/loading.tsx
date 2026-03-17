@@ -14,8 +14,8 @@ export default function RoasterDetailLoading() {
 			<div className="space-y-4">
 				<Skeleton className="h-6 w-32" />
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{Array.from({ length: 3 }).map((_, i) => (
-						<div key={i} className="space-y-3 rounded-lg border p-4">
+					{Array.from({ length: 3 }, (_, i) => `skeleton-${i}`).map((key) => (
+						<div key={key} className="space-y-3 rounded-lg border p-4">
 							<Skeleton className="h-5 w-3/4" />
 							<Skeleton className="h-4 w-1/2" />
 							<div className="flex gap-1">

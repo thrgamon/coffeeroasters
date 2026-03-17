@@ -1,4 +1,5 @@
 import { Bean, Droplets, Flame, Globe, Grape, Layers, Sprout } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +15,14 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 			<div className="space-y-4">
 				<div className="flex items-start gap-6">
 					{coffee.image_url && (
-						<img src={coffee.image_url} alt={coffee.name ?? ''} className="h-48 w-48 rounded-lg object-cover" />
+						<Image
+							src={coffee.image_url}
+							alt={coffee.name ?? ''}
+							width={192}
+							height={192}
+							unoptimized
+							className="h-48 w-48 rounded-lg object-cover"
+						/>
 					)}
 					<div className="space-y-2">
 						<h1 className="text-3xl font-bold">{coffee.name}</h1>
@@ -105,8 +113,11 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 					<div>
 						<h3 className="mb-1 text-sm font-medium">Blend components</h3>
 						<div className="space-y-1">
-							{coffee.blend_components.map((comp, i) => (
-								<div key={i} className="flex items-center gap-2 text-sm">
+							{coffee.blend_components.map((comp) => (
+								<div
+									key={`${comp.country_code}-${comp.region_id}-${comp.variety}`}
+									className="flex items-center gap-2 text-sm"
+								>
 									{comp.country_name && (
 										<Link href={`/countries/${comp.country_code}`}>
 											<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent">
