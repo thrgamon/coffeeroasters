@@ -1,47 +1,38 @@
-'use client';
-
 import Link from 'next/link';
-import { useState } from 'react';
+import { Suspense } from 'react';
+import RoasterFilters from '@/components/RoasterFilters';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useGetApiRoasters } from '@/lib/api/generated/roasters/roasters';
+import type { DomainRoasterListResponse } from '@/lib/api/generated/models';
+import { apiFetch } from '@/lib/api/server';
 
-const STATES = ['VIC', 'NSW', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'];
+interface RoastersPageProps {
+	searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
 
-export default function RoastersPage() {
-	const [state, setState] = useState('');
+export default async function RoastersPage({ searchParams }: RoastersPageProps) {
+	const sp = await searchParams;
+	const state = typeof sp.state === 'string' ? sp.state : undefined;
 
-	const params: Record<string, string> = {};
-	if (state) params.state = state;
+	const params = new URLSearchParams();
+	if (state) params.set('state', state);
+	const qs = params.toString();
 
-	const { data, isLoading } = useGetApiRoasters(params);
+	const data = await apiFetch<DomainRoasterListResponse>(`/api/roasters${qs ? `?${qs}` : ''}`);
 
 	return (
 		<div className="space-y-6">
 			<h1 className="text-3xl font-bold">Roasters</h1>
 
-			<Select value={state} onValueChange={(v) => setState(v === 'all' ? '' : v)}>
-				<SelectTrigger className="w-40">
-					<SelectValue placeholder="State" />
-				</SelectTrigger>
-				<SelectContent>
-					<SelectItem value="all">All states</SelectItem>
-					{STATES.map((s) => (
-						<SelectItem key={s} value={s}>
-							{s}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
+			<Suspense>
+				<RoasterFilters />
+			</Suspense>
 
-			{isLoading && <p className="text-muted-foreground">Loading...</p>}
-
-			{data && (
+			{data.roasters && data.roasters.length > 0 ? (
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{data.roasters?.map((roaster) => (
+					{data.roasters.map((roaster) => (
 						<Link key={roaster.id} href={`/roasters/${roaster.slug}`}>
-							<Card className="transition-colors hover:border-primary/50">
+							<Card className="shadow-sm transition-all hover:shadow-md hover:bg-muted/50">
 								<CardHeader>
 									<CardTitle className="text-lg">{roaster.name}</CardTitle>
 								</CardHeader>
@@ -63,9 +54,9 @@ export default function RoastersPage() {
 						</Link>
 					))}
 				</div>
+			) : (
+				<p className="text-muted-foreground">No roasters found.</p>
 			)}
-
-			{data && (data.roasters?.length ?? 0) === 0 && <p className="text-muted-foreground">No roasters found.</p>}
 		</div>
 	);
 }

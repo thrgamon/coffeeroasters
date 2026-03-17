@@ -1,24 +1,13 @@
-'use client';
-
 import { Bean, Droplets, Flame, Globe, Grape, Layers, Sprout } from 'lucide-react';
 import Link from 'next/link';
-import { use } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useGetApiCoffeesId } from '@/lib/api/generated/coffees/coffees';
+import type { DomainCoffeeDetailResponse } from '@/lib/api/generated/models';
+import { apiFetch } from '@/lib/api/server';
 
-export default function CoffeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
-	const { id } = use(params);
-	const coffeeId = Number(id);
-	const { data: coffee, isLoading } = useGetApiCoffeesId(coffeeId);
-
-	if (isLoading) {
-		return <p className="text-muted-foreground">Loading...</p>;
-	}
-
-	if (!coffee) {
-		return <p className="text-muted-foreground">Coffee not found.</p>;
-	}
+export default async function CoffeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+	const { id } = await params;
+	const coffee = await apiFetch<DomainCoffeeDetailResponse>(`/api/coffees/${id}`);
 
 	return (
 		<div className="space-y-8">
@@ -140,9 +129,7 @@ export default function CoffeeDetailPage({ params }: { params: Promise<{ id: str
 											{comp.variety}
 										</Badge>
 									)}
-									{comp.percentage ? (
-										<span className="text-muted-foreground">{comp.percentage}%</span>
-									) : null}
+									{comp.percentage ? <span className="text-muted-foreground">{comp.percentage}%</span> : null}
 								</div>
 							))}
 						</div>
@@ -160,7 +147,9 @@ export default function CoffeeDetailPage({ params }: { params: Promise<{ id: str
 						<span className="text-lg font-medium">${(coffee.price_cents / 100).toFixed(2)}</span>
 					) : null}
 					{coffee.price_cents ? (
-						<span className="text-muted-foreground">${(coffee.price_cents / 100).toFixed(2)} / {coffee.weight_grams}g</span>
+						<span className="text-muted-foreground">
+							${(coffee.price_cents / 100).toFixed(2)} / {coffee.weight_grams}g
+						</span>
 					) : null}
 				</div>
 
@@ -182,7 +171,7 @@ export default function CoffeeDetailPage({ params }: { params: Promise<{ id: str
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{coffee.similar_coffees.map((similar) => (
 							<Link key={similar.id} href={`/coffees/${similar.id}`}>
-								<Card className="h-full transition-colors hover:bg-accent/50">
+								<Card className="h-full shadow-sm transition-all hover:shadow-md hover:bg-accent/50">
 									<CardHeader className="pb-2">
 										<CardTitle className="text-base">{similar.name}</CardTitle>
 										{similar.roaster_name && <p className="text-sm text-muted-foreground">{similar.roaster_name}</p>}

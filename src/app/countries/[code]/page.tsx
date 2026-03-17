@@ -1,18 +1,12 @@
-'use client';
-
 import Link from 'next/link';
-import { use } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useGetApiCountriesCode } from '@/lib/api/generated/countries/countries';
 import CoffeeCard from '@/components/CoffeeCard';
+import { Badge } from '@/components/ui/badge';
+import type { DomainCountryDetailResponse } from '@/lib/api/generated/models';
+import { apiFetch } from '@/lib/api/server';
 
-export default function CountryDetailPage({ params }: { params: Promise<{ code: string }> }) {
-	const { code } = use(params);
-	const { data, isLoading, error } = useGetApiCountriesCode(code);
-
-	if (isLoading) return <p className="text-muted-foreground">Loading...</p>;
-	if (error || !data) return <p className="text-destructive">Country not found.</p>;
+export default async function CountryDetailPage({ params }: { params: Promise<{ code: string }> }) {
+	const { code } = await params;
+	const data = await apiFetch<DomainCountryDetailResponse>(`/api/countries/${code}`);
 
 	return (
 		<div className="space-y-8">

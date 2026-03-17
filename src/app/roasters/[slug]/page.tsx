@@ -1,20 +1,15 @@
-'use client';
-
 import Link from 'next/link';
-import { use } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { useGetApiRoastersSlug } from '@/lib/api/generated/roasters/roasters';
 import CoffeeCard from '@/components/CoffeeCard';
+import { Badge } from '@/components/ui/badge';
+import type { DomainRoasterDetailResponse } from '@/lib/api/generated/models';
+import { apiFetch } from '@/lib/api/server';
 
-export default function RoasterDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-	const { slug } = use(params);
-	const { data, isLoading, error } = useGetApiRoastersSlug(slug);
+export default async function RoasterDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+	const { slug } = await params;
+	const data = await apiFetch<DomainRoasterDetailResponse>(`/api/roasters/${slug}`);
 
-	if (isLoading) return <p className="text-muted-foreground">Loading...</p>;
-	if (error || !data) return <p className="text-destructive">Roaster not found.</p>;
-
-	const roaster = data?.roaster;
-	const coffees = data?.coffees ?? [];
+	const roaster = data.roaster;
+	const coffees = data.coffees ?? [];
 
 	return (
 		<div className="space-y-8">

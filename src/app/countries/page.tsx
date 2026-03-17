@@ -1,23 +1,20 @@
-'use client';
-
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useGetApiCountries } from '@/lib/api/generated/countries/countries';
+import type { DomainCountryListResponse } from '@/lib/api/generated/models';
+import { apiFetch } from '@/lib/api/server';
 
-export default function CountriesPage() {
-	const { data, isLoading } = useGetApiCountries();
+export default async function CountriesPage() {
+	const data = await apiFetch<DomainCountryListResponse>('/api/countries');
 
 	return (
 		<div className="space-y-6">
 			<h1 className="text-3xl font-bold">Countries</h1>
 
-			{isLoading && <p className="text-muted-foreground">Loading...</p>}
-
-			{data && (
+			{data.countries && data.countries.length > 0 ? (
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{data.countries?.map((country) => (
+					{data.countries.map((country) => (
 						<Link key={country.code} href={`/countries/${country.code}`}>
-							<Card className="transition-colors hover:border-primary/50">
+							<Card className="shadow-sm transition-all hover:shadow-md hover:bg-muted/50">
 								<CardHeader>
 									<CardTitle className="text-lg">{country.name}</CardTitle>
 								</CardHeader>
@@ -30,9 +27,9 @@ export default function CountriesPage() {
 						</Link>
 					))}
 				</div>
+			) : (
+				<p className="text-muted-foreground">No countries found.</p>
 			)}
-
-			{data && (data.countries?.length ?? 0) === 0 && <p className="text-muted-foreground">No countries found.</p>}
 		</div>
 	);
 }

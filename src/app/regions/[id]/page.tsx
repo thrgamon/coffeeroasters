@@ -1,17 +1,12 @@
-'use client';
-
 import Link from 'next/link';
-import { use } from 'react';
 import CoffeeCard from '@/components/CoffeeCard';
 import { Badge } from '@/components/ui/badge';
-import { useGetApiRegionsId } from '@/lib/api/generated/regions/regions';
+import type { DomainRegionDetailResponse } from '@/lib/api/generated/models';
+import { apiFetch } from '@/lib/api/server';
 
-export default function RegionDetailPage({ params }: { params: Promise<{ id: string }> }) {
-	const { id } = use(params);
-	const { data, isLoading, error } = useGetApiRegionsId(Number(id));
-
-	if (isLoading) return <p className="text-muted-foreground">Loading...</p>;
-	if (error || !data) return <p className="text-destructive">Region not found.</p>;
+export default async function RegionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+	const { id } = await params;
+	const data = await apiFetch<DomainRegionDetailResponse>(`/api/regions/${id}`);
 
 	return (
 		<div className="space-y-8">
@@ -46,7 +41,7 @@ export default function RegionDetailPage({ params }: { params: Promise<{ id: str
 							<Link
 								key={region.id}
 								href={`/regions/${region.id}`}
-								className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+								className="flex items-center justify-between rounded-lg border p-4 shadow-sm hover:shadow-md hover:bg-muted/50 transition-all"
 							>
 								<div>
 									<p className="font-medium">{region.name}</p>

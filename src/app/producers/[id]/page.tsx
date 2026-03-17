@@ -1,17 +1,12 @@
-'use client';
-
 import Link from 'next/link';
-import { use } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { useGetApiProducersId } from '@/lib/api/generated/producers/producers';
 import CoffeeCard from '@/components/CoffeeCard';
+import { Badge } from '@/components/ui/badge';
+import type { DomainProducerDetailResponse } from '@/lib/api/generated/models';
+import { apiFetch } from '@/lib/api/server';
 
-export default function ProducerDetailPage({ params }: { params: Promise<{ id: string }> }) {
-	const { id } = use(params);
-	const { data, isLoading, error } = useGetApiProducersId(Number(id));
-
-	if (isLoading) return <p className="text-muted-foreground">Loading...</p>;
-	if (error || !data) return <p className="text-destructive">Producer not found.</p>;
+export default async function ProducerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+	const { id } = await params;
+	const data = await apiFetch<DomainProducerDetailResponse>(`/api/producers/${id}`);
 
 	return (
 		<div className="space-y-8">

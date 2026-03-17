@@ -1,72 +1,63 @@
-'use client';
-
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense } from 'react';
 import CoffeeCard from '@/components/CoffeeCard';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useGetApiCoffees, useGetApiCoffeesId } from '@/lib/api/generated/coffees/coffees';
-import { useGetApiCountries } from '@/lib/api/generated/countries/countries';
+import CoffeeFilters from '@/components/CoffeeFilters';
+import type {
+	DomainCoffeeDetailResponse,
+	DomainCoffeeListResponse,
+	DomainCountryListResponse,
+} from '@/lib/api/generated/models';
+import { apiFetch } from '@/lib/api/server';
 
-const PROCESSES = ['washed', 'natural', 'honey', 'anaerobic', 'wet-hulled', 'experimental'];
-const ROAST_LEVELS = ['light', 'medium-light', 'medium', 'medium-dark', 'dark'];
-const VARIETIES = [
-	'bourbon',
-	'typica',
-	'caturra',
-	'catuai',
-	'gesha',
-	'sl28',
-	'sl34',
-	'pacamara',
-	'heirloom',
-	'castillo',
-	'catimor',
-	'mundo-novo',
-	'yellow-bourbon',
-	'pink-bourbon',
-	'red-bourbon',
-	'sidra',
-	'wush-wush',
-];
-
-export default function CoffeesPage() {
-	return (
-		<Suspense fallback={<p className="text-muted-foreground">Loading...</p>}>
-			<CoffeesContent />
-		</Suspense>
-	);
+interface CoffeesPageProps {
+	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-function CoffeesContent() {
-	const searchParams = useSearchParams();
-	const similarTo = searchParams.get('similar_to');
+export default async function CoffeesPage({ searchParams }: CoffeesPageProps) {
+	const sp = await searchParams;
 
-	const [search, setSearch] = useState('');
-	const [origin, setOrigin] = useState('');
-	const [process, setProcess] = useState('');
-	const [roast, setRoast] = useState('');
-	const [variety, setVariety] = useState('');
-	const [page, setPage] = useState(1);
+	const similarTo = typeof sp.similar_to === 'string' ? sp.similar_to : undefined;
+	const q = typeof sp.q === 'string' ? sp.q : undefined;
+	const origin = typeof sp.origin === 'string' ? sp.origin : undefined;
+	const process = typeof sp.process === 'string' ? sp.process : undefined;
+	const roast = typeof sp.roast === 'string' ? sp.roast : undefined;
+	const variety = typeof sp.variety === 'string' ? sp.variety : undefined;
+	const page = typeof sp.page === 'string' ? Number(sp.page) : 1;
 	const pageSize = 20;
 
-	const params: Record<string, string | number> = { page, page_size: pageSize };
+	const params = new URLSearchParams();
+	params.set('page', String(page));
+	params.set('page_size', String(pageSize));
 	if (similarTo) {
-		params.similar_to = Number(similarTo);
+		params.set('similar_to', similarTo);
 	} else {
-		if (search) params.q = search;
-		if (origin) params.origin = origin;
-		if (process) params.process = process;
-		if (roast) params.roast = roast;
-		if (variety) params.variety = variety;
+		if (q) params.set('q', q);
+		if (origin) params.set('origin', origin);
+		if (process) params.set('process', process);
+		if (roast) params.set('roast', roast);
+		if (variety) params.set('variety', variety);
 	}
 
-	const { data, isLoading } = useGetApiCoffees(params);
-	const { data: countries } = useGetApiCountries();
-	const { data: sourceCoffee } = useGetApiCoffeesId(similarTo ? Number(similarTo) : 0, {
-		query: { enabled: !!similarTo },
-	});
+	const [data, countries, sourceCoffee] = await Promise.all([
+		apiFetch<DomainCoffeeListResponse>(`/api/coffees?${params.toString()}`),
+		apiFetch<DomainCountryListResponse>('/api/countries'),
+		similarTo ? apiFetch<DomainCoffeeDetailResponse>(`/api/coffees/${similarTo}`) : null,
+	]);
+
+	const totalPages = Math.ceil((data.total_count ?? 0) / pageSize);
+
+	function pageUrl(p: number) {
+		const next = new URLSearchParams();
+		if (q) next.set('q', q);
+		if (origin) next.set('origin', origin);
+		if (process) next.set('process', process);
+		if (roast) next.set('roast', roast);
+		if (variety) next.set('variety', variety);
+		if (similarTo) next.set('similar_to', similarTo);
+		if (p > 1) next.set('page', String(p));
+		const qs = next.toString();
+		return `/coffees${qs ? `?${qs}` : ''}`;
+	}
 
 	return (
 		<div className="space-y-6">
@@ -87,133 +78,41 @@ function CoffeesContent() {
 			)}
 
 			{!similarTo && (
-				<div className="flex flex-wrap gap-3">
-					<Input
-						placeholder="Search coffees..."
-						value={search}
-						onChange={(e) => {
-							setSearch(e.target.value);
-							setPage(1);
-						}}
-						className="w-64"
-					/>
-					<Select
-						value={origin}
-						onValueChange={(v) => {
-							setOrigin(v === 'all' ? '' : v);
-							setPage(1);
-						}}
-					>
-						<SelectTrigger className="w-48">
-							<SelectValue placeholder="Country" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">All countries</SelectItem>
-							{countries?.countries?.map((c) => (
-								<SelectItem key={c.code} value={c.code ?? ''}>
-									{c.name} ({c.coffee_count})
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-					<Select
-						value={process}
-						onValueChange={(v) => {
-							setProcess(v === 'all' ? '' : v);
-							setPage(1);
-						}}
-					>
-						<SelectTrigger className="w-40">
-							<SelectValue placeholder="Process" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">All processes</SelectItem>
-							{PROCESSES.map((p) => (
-								<SelectItem key={p} value={p}>
-									{p}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-					<Select
-						value={roast}
-						onValueChange={(v) => {
-							setRoast(v === 'all' ? '' : v);
-							setPage(1);
-						}}
-					>
-						<SelectTrigger className="w-40">
-							<SelectValue placeholder="Roast level" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">All roasts</SelectItem>
-							{ROAST_LEVELS.map((r) => (
-								<SelectItem key={r} value={r}>
-									{r}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-					<Select
-						value={variety}
-						onValueChange={(v) => {
-							setVariety(v === 'all' ? '' : v);
-							setPage(1);
-						}}
-					>
-						<SelectTrigger className="w-40">
-							<SelectValue placeholder="Variety" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">All varieties</SelectItem>
-							{VARIETIES.map((v) => (
-								<SelectItem key={v} value={v}>
-									{v}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
+				<Suspense>
+					<CoffeeFilters countries={countries.countries ?? []} />
+				</Suspense>
 			)}
 
-			{isLoading && <p className="text-muted-foreground">Loading...</p>}
+			<p className="text-sm text-muted-foreground">
+				{data.total_count ?? 0} coffee{(data.total_count ?? 0) !== 1 ? 's' : ''} found
+			</p>
 
-			{data && (
-				<>
-					<p className="text-sm text-muted-foreground">
-						{data.total_count ?? 0} coffee{(data.total_count ?? 0) !== 1 ? 's' : ''} found
-					</p>
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				{data.coffees?.map((coffee) => (
+					<CoffeeCard key={coffee.id} coffee={coffee} />
+				))}
+			</div>
 
-					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-						{data.coffees?.map((coffee) => (
-							<CoffeeCard key={coffee.id} coffee={coffee} />
-						))}
-					</div>
-
-					{(data.total_count ?? 0) > pageSize && (
-						<div className="flex justify-center gap-2">
-							<button
-								type="button"
-								onClick={() => setPage((p) => Math.max(1, p - 1))}
-								disabled={page <= 1}
-								className="rounded border border-border px-3 py-1 text-sm disabled:opacity-50"
-							>
-								Previous
-							</button>
-							<span className="px-3 py-1 text-sm text-muted-foreground">
-								Page {page} of {Math.ceil((data.total_count ?? 0) / pageSize)}
-							</span>
-							<button
-								type="button"
-								onClick={() => setPage((p) => p + 1)}
-								disabled={page * pageSize >= (data.total_count ?? 0)}
-								className="rounded border border-border px-3 py-1 text-sm disabled:opacity-50"
-							>
-								Next
-							</button>
-						</div>
+			{totalPages > 1 && (
+				<div className="flex justify-center gap-2">
+					{page > 1 ? (
+						<Link href={pageUrl(page - 1)} className="rounded border border-border px-3 py-1 text-sm hover:bg-accent">
+							Previous
+						</Link>
+					) : (
+						<span className="rounded border border-border px-3 py-1 text-sm opacity-50">Previous</span>
 					)}
-				</>
+					<span className="px-3 py-1 text-sm text-muted-foreground">
+						Page {page} of {totalPages}
+					</span>
+					{page < totalPages ? (
+						<Link href={pageUrl(page + 1)} className="rounded border border-border px-3 py-1 text-sm hover:bg-accent">
+							Next
+						</Link>
+					) : (
+						<span className="rounded border border-border px-3 py-1 text-sm opacity-50">Next</span>
+					)}
+				</div>
 			)}
 		</div>
 	);
