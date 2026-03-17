@@ -29,6 +29,7 @@ type FetchMethod string
 const (
 	FetchShopifyJSON FetchMethod = "shopify_json"
 	FetchHTML        FetchMethod = "html"
+	FetchHTMLDetail  FetchMethod = "html_detail"
 )
 
 // RoasterConfig defines a roaster to scrape, loaded from roasters.yaml.
@@ -41,6 +42,7 @@ type RoasterConfig struct {
 	FetchMethod     FetchMethod `yaml:"fetch_method"`
 	ProductType     string      `yaml:"product_type,omitempty"` // Shopify product_type filter
 	ContentSelector string      `yaml:"content_selector,omitempty"` // CSS selector for product listing area (HTML fetch)
+	DetailSelector  string      `yaml:"detail_selector,omitempty"`  // CSS selector for product detail content area (html_detail fetch)
 	Active          bool        `yaml:"active"`
 }
 

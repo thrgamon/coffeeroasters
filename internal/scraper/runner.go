@@ -159,6 +159,8 @@ func (r *Runner) scrapeOne(ctx context.Context, cfg domain.RoasterConfig, opts R
 		coffees, err = FetchShopify(ctx, cfg, r.client, r.extractor, r.limiter)
 	case domain.FetchHTML:
 		coffees, err = FetchHTMLPage(ctx, cfg, r.client, r.extractor, r.limiter)
+	case domain.FetchHTMLDetail:
+		coffees, err = FetchHTMLDetail(ctx, cfg, r.client, r.extractor, r.limiter)
 	default:
 		err = fmt.Errorf("unknown fetch method: %s", cfg.FetchMethod)
 	}

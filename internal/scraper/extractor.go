@@ -106,6 +106,27 @@ For each coffee product, extract:
 Use null for any field where the information is not clearly stated. Do not guess.
 Prices are in AUD unless stated otherwise.`
 
+const detailPageSystemPrompt = `You extract detailed coffee product information from an individual product page on an Australian specialty coffee roaster website.
+
+This is a single product page, not a listing of many products. Extract as much detail as possible.
+
+For the coffee product on this page, extract:
+- name: the product name
+- origin: country of origin (e.g. Colombia, Ethiopia, Kenya)
+- region: specific growing region within the country (e.g. Huila, Yirgacheffe, Nyeri)
+- process: processing method (e.g. Washed, Natural, Honey, Anaerobic)
+- roast_level: roast profile (e.g. Light, Medium, Filter, Espresso, Omni)
+- tasting_notes: comma-separated flavour descriptors
+- variety: coffee cultivar/variety (e.g. Caturra, SL28, Gesha, Heirloom, Castillo)
+- producer: farm name, estate name, cooperative, or washing station name
+- price_text: the displayed price (e.g. "$32.00")
+- weight_text: the displayed weight (e.g. "250g")
+- in_stock: whether it appears available for purchase
+
+Use null for any field where the information is not clearly stated. Do not guess.
+Only extract if this is a single purchasable bag of coffee beans or ground coffee. Set is_coffee=true for these.
+Set is_coffee=false for everything else: subscriptions, recurring plans, sample packs, mixed bundles, gift cards, equipment, merchandise, tea, vouchers, accessories, pods, and drip bags.`
+
 const pageSystemPrompt = `You extract coffee product listings from Australian specialty coffee roaster web pages.
 
 For each coffee product you find on the page, extract:
@@ -205,5 +226,48 @@ func (e *Extractor) ExtractFromPage(ctx context.Context, cleanedHTML string) ([]
 	}
 
 	return result.Products, nil
+}
+
+// ExtractFromProductPage sends a single product page's cleaned HTML to
+// GPT-4.1-mini and returns the extracted coffee data. Returns nil if the
+// page does not contain a coffee product.
+func (e *Extractor) ExtractFromProductPage(ctx context.Context, cleanedHTML string) (*PageProduct, error) {
+	schema := llm.GenerateSchema(PageExtraction{})
+
+	resp, err := e.client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+		Model: shared.ChatModelGPT4_1Mini,
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.SystemMessage(detailPageSystemPrompt),
+			openai.UserMessage(cleanedHTML),
+		},
+		Temperature: openai.Opt(0.0),
+		ResponseFormat: openai.ChatCompletionNewParamsResponseFormatUnion{
+			OfJSONSchema: &shared.ResponseFormatJSONSchemaParam{
+				JSONSchema: shared.ResponseFormatJSONSchemaJSONSchemaParam{
+					Name:   "page_extraction",
+					Strict: openai.Opt(true),
+					Schema: schema,
+				},
+			},
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("openai detail page extraction: %w", err)
+	}
+
+	if len(resp.Choices) == 0 {
+		return nil, fmt.Errorf("openai returned no choices")
+	}
+
+	var result PageExtraction
+	if err := json.Unmarshal([]byte(resp.Choices[0].Message.Content), &result); err != nil {
+		return nil, fmt.Errorf("parse detail page extraction response: %w", err)
+	}
+
+	if len(result.Products) == 0 {
+		return nil, nil
+	}
+
+	return &result.Products[0], nil
 }
 
