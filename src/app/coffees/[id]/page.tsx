@@ -1,11 +1,11 @@
 'use client';
 
-import { use } from 'react';
+import { Bean, Droplets, Flame, Globe, Grape, Sprout } from 'lucide-react';
 import Link from 'next/link';
+import { use } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGetApiCoffeesId } from '@/lib/api/generated/coffees/coffees';
-import CoffeeCard from '@/components/CoffeeCard';
 
 export default function CoffeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = use(params);
@@ -25,11 +25,7 @@ export default function CoffeeDetailPage({ params }: { params: Promise<{ id: str
 			<div className="space-y-4">
 				<div className="flex items-start gap-6">
 					{coffee.image_url && (
-						<img
-							src={coffee.image_url}
-							alt={coffee.name ?? ''}
-							className="h-48 w-48 rounded-lg object-cover"
-						/>
+						<img src={coffee.image_url} alt={coffee.name ?? ''} className="h-48 w-48 rounded-lg object-cover" />
 					)}
 					<div className="space-y-2">
 						<h1 className="text-3xl font-bold">{coffee.name}</h1>
@@ -44,22 +40,44 @@ export default function CoffeeDetailPage({ params }: { params: Promise<{ id: str
 						<div className="flex flex-wrap gap-2">
 							{coffee.country_name && (
 								<Link href={`/countries/${coffee.country_code}`}>
-									<Badge variant="secondary" className="cursor-pointer hover:bg-accent">
+									<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent">
+										<Globe className="size-3" />
 										{coffee.country_name}
 									</Badge>
 								</Link>
 							)}
 							{coffee.region_name && coffee.region_id && (
 								<Link href={`/regions/${coffee.region_id}`}>
-									<Badge variant="secondary" className="cursor-pointer hover:bg-accent">
+									<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent">
+										<Globe className="size-3" />
 										{coffee.region_name}
 									</Badge>
 								</Link>
 							)}
-							{coffee.process && <Badge variant="outline">{coffee.process}</Badge>}
-							{coffee.roast_level && <Badge variant="outline">{coffee.roast_level}</Badge>}
-							{coffee.variety && <Badge variant="outline">{coffee.variety}</Badge>}
-							{coffee.species && <Badge variant="outline">{coffee.species}</Badge>}
+							{coffee.process && (
+								<Badge variant="outline" className="gap-1">
+									<Droplets className="size-3" />
+									{coffee.process}
+								</Badge>
+							)}
+							{coffee.roast_level && (
+								<Badge variant="outline" className="gap-1">
+									<Flame className="size-3" />
+									{coffee.roast_level}
+								</Badge>
+							)}
+							{coffee.variety && (
+								<Badge variant="outline" className="gap-1">
+									<Bean className="size-3" />
+									{coffee.variety}
+								</Badge>
+							)}
+							{coffee.species && (
+								<Badge variant="outline" className="gap-1">
+									<Sprout className="size-3" />
+									{coffee.species}
+								</Badge>
+							)}
 							{!coffee.in_stock && <Badge variant="destructive">Out of stock</Badge>}
 						</div>
 					</div>
@@ -79,7 +97,8 @@ export default function CoffeeDetailPage({ params }: { params: Promise<{ id: str
 						<h3 className="mb-1 text-sm font-medium">Tasting notes</h3>
 						<div className="flex flex-wrap gap-1">
 							{coffee.tasting_notes.map((note) => (
-								<Badge key={note} variant="secondary">
+								<Badge key={note} variant="secondary" className="gap-1">
+									<Grape className="size-3" />
 									{note}
 								</Badge>
 							))}
@@ -91,9 +110,7 @@ export default function CoffeeDetailPage({ params }: { params: Promise<{ id: str
 					{coffee.price_cents ? (
 						<span className="text-lg font-medium">${(coffee.price_cents / 100).toFixed(2)}</span>
 					) : null}
-					{coffee.weight_grams ? (
-						<span className="text-muted-foreground">{coffee.weight_grams}g</span>
-					) : null}
+					{coffee.weight_grams ? <span className="text-muted-foreground">{coffee.weight_grams}g</span> : null}
 				</div>
 
 				{coffee.product_url && (
@@ -117,26 +134,40 @@ export default function CoffeeDetailPage({ params }: { params: Promise<{ id: str
 								<Card className="h-full transition-colors hover:bg-accent/50">
 									<CardHeader className="pb-2">
 										<CardTitle className="text-base">{similar.name}</CardTitle>
-										{similar.roaster_name && (
-											<p className="text-sm text-muted-foreground">{similar.roaster_name}</p>
-										)}
+										{similar.roaster_name && <p className="text-sm text-muted-foreground">{similar.roaster_name}</p>}
 									</CardHeader>
 									<CardContent className="space-y-2">
 										<div className="flex flex-wrap gap-1">
-											{similar.process && <Badge variant="outline">{similar.process}</Badge>}
-											{similar.roast_level && (
-												<Badge variant="outline">{similar.roast_level}</Badge>
+											{similar.process && (
+												<Badge variant="outline" className="gap-1">
+													<Droplets className="size-3" />
+													{similar.process}
+												</Badge>
 											)}
-											{similar.variety && <Badge variant="outline">{similar.variety}</Badge>}
+											{similar.roast_level && (
+												<Badge variant="outline" className="gap-1">
+													<Flame className="size-3" />
+													{similar.roast_level}
+												</Badge>
+											)}
+											{similar.variety && (
+												<Badge variant="outline" className="gap-1">
+													<Bean className="size-3" />
+													{similar.variety}
+												</Badge>
+											)}
 										</div>
 										{similar.tasting_notes && similar.tasting_notes.length > 0 && (
-											<p className="text-sm text-muted-foreground">
-												{similar.tasting_notes.join(', ')}
-											</p>
+											<div className="flex flex-wrap gap-1">
+												{similar.tasting_notes.map((note) => (
+													<Badge key={note} variant="secondary" className="gap-1 font-normal text-xs">
+														<Grape className="size-3" />
+														{note}
+													</Badge>
+												))}
+											</div>
 										)}
-										<p className="text-xs text-muted-foreground">
-											{Math.round((similar.score ?? 0) * 100)}% match
-										</p>
+										<p className="text-xs text-muted-foreground">{Math.round((similar.score ?? 0) * 100)}% match</p>
 									</CardContent>
 								</Card>
 							</Link>

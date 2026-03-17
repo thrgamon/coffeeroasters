@@ -1,3 +1,4 @@
+import { Bean, Droplets, Flame, Globe, Grape } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,21 +26,38 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 				<div className="flex flex-wrap gap-1">
 					{coffee.country_name && (
 						<Link href={`/countries/${coffee.country_code}`}>
-							<Badge variant="secondary" className="cursor-pointer hover:bg-accent">
+							<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent">
+								<Globe className="size-3" />
 								{coffee.country_name}
 							</Badge>
 						</Link>
 					)}
 					{coffee.region_name && coffee.region_id && (
 						<Link href={`/regions/${coffee.region_id}`}>
-							<Badge variant="secondary" className="cursor-pointer hover:bg-accent">
+							<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent">
+								<Globe className="size-3" />
 								{coffee.region_name}
 							</Badge>
 						</Link>
 					)}
-					{coffee.process && <Badge variant="outline">{coffee.process}</Badge>}
-					{coffee.roast_level && <Badge variant="outline">{coffee.roast_level}</Badge>}
-					{coffee.variety && <Badge variant="outline">{coffee.variety}</Badge>}
+					{coffee.process && (
+						<Badge variant="outline" className="gap-1">
+							<Droplets className="size-3" />
+							{coffee.process}
+						</Badge>
+					)}
+					{coffee.roast_level && (
+						<Badge variant="outline" className="gap-1">
+							<Flame className="size-3" />
+							{coffee.roast_level}
+						</Badge>
+					)}
+					{coffee.variety && (
+						<Badge variant="outline" className="gap-1">
+							<Bean className="size-3" />
+							{coffee.variety}
+						</Badge>
+					)}
 					{!coffee.in_stock && <Badge variant="destructive">Out of stock</Badge>}
 				</div>
 				{coffee.producer_name && coffee.producer_id && (
@@ -51,7 +69,14 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 					</Link>
 				)}
 				{coffee.tasting_notes && coffee.tasting_notes.length > 0 && (
-					<p className="text-sm text-muted-foreground">{coffee.tasting_notes.join(', ')}</p>
+					<div className="flex flex-wrap gap-1">
+						{coffee.tasting_notes.map((note) => (
+							<Badge key={note} variant="secondary" className="gap-1 font-normal">
+								<Grape className="size-3" />
+								{note}
+							</Badge>
+						))}
+					</div>
 				)}
 				<div className="flex items-center justify-between text-sm">
 					{coffee.price_cents ? (
