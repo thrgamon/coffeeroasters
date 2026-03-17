@@ -1,0 +1,72 @@
+roasters:
+  - slug: seven-seeds
+    name: Seven Seeds
+    website: https://sevenseeds.com.au
+    shop_url: https://sevenseeds.com.au/collections/coffee
+    state: VIC
+    fetch_method: shopify_json
+    active: true
+
+  - slug: market-lane
+    name: Market Lane
+    website: https://marketlane.com.au
+    shop_url: https://marketlane.com.au/collections/coffee
+    state: VIC
+    fetch_method: html
+    active: true
+
+  - slug: ona-coffee
+    name: ONA Coffee
+    website: https://onacoffee.com.au
+    shop_url: https://onacoffee.com.au/collections/coffee
+    state: ACT
+    fetch_method: shopify_json
+    active: true
+
+  - slug: single-o
+    name: Single O
+    website: https://singleo.com.au
+    shop_url: https://singleo.com.au/collections/coffee
+    state: NSW
+    fetch_method: shopify_json
+    active: true
+
+  - slug: padre-coffee
+    name: Padre Coffee
+    website: https://padrecoffee.com.au
+    shop_url: https://padrecoffee.com.au/collections/coffee
+    state: VIC
+    fetch_method: shopify_json
+    active: true
+
+  - slug: proud-mary
+    name: Proud Mary
+    website: https://proudmarycoffee.com.au
+    shop_url: https://proudmarycoffee.com.au/collections/coffee
+    state: VIC
+    fetch_method: shopify_json
+    active: true
+
+  - slug: sample-coffee
+    name: Sample Coffee
+    website: https://samplecoffee.com.au
+    shop_url: https://samplecoffee.com.au/collections/coffee
+    state: NSW
+    fetch_method: shopify_json
+    active: false  # products.json returns 500
+
+  - slug: dukes-coffee
+    name: Dukes Coffee
+    website: https://dukescoffee.com.au
+    shop_url: https://dukescoffee.com.au/collections/coffee
+    state: VIC
+    fetch_method: shopify_json
+    active: false  # not on Shopify, returns HTML
+
+  - slug: small-batch
+    name: Small Batch
+    website: https://www.smallbatch.com.au
+    shop_url: https://www.smallbatch.com.au/shop/
+    state: VIC
+    fetch_method: html
+    active: true

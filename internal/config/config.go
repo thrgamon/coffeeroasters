@@ -25,7 +25,7 @@ func LoadConfig() Config {
 
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
-		databaseURL = "postgres://postgres:postgres@localhost:5432/myapp?sslmode=disable"
+		databaseURL = "postgres://postgres:postgres@localhost:5432/coffeeroasters?sslmode=disable"
 	}
 
 	environment := os.Getenv("ENVIRONMENT")

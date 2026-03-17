@@ -25,7 +25,7 @@ backend:
 
 # Run frontend locally (outside docker)
 frontend:
-    npm install && npm run dev
+    yarn install && yarn dev
 
 # Install git hooks
 install-hooks:
@@ -49,7 +49,7 @@ api-types:
 # Full sync: sqlc + swagger + orval + format + type check
 sync: sqlc api-docs api-types
     npx biome format --write src/lib/api/generated || true
-    npm run check
+    yarn check
     go vet ./...
 
 # --- Quality ---
@@ -69,20 +69,20 @@ fmt:
 
 # Frontend lint
 fe-lint:
-    npm run lint
+    yarn lint
 
 # Frontend lint with auto-fix
 fe-lint-fix:
-    npm run lint:fix
+    yarn lint:fix
 
 # Frontend format
 fe-fmt:
-    npm run format
+    yarn format
 
 # Run all checks (lint + test + type-check)
 check: lint test
-    npm run check
-    npm run lint
+    yarn check
+    yarn lint
 
 # --- E2E Tests ---
 
@@ -93,6 +93,10 @@ e2e:
 # Run Playwright with UI mode
 e2e-ui:
     npx playwright test --ui
+
+# Geocode regions that are missing coordinates
+geocode:
+    go run ./cmd/geocode
 
 # --- Database ---
 
@@ -128,11 +132,11 @@ db-reset:
 
 # Build production Docker image
 build:
-    docker build -t myapp -f Dockerfile .
+    docker build -t coffeeroasters -f Dockerfile .
 
 # Build Dokku Docker image
 dokku-build:
-    docker build -t myapp-dokku -f Dockerfile.dokku .
+    docker build -t coffeeroasters-dokku -f Dockerfile.dokku .
 
 # Clean build artifacts
 clean:
@@ -150,23 +154,23 @@ dokku-deploy:
 
 # View Dokku app logs
 dokku-logs:
-    ssh dokku@$(just _dokku-host) logs myapp -t
+    ssh dokku@$(just _dokku-host) logs coffeeroasters -t
 
 # View Dokku app config
 dokku-config:
-    ssh dokku@$(just _dokku-host) config:show myapp
+    ssh dokku@$(just _dokku-host) config:show coffeeroasters
 
 # View Dokku app process status
 dokku-ps:
-    ssh dokku@$(just _dokku-host) ps:report myapp
+    ssh dokku@$(just _dokku-host) ps:report coffeeroasters
 
 # Connect to Dokku database
 dokku-db-connect:
-    ssh dokku@$(just _dokku-host) postgres:connect myapp-db
+    ssh dokku@$(just _dokku-host) postgres:connect coffeeroasters-db
 
 # Backup Dokku database locally
 dokku-db-backup:
-    ssh dokku@$(just _dokku-host) postgres:export myapp-db > myapp-db-backup.sql
+    ssh dokku@$(just _dokku-host) postgres:export coffeeroasters-db > coffeeroasters-db-backup.sql
 
 # --- Monitoring ---
 

@@ -1,0 +1,226 @@
+package scraper
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log/slog"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/thrgamon/coffeeroasters/internal/domain"
+)
+
+// shopifyProduct mirrors the relevant fields from Shopify's /products.json.
+type shopifyProduct struct {
+	ID        int64            `json:"id"`
+	Title     string           `json:"title"`
+	BodyHTML  string           `json:"body_html"`
+	Handle    string           `json:"handle"`
+	Type      string           `json:"product_type"`
+	Variants  []shopifyVariant `json:"variants"`
+	Images    []shopifyImage   `json:"images"`
+	Status    string           `json:"status"`
+	CreatedAt string           `json:"created_at"`
+}
+
+type shopifyVariant struct {
+	Price     string `json:"price"`
+	Available bool   `json:"available"`
+	Title     string `json:"title"`
+	Grams     int    `json:"grams"`
+	Weight    float64 `json:"weight"`
+	WeightUnit string `json:"weight_unit"`
+}
+
+type shopifyImage struct {
+	Src string `json:"src"`
+}
+
+type shopifyResponse struct {
+	Products []shopifyProduct `json:"products"`
+}
+
+const shopifyBatchSize = 10
+
+// FetchShopify fetches products from a Shopify store's /products.json endpoint,
+// extracts structured data from the JSON, and uses the LLM to parse origin/
+// process/tasting notes from the HTML descriptions.
+func FetchShopify(ctx context.Context, cfg domain.RoasterConfig, client *http.Client, extractor *Extractor, limiter *RateLimiter) ([]RawCoffee, error) {
+	var allProducts []shopifyProduct
+
+	baseURL := strings.TrimSuffix(cfg.ShopURL, "/")
+	// Ensure we're hitting the root /products.json, not a collection
+	productsURL := baseURL
+	if !strings.HasSuffix(productsURL, "/products.json") {
+		// Strip any collection path and use root products.json
+		parts := strings.Split(productsURL, "/")
+		scheme := parts[0] + "//" + parts[2]
+		productsURL = scheme + "/products.json"
+	}
+
+	for page := 1; page <= 5; page++ {
+		url := fmt.Sprintf("%s?limit=250&page=%d", productsURL, page)
+		limiter.Wait(url, 3*time.Second)
+
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			return nil, fmt.Errorf("build request: %w", err)
+		}
+		req.Header.Set("User-Agent", botUserAgent)
+		req.Header.Set("Accept", "application/json")
+
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("GET %s: %w", url, err)
+		}
+
+		body, err := io.ReadAll(io.LimitReader(resp.Body, 10*1024*1024))
+		resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("GET %s: status %d", url, resp.StatusCode)
+		}
+		if err != nil {
+			return nil, fmt.Errorf("read body: %w", err)
+		}
+
+		var sr shopifyResponse
+		if err := json.Unmarshal(body, &sr); err != nil {
+			return nil, fmt.Errorf("parse products.json: %w", err)
+		}
+
+		if len(sr.Products) == 0 {
+			break
+		}
+		allProducts = append(allProducts, sr.Products...)
+
+		if len(sr.Products) < 250 {
+			break
+		}
+	}
+
+	// Filter by product_type if configured, and skip archived/upcoming products
+	var filtered []shopifyProduct
+	for _, p := range allProducts {
+		if cfg.ProductType != "" && !strings.EqualFold(p.Type, cfg.ProductType) {
+			continue
+		}
+		typeLower := strings.ToLower(p.Type)
+		if strings.Contains(typeLower, "archive") || strings.Contains(typeLower, "upcoming") {
+			continue
+		}
+		filtered = append(filtered, p)
+	}
+
+	if len(filtered) == 0 {
+		return nil, nil
+	}
+
+	// Build descriptions for LLM extraction in batches
+	var allCoffees []RawCoffee
+	for i := 0; i < len(filtered); i += shopifyBatchSize {
+		end := i + shopifyBatchSize
+		if end > len(filtered) {
+			end = len(filtered)
+		}
+		batch := filtered[i:end]
+
+		var descriptions []ProductDescription
+		for j, p := range batch {
+			descriptions = append(descriptions, ProductDescription{
+				Index: j,
+				Title: p.Title,
+				HTML:  p.BodyHTML,
+			})
+		}
+
+		slog.Info("extracting batch", "roaster", cfg.Slug, "batch_start", i, "batch_size", len(batch))
+
+		extracted, err := extractor.ExtractFromDescriptions(ctx, descriptions)
+		if err != nil {
+			slog.Error("batch extraction failed", "roaster", cfg.Slug, "error", err)
+			continue
+		}
+
+		// Merge LLM extraction with Shopify JSON data
+		for _, ep := range extracted {
+			if ep.Index < 0 || ep.Index >= len(batch) {
+				continue
+			}
+			if !ep.IsCoffee {
+				continue
+			}
+			sp := batch[ep.Index]
+
+			raw := RawCoffee{
+				Name:       ep.Name,
+				ProductURL: shopifyProductURL(cfg.Website, sp.Handle),
+				ScrapedAt:  time.Now(),
+				Currency:   "AUD",
+			}
+
+			if len(sp.Images) > 0 {
+				raw.ImageURL = sp.Images[0].Src
+			}
+
+			// Price and stock from Shopify JSON (most reliable source)
+			if len(sp.Variants) > 0 {
+				v := sp.Variants[0]
+				raw.PriceRaw = v.Price
+				raw.InStock = v.Available
+				raw.WeightRaw = shopifyWeight(v)
+			}
+
+			// Origin, process, tasting notes from LLM
+			if ep.Origin != nil {
+				raw.OriginRaw = *ep.Origin
+			}
+			if ep.Region != nil {
+				raw.RegionRaw = *ep.Region
+			}
+			if ep.Process != nil {
+				raw.ProcessRaw = *ep.Process
+			}
+			if ep.RoastLevel != nil {
+				raw.RoastRaw = *ep.RoastLevel
+			}
+			if ep.TastingNotes != nil {
+				raw.TastingNotes = *ep.TastingNotes
+			}
+			if ep.Variety != nil {
+				raw.VarietyRaw = *ep.Variety
+			}
+			if ep.Producer != nil {
+				raw.ProducerRaw = *ep.Producer
+			}
+
+			allCoffees = append(allCoffees, raw)
+		}
+	}
+
+	return allCoffees, nil
+}
+
+func shopifyProductURL(website, handle string) string {
+	base := strings.TrimSuffix(website, "/")
+	return base + "/products/" + handle
+}
+
+func shopifyWeight(v shopifyVariant) string {
+	if v.Grams > 0 {
+		return strconv.Itoa(v.Grams) + "g"
+	}
+	if v.Weight > 0 {
+		unit := v.WeightUnit
+		if unit == "" {
+			unit = "g"
+		}
+		return fmt.Sprintf("%.0f%s", v.Weight, unit)
+	}
+	return ""
+}
+

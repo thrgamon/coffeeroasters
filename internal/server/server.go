@@ -35,7 +35,7 @@ func New(opts Options) *Server {
 	}
 
 	engine := gin.New()
-	engine.Use(otelgin.Middleware("myapp"))
+	engine.Use(otelgin.Middleware("coffeeroasters"))
 	engine.Use(gin.Recovery())
 	engine.Use(middleware.RequestID())
 

@@ -1,0 +1,149 @@
+'use client';
+
+import { use } from 'react';
+import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useGetApiCoffeesId } from '@/lib/api/generated/coffees/coffees';
+import CoffeeCard from '@/components/CoffeeCard';
+
+export default function CoffeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+	const { id } = use(params);
+	const coffeeId = Number(id);
+	const { data: coffee, isLoading } = useGetApiCoffeesId(coffeeId);
+
+	if (isLoading) {
+		return <p className="text-muted-foreground">Loading...</p>;
+	}
+
+	if (!coffee) {
+		return <p className="text-muted-foreground">Coffee not found.</p>;
+	}
+
+	return (
+		<div className="space-y-8">
+			<div className="space-y-4">
+				<div className="flex items-start gap-6">
+					{coffee.image_url && (
+						<img
+							src={coffee.image_url}
+							alt={coffee.name ?? ''}
+							className="h-48 w-48 rounded-lg object-cover"
+						/>
+					)}
+					<div className="space-y-2">
+						<h1 className="text-3xl font-bold">{coffee.name}</h1>
+						{coffee.roaster_name && (
+							<Link
+								href={`/roasters/${coffee.roaster_slug}`}
+								className="text-lg text-muted-foreground hover:text-foreground"
+							>
+								{coffee.roaster_name}
+							</Link>
+						)}
+						<div className="flex flex-wrap gap-2">
+							{coffee.country_name && (
+								<Link href={`/countries/${coffee.country_code}`}>
+									<Badge variant="secondary" className="cursor-pointer hover:bg-accent">
+										{coffee.country_name}
+									</Badge>
+								</Link>
+							)}
+							{coffee.region_name && coffee.region_id && (
+								<Link href={`/regions/${coffee.region_id}`}>
+									<Badge variant="secondary" className="cursor-pointer hover:bg-accent">
+										{coffee.region_name}
+									</Badge>
+								</Link>
+							)}
+							{coffee.process && <Badge variant="outline">{coffee.process}</Badge>}
+							{coffee.roast_level && <Badge variant="outline">{coffee.roast_level}</Badge>}
+							{coffee.variety && <Badge variant="outline">{coffee.variety}</Badge>}
+							{coffee.species && <Badge variant="outline">{coffee.species}</Badge>}
+							{!coffee.in_stock && <Badge variant="destructive">Out of stock</Badge>}
+						</div>
+					</div>
+				</div>
+
+				{coffee.producer_name && coffee.producer_id && (
+					<Link
+						href={`/producers/${coffee.producer_id}`}
+						className="block text-sm text-muted-foreground hover:text-foreground"
+					>
+						Producer: {coffee.producer_name}
+					</Link>
+				)}
+
+				{coffee.tasting_notes && coffee.tasting_notes.length > 0 && (
+					<div>
+						<h3 className="mb-1 text-sm font-medium">Tasting notes</h3>
+						<div className="flex flex-wrap gap-1">
+							{coffee.tasting_notes.map((note) => (
+								<Badge key={note} variant="secondary">
+									{note}
+								</Badge>
+							))}
+						</div>
+					</div>
+				)}
+
+				<div className="flex items-center gap-4 text-sm">
+					{coffee.price_cents ? (
+						<span className="text-lg font-medium">${(coffee.price_cents / 100).toFixed(2)}</span>
+					) : null}
+					{coffee.weight_grams ? (
+						<span className="text-muted-foreground">{coffee.weight_grams}g</span>
+					) : null}
+				</div>
+
+				{coffee.product_url && (
+					<a
+						href={coffee.product_url}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-block rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90"
+					>
+						View on roaster site
+					</a>
+				)}
+			</div>
+
+			{coffee.similar_coffees && coffee.similar_coffees.length > 0 && (
+				<div className="space-y-4">
+					<h2 className="text-2xl font-bold">Similar coffees</h2>
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{coffee.similar_coffees.map((similar) => (
+							<Link key={similar.id} href={`/coffees/${similar.id}`}>
+								<Card className="h-full transition-colors hover:bg-accent/50">
+									<CardHeader className="pb-2">
+										<CardTitle className="text-base">{similar.name}</CardTitle>
+										{similar.roaster_name && (
+											<p className="text-sm text-muted-foreground">{similar.roaster_name}</p>
+										)}
+									</CardHeader>
+									<CardContent className="space-y-2">
+										<div className="flex flex-wrap gap-1">
+											{similar.process && <Badge variant="outline">{similar.process}</Badge>}
+											{similar.roast_level && (
+												<Badge variant="outline">{similar.roast_level}</Badge>
+											)}
+											{similar.variety && <Badge variant="outline">{similar.variety}</Badge>}
+										</div>
+										{similar.tasting_notes && similar.tasting_notes.length > 0 && (
+											<p className="text-sm text-muted-foreground">
+												{similar.tasting_notes.join(', ')}
+											</p>
+										)}
+										<p className="text-xs text-muted-foreground">
+											{Math.round((similar.score ?? 0) * 100)}% match
+										</p>
+									</CardContent>
+								</Card>
+							</Link>
+						))}
+					</div>
+				</div>
+			)}
+		</div>
+	);
+}

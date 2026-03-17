@@ -1,0 +1,644 @@
+basePath: /api
+definitions:
+  domain.AuthResponse:
+    properties:
+      user:
+        $ref: '#/definitions/domain.UserResponse'
+    required:
+    - user
+    type: object
+  domain.CoffeeDetailResponse:
+    properties:
+      country_code:
+        type: string
+      country_name:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      in_stock:
+        type: boolean
+      name:
+        type: string
+      price_cents:
+        type: integer
+      process:
+        type: string
+      producer_id:
+        type: integer
+      producer_name:
+        type: string
+      product_url:
+        type: string
+      region_id:
+        type: integer
+      region_name:
+        type: string
+      roast_level:
+        type: string
+      roaster_id:
+        type: integer
+      roaster_name:
+        type: string
+      roaster_slug:
+        type: string
+      similar_coffees:
+        items:
+          $ref: '#/definitions/domain.SimilarCoffee'
+        type: array
+      species:
+        type: string
+      tasting_notes:
+        items:
+          type: string
+        type: array
+      variety:
+        type: string
+      weight_grams:
+        type: integer
+    type: object
+  domain.CoffeeListResponse:
+    properties:
+      coffees:
+        items:
+          $ref: '#/definitions/domain.CoffeeResponse'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total_count:
+        type: integer
+    type: object
+  domain.CoffeeResponse:
+    properties:
+      country_code:
+        type: string
+      country_name:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      in_stock:
+        type: boolean
+      name:
+        type: string
+      price_cents:
+        type: integer
+      process:
+        type: string
+      producer_id:
+        type: integer
+      producer_name:
+        type: string
+      product_url:
+        type: string
+      region_id:
+        type: integer
+      region_name:
+        type: string
+      roast_level:
+        type: string
+      roaster_id:
+        type: integer
+      roaster_name:
+        type: string
+      roaster_slug:
+        type: string
+      species:
+        type: string
+      tasting_notes:
+        items:
+          type: string
+        type: array
+      variety:
+        type: string
+      weight_grams:
+        type: integer
+    type: object
+  domain.CountryDetailResponse:
+    properties:
+      code:
+        type: string
+      coffees:
+        items:
+          $ref: '#/definitions/domain.CoffeeResponse'
+        type: array
+      name:
+        type: string
+      regions:
+        items:
+          $ref: '#/definitions/domain.RegionSummary'
+        type: array
+    type: object
+  domain.CountryListResponse:
+    properties:
+      countries:
+        items:
+          $ref: '#/definitions/domain.CountryResponse'
+        type: array
+    type: object
+  domain.CountryResponse:
+    properties:
+      code:
+        type: string
+      coffee_count:
+        type: integer
+      name:
+        type: string
+    type: object
+  domain.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  domain.NearbyRegion:
+    properties:
+      coffee_count:
+        type: integer
+      country_code:
+        type: string
+      country_name:
+        type: string
+      distance_km:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  domain.ProducerDetailResponse:
+    properties:
+      coffees:
+        items:
+          $ref: '#/definitions/domain.CoffeeResponse'
+        type: array
+      country_code:
+        type: string
+      country_name:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      region_name:
+        type: string
+    type: object
+  domain.RegionDetailResponse:
+    properties:
+      coffees:
+        items:
+          $ref: '#/definitions/domain.CoffeeResponse'
+        type: array
+      country_code:
+        type: string
+      country_name:
+        type: string
+      id:
+        type: integer
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      nearby_regions:
+        items:
+          $ref: '#/definitions/domain.NearbyRegion'
+        type: array
+    type: object
+  domain.RegionSummary:
+    properties:
+      coffee_count:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  domain.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  domain.RoasterDetailResponse:
+    properties:
+      coffees:
+        items:
+          $ref: '#/definitions/domain.CoffeeResponse'
+        type: array
+      roaster:
+        $ref: '#/definitions/domain.RoasterResponse'
+    type: object
+  domain.RoasterListResponse:
+    properties:
+      roasters:
+        items:
+          $ref: '#/definitions/domain.RoasterResponse'
+        type: array
+    type: object
+  domain.RoasterResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      slug:
+        type: string
+      state:
+        type: string
+      website:
+        type: string
+    type: object
+  domain.SimilarCoffee:
+    properties:
+      id:
+        type: integer
+      image_url:
+        type: string
+      name:
+        type: string
+      process:
+        type: string
+      roast_level:
+        type: string
+      roaster_name:
+        type: string
+      roaster_slug:
+        type: string
+      score:
+        type: number
+      tasting_notes:
+        items:
+          type: string
+        type: array
+      variety:
+        type: string
+    type: object
+  domain.StatsResponse:
+    properties:
+      coffee_count:
+        type: integer
+      origins:
+        items:
+          type: string
+        type: array
+      roaster_count:
+        type: integer
+    type: object
+  domain.UserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+    required:
+    - email
+    - id
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: Coffeeroasters API
+  version: "1.0"
+paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AuthResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login with email and password
+      tags:
+      - auth
+  /api/auth/logout:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Logout current session
+      tags:
+      - auth
+  /api/auth/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get current user
+      tags:
+      - auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Registration details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /api/coffees:
+    get:
+      parameters:
+      - description: Full-text search query
+        in: query
+        name: q
+        type: string
+      - description: Filter by origin
+        in: query
+        name: origin
+        type: string
+      - description: Filter by process
+        in: query
+        name: process
+        type: string
+      - description: Filter by roast level
+        in: query
+        name: roast
+        type: string
+      - description: Filter by variety
+        in: query
+        name: variety
+        type: string
+      - description: Filter by stock status
+        in: query
+        name: in_stock
+        type: boolean
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Page size (default 20, max 100)
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.CoffeeListResponse'
+      summary: List or search coffees with optional filters
+      tags:
+      - coffees
+  /api/coffees/{id}:
+    get:
+      parameters:
+      - description: Coffee ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.CoffeeDetailResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a single coffee by ID with similar coffees
+      tags:
+      - coffees
+  /api/countries:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.CountryListResponse'
+      summary: List countries with coffee counts
+      tags:
+      - countries
+  /api/countries/{code}:
+    get:
+      parameters:
+      - description: ISO 3166-1 alpha-2 country code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.CountryDetailResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a country with its regions and coffees
+      tags:
+      - countries
+  /api/dashboard:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Example protected endpoint
+      tags:
+      - dashboard
+  /api/health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /api/producers/{id}:
+    get:
+      parameters:
+      - description: Producer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ProducerDetailResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a producer with their coffees
+      tags:
+      - producers
+  /api/regions/{id}:
+    get:
+      parameters:
+      - description: Region ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.RegionDetailResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a region with its coffees
+      tags:
+      - regions
+  /api/roasters:
+    get:
+      parameters:
+      - description: Filter by AU state code (e.g. VIC, NSW)
+        in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.RoasterListResponse'
+      summary: List all active roasters
+      tags:
+      - roasters
+  /api/roasters/{slug}:
+    get:
+      parameters:
+      - description: Roaster slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.RoasterDetailResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a roaster by slug with their coffees
+      tags:
+      - roasters
+  /api/stats:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.StatsResponse'
+      summary: Get aggregate statistics
+      tags:
+      - stats
+swagger: "2.0"

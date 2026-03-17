@@ -4,10 +4,10 @@ node = "22"
 
 [env]
 # Database
-POSTGRES_DB = "myapp"
+POSTGRES_DB = "coffeeroasters"
 POSTGRES_USER = "postgres"
 POSTGRES_PASSWORD = "postgres"
-DATABASE_URL = "postgres://postgres:postgres@localhost:5432/myapp?sslmode=disable"
+DATABASE_URL = "postgres://postgres:postgres@localhost:5432/coffeeroasters?sslmode=disable"
 
 # Application
 PORT = "8080"

@@ -7,21 +7,24 @@ import (
 
 	"github.com/thrgamon/coffeeroasters/internal/auth"
 	"github.com/thrgamon/coffeeroasters/internal/config"
+	"github.com/thrgamon/coffeeroasters/internal/db"
 	"github.com/thrgamon/coffeeroasters/internal/domain"
 )
 
 type HandlerConfig struct {
-	Auth *auth.Service
-	Cfg  config.Config
+	Auth    *auth.Service
+	Cfg     config.Config
+	Queries *db.Queries
 }
 
 type Handler struct {
-	auth *auth.Service
-	cfg  config.Config
+	auth    *auth.Service
+	cfg     config.Config
+	queries *db.Queries
 }
 
 func NewHandler(cfg HandlerConfig) *Handler {
-	return &Handler{auth: cfg.Auth, cfg: cfg.Cfg}
+	return &Handler{auth: cfg.Auth, cfg: cfg.Cfg, queries: cfg.Queries}
 }
 
 // Routes registers all HTTP routes on the given router group.
@@ -35,6 +38,17 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 		authGroup.POST("/logout", h.Logout)
 		authGroup.GET("/me", auth.RequireAuth(h.auth), h.Me)
 	}
+
+	// Public read-only endpoints
+	rg.GET("/roasters", h.ListRoasters)
+	rg.GET("/roasters/:slug", h.GetRoaster)
+	rg.GET("/coffees", h.ListCoffees)
+	rg.GET("/coffees/:id", h.GetCoffee)
+	rg.GET("/stats", h.GetStats)
+	rg.GET("/countries", h.ListCountries)
+	rg.GET("/countries/:code", h.GetCountry)
+	rg.GET("/regions/:id", h.GetRegion)
+	rg.GET("/producers/:id", h.GetProducer)
 
 	protected := rg.Group("")
 	protected.Use(auth.RequireAuth(h.auth))

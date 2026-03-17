@@ -1,0 +1,29 @@
+# Reference data: Australian states and territories
+# ==================================================
+# Used for roaster location data and frontend filtering.
+
+states:
+  - code: VIC
+    name: Victoria
+    capital: Melbourne
+  - code: NSW
+    name: New South Wales
+    capital: Sydney
+  - code: QLD
+    name: Queensland
+    capital: Brisbane
+  - code: WA
+    name: Western Australia
+    capital: Perth
+  - code: SA
+    name: South Australia
+    capital: Adelaide
+  - code: TAS
+    name: Tasmania
+    capital: Hobart
+  - code: ACT
+    name: Australian Capital Territory
+    capital: Canberra
+  - code: NT
+    name: Northern Territory
+    capital: Darwin

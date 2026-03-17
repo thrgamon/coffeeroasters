@@ -14,7 +14,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 function extractError(data: unknown, fallback: string): string {
-	if (data && typeof data === 'object' && 'error' in data && typeof (data as Record<string, unknown>).error === 'string') {
+	if (
+		data &&
+		typeof data === 'object' &&
+		'error' in data &&
+		typeof (data as Record<string, unknown>).error === 'string'
+	) {
 		return (data as Record<string, string>).error;
 	}
 	return fallback;

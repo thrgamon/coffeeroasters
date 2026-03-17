@@ -20,7 +20,7 @@ import (
 	"github.com/thrgamon/coffeeroasters/internal/telemetry"
 )
 
-// @title My App API
+// @title Coffeeroasters API
 // @version 1.0
 // @host localhost:8080
 // @BasePath /api
@@ -30,7 +30,7 @@ func main() {
 	defer stop()
 
 	// Telemetry (no-op if OTEL_EXPORTER_OTLP_ENDPOINT is unset)
-	logger, shutdownTelemetry, err := telemetry.Init(ctx, "myapp")
+	logger, shutdownTelemetry, err := telemetry.Init(ctx, "coffeeroasters")
 	if err != nil {
 		log.Fatalf("initialize telemetry: %v", err)
 	}
@@ -55,8 +55,9 @@ func main() {
 	queries := db.New(pool)
 	authSvc := auth.NewService(queries, cfg)
 	handler := api.NewHandler(api.HandlerConfig{
-		Auth: authSvc,
-		Cfg:  cfg,
+		Auth:    authSvc,
+		Cfg:     cfg,
+		Queries: queries,
 	})
 
 	srv := server.New(server.Options{

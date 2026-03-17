@@ -1,0 +1,65 @@
+# Reference data: roast level aliases → canonical values
+# =======================================================
+# Used by internal/normalise to map raw scraped roast level strings.
+#
+# Canonical values: light | medium-light | medium | medium-dark | dark
+#
+# The Australian specialty market skews lighter; most indie roasters
+# primarily offer light and medium-light ("filter" / "espresso") profiles.
+
+light:
+  canonical: light
+  aliases:
+    - light
+    - light roast
+    - filter
+    - filter roast
+    - filter profile
+    - omni
+    - omni roast
+    - pour over
+    - batch brew
+
+medium-light:
+  canonical: medium-light
+  aliases:
+    - medium light
+    - medium-light
+    - med-light
+    - espresso light
+    - light-medium
+    - light medium
+    - versatile
+
+medium:
+  canonical: medium
+  aliases:
+    - medium
+    - medium roast
+    - med
+    - espresso
+    - espresso roast
+    - all rounder
+    - all-rounder
+    - classic espresso
+
+medium-dark:
+  canonical: medium-dark
+  aliases:
+    - medium dark
+    - medium-dark
+    - med-dark
+    - full city
+    - full city+
+    - vienna
+    - darker espresso
+
+dark:
+  canonical: dark
+  aliases:
+    - dark
+    - dark roast
+    - french roast
+    - italian roast
+    - full roast
+    - dark blend
