@@ -1,70 +1,58 @@
-import { Bean, Droplets, Flame, Globe, Grape, Layers } from 'lucide-react';
+import { Bean, Droplets, Flame, Layers } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DomainCoffeeResponse } from '@/lib/api/generated/models';
 
 export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse }) {
+	const origin = [coffee.country_name, coffee.region_name].filter(Boolean).join(', ');
+
 	return (
 		<Link href={`/coffees/${coffee.id}`} className="block">
 			<Card className="shadow-sm transition-all hover:shadow-md hover:bg-muted/50">
-				<CardHeader className="pb-2">
-					<CardTitle className="text-base">{coffee.name}</CardTitle>
-					{coffee.roaster_name && <span className="text-sm text-muted-foreground">{coffee.roaster_name}</span>}
+				<CardHeader className="pb-1">
+					<CardTitle className="text-base leading-snug">{coffee.name}</CardTitle>
+					{coffee.roaster_name && <p className="text-xs text-muted-foreground">{coffee.roaster_name}</p>}
 				</CardHeader>
-				<CardContent className="space-y-2">
+				<CardContent className="space-y-2 pt-0">
+					{origin && <p className="text-sm font-medium text-foreground/70">{origin}</p>}
+
 					<div className="flex flex-wrap gap-1">
-						{coffee.country_name && (
-							<Badge variant="secondary" className="gap-1">
-								<Globe className="size-3" />
-								{coffee.country_name}
-							</Badge>
-						)}
-						{coffee.region_name && coffee.region_id && (
-							<Badge variant="secondary" className="gap-1">
-								<Globe className="size-3" />
-								{coffee.region_name}
-							</Badge>
-						)}
 						{coffee.process && (
-							<Badge variant="outline" className="gap-1">
+							<Badge variant="outline" className="gap-1 text-xs">
 								<Droplets className="size-3" />
 								{coffee.process}
 							</Badge>
 						)}
 						{coffee.roast_level && (
-							<Badge variant="outline" className="gap-1">
+							<Badge variant="outline" className="gap-1 text-xs">
 								<Flame className="size-3" />
 								{coffee.roast_level}
 							</Badge>
 						)}
 						{coffee.variety && (
-							<Badge variant="outline" className="gap-1">
+							<Badge variant="outline" className="gap-1 text-xs">
 								<Bean className="size-3" />
 								{coffee.variety}
 							</Badge>
 						)}
 						{coffee.is_blend && (
-							<Badge variant="outline" className="gap-1">
+							<Badge variant="outline" className="gap-1 text-xs">
 								<Layers className="size-3" />
 								Blend
 							</Badge>
 						)}
-						{!coffee.in_stock && <Badge variant="destructive">Out of stock</Badge>}
+						{!coffee.in_stock && (
+							<Badge variant="destructive" className="text-xs">
+								Out of stock
+							</Badge>
+						)}
 					</div>
-					{coffee.producer_name && coffee.producer_id && (
-						<p className="text-sm text-muted-foreground">{coffee.producer_name}</p>
-					)}
+
 					{coffee.tasting_notes && coffee.tasting_notes.length > 0 && (
-						<div className="flex flex-wrap gap-1">
-							{coffee.tasting_notes.map((note) => (
-								<Badge key={note} variant="secondary" className="gap-1 font-normal">
-									<Grape className="size-3" />
-									{note}
-								</Badge>
-							))}
-						</div>
+						<p className="text-xs text-muted-foreground leading-relaxed">{coffee.tasting_notes.join(', ')}</p>
 					)}
+
 					<div className="flex items-center justify-between text-sm">
 						<div className="flex items-baseline gap-2">
 							{coffee.price_per_100g_min ? (

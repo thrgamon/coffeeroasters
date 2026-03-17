@@ -39,15 +39,7 @@ export default async function RoastersPage({ searchParams }: RoastersPageProps) 
 								<CardContent className="flex items-center gap-2">
 									{roaster.state && <Badge variant="secondary">{roaster.state}</Badge>}
 									{roaster.website && (
-										<a
-											href={roaster.website}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="text-sm text-muted-foreground hover:text-primary"
-											onClick={(e) => e.stopPropagation()}
-										>
-											{new URL(roaster.website).hostname}
-										</a>
+										<span className="text-sm text-muted-foreground">{new URL(roaster.website).hostname}</span>
 									)}
 								</CardContent>
 							</Card>
