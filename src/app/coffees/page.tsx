@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import CoffeeCard from '@/components/CoffeeCard';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,6 +32,14 @@ const VARIETIES = [
 ];
 
 export default function CoffeesPage() {
+	return (
+		<Suspense fallback={<p className="text-muted-foreground">Loading...</p>}>
+			<CoffeesContent />
+		</Suspense>
+	);
+}
+
+function CoffeesContent() {
 	const searchParams = useSearchParams();
 	const similarTo = searchParams.get('similar_to');
 
