@@ -159,6 +159,10 @@ func fetchAndExtractProduct(ctx context.Context, cfg domain.RoasterConfig, clien
 		return nil, fmt.Errorf("read body: %w", err)
 	}
 
+	// Extract product image from full HTML before cleaning (detail_selector
+	// may exclude the image container).
+	imageURL := extractProductImage(string(body), productURL)
+
 	// Use detail_selector if configured, otherwise no selector.
 	cleaned, err := CleanHTML(string(body), cfg.DetailSelector)
 	if err != nil {
@@ -179,6 +183,7 @@ func fetchAndExtractProduct(ctx context.Context, cfg domain.RoasterConfig, clien
 	raw := RawCoffee{
 		Name:       product.Name,
 		ProductURL: productURL,
+		ImageURL:   imageURL,
 		InStock:    product.InStock,
 		ScrapedAt:  time.Now(),
 		Currency:   "AUD",
@@ -233,4 +238,39 @@ func fetchAndExtractProduct(ctx context.Context, cfg domain.RoasterConfig, clien
 	}
 
 	return &raw, nil
+}
+
+// extractProductImage extracts a product image URL from the raw HTML of a
+// product page. Tries og:image meta tag first (most reliable), then falls
+// back to the first content image on the page.
+func extractProductImage(htmlBody string, pageURL string) string {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlBody))
+	if err != nil {
+		return ""
+	}
+
+	baseURL, err := url.Parse(pageURL)
+	if err != nil {
+		return ""
+	}
+
+	// Try og:image meta tag first (most reliable for product pages).
+	if content, exists := doc.Find(`meta[property="og:image"]`).Attr("content"); exists && content != "" {
+		return resolveURL(baseURL, content)
+	}
+
+	// Fallback: first image in common product image containers.
+	selectors := []string{
+		".woocommerce-product-gallery img",
+		".product-image img",
+		".product_image img",
+		".product-single__photo img",
+	}
+	for _, sel := range selectors {
+		if src, exists := doc.Find(sel).First().Attr("src"); exists && src != "" {
+			return resolveURL(baseURL, src)
+		}
+	}
+
+	return ""
 }
