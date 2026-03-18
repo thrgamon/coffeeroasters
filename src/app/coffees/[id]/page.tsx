@@ -1,6 +1,7 @@
 import { Bean, Droplets, Flame, Globe, Grape, Layers, Sprout } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import CoffeeTrackButton from '@/components/CoffeeTrackButton';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import type { DomainCoffeeDetailResponse } from '@/lib/api/generated/models';
@@ -25,7 +26,15 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 						/>
 					)}
 					<div className="space-y-2">
-						<h1 className="text-3xl font-bold">{coffee.name}</h1>
+						<div className="flex items-center gap-2">
+							<h1 className="text-3xl font-bold">{coffee.name}</h1>
+							{coffee.id && (
+								<div className="flex items-center gap-1">
+									<CoffeeTrackButton coffeeId={coffee.id} variant="like" size="md" />
+									<CoffeeTrackButton coffeeId={coffee.id} variant="tried" size="md" />
+								</div>
+							)}
+						</div>
 						{coffee.roaster_name && (
 							<Link
 								href={`/roasters/${coffee.roaster_slug}`}

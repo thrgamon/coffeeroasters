@@ -1,5 +1,6 @@
 import { Bean, Droplets, Flame, Layers } from 'lucide-react';
 import Link from 'next/link';
+import CoffeeTrackButton from '@/components/CoffeeTrackButton';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DomainCoffeeResponse } from '@/lib/api/generated/models';
@@ -11,7 +12,10 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 		<Link href={`/coffees/${coffee.id}`} className="block">
 			<Card className="shadow-sm transition-all hover:shadow-md hover:bg-muted/50">
 				<CardHeader className="pb-1">
-					<CardTitle className="text-base leading-snug">{coffee.name}</CardTitle>
+					<div className="flex items-start justify-between gap-1">
+						<CardTitle className="text-base leading-snug">{coffee.name}</CardTitle>
+						{coffee.id && <CoffeeTrackButton coffeeId={coffee.id} variant="like" />}
+					</div>
 					{coffee.roaster_name && <p className="text-xs text-muted-foreground">{coffee.roaster_name}</p>}
 				</CardHeader>
 				<CardContent className="space-y-2 pt-0">
