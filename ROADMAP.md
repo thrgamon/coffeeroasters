@@ -8,7 +8,7 @@
 
 ## Features
 
-- [ ] **Coffee tracking (likes/have)** — local/session storage to track coffees you have or like
+- [x] **Coffee tracking (likes/have)** — localStorage tracking with like/tried buttons, /my-coffees page
 - [ ] **Historical availability tracking** — track when coffees come in/out of stock so users can see ones they historically liked
 - [ ] **Likes-based recommendations** — use liked coffees to inform similarity recommendations
 - [ ] **Scheduled scraping** — run scrapers once daily on a cron/schedule
