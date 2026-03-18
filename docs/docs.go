@@ -202,6 +202,12 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "description": "Comma-separated liked coffee IDs for recommendations",
+                        "name": "liked",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "description": "Page number (default 1)",
                         "name": "page",

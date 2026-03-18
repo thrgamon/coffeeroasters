@@ -2,6 +2,7 @@
 
 import { useQueries } from '@tanstack/react-query';
 import CoffeeCard from '@/components/CoffeeCard';
+import Recommendations from '@/components/Recommendations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getGetApiCoffeesIdQueryOptions } from '@/lib/api/generated/coffees/coffees';
 import type { DomainCoffeeResponse } from '@/lib/api/generated/models';
@@ -56,6 +57,7 @@ export default function MyCoffeesPage() {
 				<>
 					{likedIds.length > 0 && <CoffeeGrid title="Liked" ids={likedIds} />}
 					{triedIds.length > 0 && <CoffeeGrid title="Tried" ids={triedIds} />}
+					<Recommendations />
 				</>
 			)}
 		</div>

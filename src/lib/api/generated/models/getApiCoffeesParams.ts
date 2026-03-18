@@ -35,6 +35,10 @@ in_stock?: boolean;
  */
 similar_to?: number;
 /**
+ * Comma-separated liked coffee IDs for recommendations
+ */
+liked?: string;
+/**
  * Page number (default 1)
  */
 page?: number;

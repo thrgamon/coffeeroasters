@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -117,6 +118,7 @@ func (h *Handler) GetRoaster(c *gin.Context) {
 // @Param variety query string false "Filter by variety"
 // @Param in_stock query boolean false "Filter by stock status"
 // @Param similar_to query int false "Coffee ID to find similar coffees for"
+// @Param liked query string false "Comma-separated liked coffee IDs for recommendations"
 // @Param page query int false "Page number (default 1)"
 // @Param page_size query int false "Page size (default 20, max 100)"
 // @Success 200 {object} domain.CoffeeListResponse
@@ -145,6 +147,12 @@ func (h *Handler) ListCoffees(c *gin.Context) {
 
 	if similarToStr != "" {
 		h.listSimilarCoffees(c, similarToStr, pageSize, offset)
+		return
+	}
+
+	likedStr := c.Query("liked")
+	if likedStr != "" {
+		h.listRecommendedCoffees(c, likedStr, pageSize, offset)
 		return
 	}
 
@@ -245,27 +253,9 @@ func (h *Handler) listSimilarCoffees(c *gin.Context, similarToStr string, pageSi
 		source.RegionID = &sourceRow.RegionID.Int32
 	}
 
-	candidateIndex := make(map[int64]db.ListCoffeesForSimilarityRow, len(simRows))
 	candidates := make([]similarity.CoffeeAttrs, 0, len(simRows))
 	for _, sr := range simRows {
-		candidateIndex[sr.ID] = sr
-		attrs := similarity.CoffeeAttrs{
-			CoffeeID:     sr.ID,
-			TastingNotes: sr.TastingNotes,
-			Process:      sr.Process.String,
-			RoastLevel:   sr.RoastLevel.String,
-			Variety:      sr.Variety.String,
-		}
-		if sr.RegionID.Valid {
-			attrs.RegionID = &sr.RegionID.Int32
-		}
-		if sr.Latitude.Valid {
-			attrs.Latitude = &sr.Latitude.Float64
-		}
-		if sr.Longitude.Valid {
-			attrs.Longitude = &sr.Longitude.Float64
-		}
-		candidates = append(candidates, attrs)
+		candidates = append(candidates, simRowToAttrs(sr))
 	}
 
 	ranked := similarity.Rank(source, candidates, pageSize+offset)
@@ -296,6 +286,88 @@ func (h *Handler) listSimilarCoffees(c *gin.Context, similarToStr string, pageSi
 
 	resp.Coffees = coffees
 	resp.TotalCount = int64(len(candidates) - 1) // exclude source
+
+	c.JSON(http.StatusOK, resp)
+}
+
+// listRecommendedCoffees returns coffees ranked by similarity to multiple liked coffees.
+func (h *Handler) listRecommendedCoffees(c *gin.Context, likedStr string, pageSize, offset int) {
+	ctx := c.Request.Context()
+
+	likedIDs, err := parseIDList(likedStr, 50)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid liked IDs"})
+		return
+	}
+	if len(likedIDs) == 0 {
+		c.JSON(http.StatusOK, domain.CoffeeListResponse{
+			Coffees:  []domain.CoffeeResponse{},
+			Page:     1,
+			PageSize: int32(pageSize),
+		})
+		return
+	}
+
+	simRows, err := h.queries.ListCoffeesForSimilarity(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load coffees"})
+		return
+	}
+
+	// Build attrs index and candidate list
+	attrsByID := make(map[int64]similarity.CoffeeAttrs, len(simRows))
+	candidates := make([]similarity.CoffeeAttrs, 0, len(simRows))
+	for _, sr := range simRows {
+		attrs := simRowToAttrs(sr)
+		attrsByID[sr.ID] = attrs
+		candidates = append(candidates, attrs)
+	}
+
+	// Extract source attrs for liked IDs
+	var sources []similarity.CoffeeAttrs
+	for _, id := range likedIDs {
+		if attrs, ok := attrsByID[id]; ok {
+			sources = append(sources, attrs)
+		}
+	}
+
+	if len(sources) == 0 {
+		c.JSON(http.StatusOK, domain.CoffeeListResponse{
+			Coffees:  []domain.CoffeeResponse{},
+			Page:     1,
+			PageSize: int32(pageSize),
+		})
+		return
+	}
+
+	ranked := similarity.RankFromMultiple(sources, candidates, pageSize+offset)
+
+	// Paginate
+	if offset > len(ranked) {
+		ranked = nil
+	} else if offset+pageSize > len(ranked) {
+		ranked = ranked[offset:]
+	} else {
+		ranked = ranked[offset : offset+pageSize]
+	}
+
+	var resp domain.CoffeeListResponse
+	resp.Page = int32(offset/pageSize + 1)
+	resp.PageSize = int32(pageSize)
+
+	coffees := make([]domain.CoffeeResponse, 0, len(ranked))
+	for _, sc := range ranked {
+		fullRow, err := h.queries.GetCoffeeByID(ctx, sc.CoffeeID)
+		if err != nil {
+			continue
+		}
+		coffee := coffeeDetailRowToResponse(fullRow)
+		coffee.SimilarityScore = sc.Score
+		coffees = append(coffees, coffee)
+	}
+
+	resp.Coffees = coffees
+	resp.TotalCount = int64(len(candidates) - len(sources))
 
 	c.JSON(http.StatusOK, resp)
 }
@@ -371,23 +443,7 @@ func (h *Handler) GetCoffee(c *gin.Context) {
 	candidates := make([]similarity.CoffeeAttrs, 0, len(simRows))
 	for _, sr := range simRows {
 		candidateIndex[sr.ID] = sr
-		attrs := similarity.CoffeeAttrs{
-			CoffeeID:     sr.ID,
-			TastingNotes: sr.TastingNotes,
-			Process:      sr.Process.String,
-			RoastLevel:   sr.RoastLevel.String,
-			Variety:      sr.Variety.String,
-		}
-		if sr.RegionID.Valid {
-			attrs.RegionID = &sr.RegionID.Int32
-		}
-		if sr.Latitude.Valid {
-			attrs.Latitude = &sr.Latitude.Float64
-		}
-		if sr.Longitude.Valid {
-			attrs.Longitude = &sr.Longitude.Float64
-		}
-		candidates = append(candidates, attrs)
+		candidates = append(candidates, simRowToAttrs(sr))
 	}
 
 	ranked := similarity.Rank(source, candidates, 3)
@@ -667,6 +723,53 @@ func regionListRowToResponse(row db.ListCoffeesByRegionRow) domain.CoffeeRespons
 		IsBlend:         row.IsBlend,
 		InStock:         row.InStock,
 	}
+}
+
+func simRowToAttrs(sr db.ListCoffeesForSimilarityRow) similarity.CoffeeAttrs {
+	attrs := similarity.CoffeeAttrs{
+		CoffeeID:     sr.ID,
+		TastingNotes: sr.TastingNotes,
+		Process:      sr.Process.String,
+		RoastLevel:   sr.RoastLevel.String,
+		Variety:      sr.Variety.String,
+	}
+	if sr.RegionID.Valid {
+		attrs.RegionID = &sr.RegionID.Int32
+	}
+	if sr.Latitude.Valid {
+		attrs.Latitude = &sr.Latitude.Float64
+	}
+	if sr.Longitude.Valid {
+		attrs.Longitude = &sr.Longitude.Float64
+	}
+	return attrs
+}
+
+// parseIDList parses a comma-separated string of IDs, deduplicating and validating.
+// Returns at most maxIDs entries.
+func parseIDList(s string, maxIDs int) ([]int64, error) {
+	parts := strings.Split(s, ",")
+	seen := make(map[int64]bool, len(parts))
+	var ids []int64
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		id, err := strconv.ParseInt(p, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		if seen[id] {
+			continue
+		}
+		seen[id] = true
+		ids = append(ids, id)
+		if len(ids) >= maxIDs {
+			break
+		}
+	}
+	return ids, nil
 }
 
 func producerListRowToResponse(row db.ListCoffeesByProducerRow) domain.CoffeeResponse {

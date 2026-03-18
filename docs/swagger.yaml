@@ -471,6 +471,10 @@ paths:
         in: query
         name: similar_to
         type: integer
+      - description: Comma-separated liked coffee IDs for recommendations
+        in: query
+        name: liked
+        type: string
       - description: Page number (default 1)
         in: query
         name: page

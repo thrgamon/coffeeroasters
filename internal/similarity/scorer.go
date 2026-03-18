@@ -243,6 +243,48 @@ func degreesToRadians(deg float64) float64 {
 	return deg * math.Pi / 180
 }
 
+// RankFromMultiple scores all candidates against multiple source coffees using
+// max-score aggregation: each candidate's score is the highest score it gets
+// against any source. This preserves distinct preference clusters rather than
+// averaging them together. Sources are excluded from results.
+func RankFromMultiple(sources []CoffeeAttrs, candidates []CoffeeAttrs, limit int) []ScoredCoffee {
+	sourceIDs := make(map[int64]bool, len(sources))
+	for _, s := range sources {
+		sourceIDs[s.CoffeeID] = true
+	}
+
+	var scored []ScoredCoffee
+	for _, c := range candidates {
+		if sourceIDs[c.CoffeeID] {
+			continue
+		}
+
+		var bestScore float64
+		var bestReasons []string
+		for _, s := range sources {
+			sc, reasons := Score(s, c)
+			if sc > bestScore {
+				bestScore = sc
+				bestReasons = reasons
+			}
+		}
+
+		if bestScore >= minScoreThreshold {
+			scored = append(scored, ScoredCoffee{CoffeeID: c.CoffeeID, Score: bestScore, Reasons: bestReasons})
+		}
+	}
+
+	sort.Slice(scored, func(i, j int) bool {
+		return scored[i].Score > scored[j].Score
+	})
+
+	if len(scored) > limit {
+		scored = scored[:limit]
+	}
+
+	return scored
+}
+
 func abs(x int) int {
 	if x < 0 {
 		return -x

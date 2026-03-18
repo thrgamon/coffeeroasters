@@ -151,6 +151,125 @@ func TestRank_RespectsLimit(t *testing.T) {
 	}
 }
 
+func TestRankFromMultiple_MaxScoreAggregation(t *testing.T) {
+	// Two sources with distinct profiles
+	lightEthiopian := CoffeeAttrs{
+		CoffeeID:     1,
+		TastingNotes: []string{"blueberry", "jasmine"},
+		Process:      "natural",
+		RoastLevel:   "light",
+		Variety:      "heirloom",
+		RegionID:     ptr(int32(1)),
+	}
+	darkBrazilian := CoffeeAttrs{
+		CoffeeID:     2,
+		TastingNotes: []string{"dark chocolate", "walnut"},
+		Process:      "washed",
+		RoastLevel:   "dark",
+		Variety:      "bourbon",
+		RegionID:     ptr(int32(2)),
+	}
+	sources := []CoffeeAttrs{lightEthiopian, darkBrazilian}
+
+	candidates := []CoffeeAttrs{
+		lightEthiopian, // should be excluded
+		darkBrazilian,  // should be excluded
+		{
+			CoffeeID:     3,
+			TastingNotes: []string{"blueberry", "floral"},
+			Process:      "natural",
+			RoastLevel:   "light",
+			Variety:      "heirloom",
+			RegionID:     ptr(int32(1)),
+		},
+		{
+			CoffeeID:     4,
+			TastingNotes: []string{"dark chocolate", "hazelnut"},
+			Process:      "washed",
+			RoastLevel:   "dark",
+			Variety:      "bourbon",
+			RegionID:     ptr(int32(2)),
+		},
+		{
+			CoffeeID:     5,
+			TastingNotes: []string{"pineapple"},
+			Process:      "honey",
+			RoastLevel:   "medium",
+			Variety:      "catimor",
+			RegionID:     ptr(int32(99)),
+		},
+	}
+
+	results := RankFromMultiple(sources, candidates, 10)
+
+	// Sources should be excluded
+	for _, r := range results {
+		if r.CoffeeID == 1 || r.CoffeeID == 2 {
+			t.Errorf("source coffee %d should be excluded", r.CoffeeID)
+		}
+	}
+
+	// Coffee 3 (similar to light Ethiopian) and 4 (similar to dark Brazilian)
+	// should both appear and score well
+	if len(results) < 2 {
+		t.Fatalf("expected at least 2 results, got %d", len(results))
+	}
+
+	topIDs := make(map[int64]bool)
+	for _, r := range results[:2] {
+		topIDs[r.CoffeeID] = true
+	}
+	if !topIDs[3] || !topIDs[4] {
+		t.Errorf("expected coffees 3 and 4 in top results, got %v", topIDs)
+	}
+}
+
+func TestRankFromMultiple_ExcludesAllSources(t *testing.T) {
+	sources := []CoffeeAttrs{
+		{CoffeeID: 1, TastingNotes: []string{"chocolate"}, Process: "natural"},
+		{CoffeeID: 2, TastingNotes: []string{"chocolate"}, Process: "natural"},
+		{CoffeeID: 3, TastingNotes: []string{"chocolate"}, Process: "natural"},
+	}
+	candidates := sources // all candidates are sources
+
+	results := RankFromMultiple(sources, candidates, 10)
+	if len(results) != 0 {
+		t.Errorf("expected 0 results when all candidates are sources, got %d", len(results))
+	}
+}
+
+func TestRankFromMultiple_RespectsLimit(t *testing.T) {
+	source := CoffeeAttrs{
+		CoffeeID:     1,
+		TastingNotes: []string{"chocolate"},
+		Process:      "natural",
+	}
+
+	var candidates []CoffeeAttrs
+	for i := int64(2); i <= 20; i++ {
+		candidates = append(candidates, CoffeeAttrs{
+			CoffeeID:     i,
+			TastingNotes: []string{"chocolate"},
+			Process:      "natural",
+		})
+	}
+
+	results := RankFromMultiple([]CoffeeAttrs{source}, candidates, 3)
+	if len(results) > 3 {
+		t.Errorf("expected max 3 results, got %d", len(results))
+	}
+}
+
+func TestRankFromMultiple_EmptySources(t *testing.T) {
+	candidates := []CoffeeAttrs{
+		{CoffeeID: 1, TastingNotes: []string{"chocolate"}, Process: "natural"},
+	}
+	results := RankFromMultiple(nil, candidates, 10)
+	if len(results) != 0 {
+		t.Errorf("expected 0 results with no sources, got %d", len(results))
+	}
+}
+
 func TestHaversineKm(t *testing.T) {
 	// London to Paris ~344km
 	dist := haversineKm(51.5074, -0.1278, 48.8566, 2.3522)

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import CoffeeCard from '@/components/CoffeeCard';
+import Recommendations from '@/components/Recommendations';
 import type { DomainCoffeeListResponse, DomainStatsResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
@@ -36,6 +37,8 @@ export default async function Home() {
 					</Link>
 				</div>
 			</section>
+
+			<Recommendations />
 
 			{coffees.coffees && coffees.coffees.length > 0 && (
 				<section className="space-y-4">
