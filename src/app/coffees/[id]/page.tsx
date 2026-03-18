@@ -2,7 +2,7 @@ import { Bean, Droplets, Flame, Globe, Grape, Layers, Sprout } from 'lucide-reac
 import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import type { DomainCoffeeDetailResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
@@ -177,48 +177,18 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 			</div>
 
 			{coffee.similar_coffees && coffee.similar_coffees.length > 0 && (
-				<div className="space-y-4">
-					<h2 className="text-2xl font-bold">Similar coffees</h2>
-					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				<div className="space-y-3">
+					<h3 className="text-lg font-medium text-muted-foreground">You might also like</h3>
+					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 						{coffee.similar_coffees.map((similar) => (
 							<Link key={similar.id} href={`/coffees/${similar.id}`}>
 								<Card className="h-full shadow-sm transition-all hover:shadow-md hover:bg-accent/50">
-									<CardHeader className="pb-2">
-										<CardTitle className="text-base">{similar.name}</CardTitle>
-										{similar.roaster_name && <p className="text-sm text-muted-foreground">{similar.roaster_name}</p>}
-									</CardHeader>
-									<CardContent className="space-y-2">
-										<div className="flex flex-wrap gap-1">
-											{similar.process && (
-												<Badge variant="outline" className="gap-1">
-													<Droplets className="size-3" />
-													{similar.process}
-												</Badge>
-											)}
-											{similar.roast_level && (
-												<Badge variant="outline" className="gap-1">
-													<Flame className="size-3" />
-													{similar.roast_level}
-												</Badge>
-											)}
-											{similar.variety && (
-												<Badge variant="outline" className="gap-1">
-													<Bean className="size-3" />
-													{similar.variety}
-												</Badge>
-											)}
-										</div>
-										{similar.tasting_notes && similar.tasting_notes.length > 0 && (
-											<div className="flex flex-wrap gap-1">
-												{similar.tasting_notes.map((note) => (
-													<Badge key={note} variant="secondary" className="gap-1 font-normal text-xs">
-														<Grape className="size-3" />
-														{note}
-													</Badge>
-												))}
-											</div>
+									<CardContent className="p-4 space-y-1.5">
+										<p className="font-medium text-sm leading-snug">{similar.name}</p>
+										{similar.roaster_name && <p className="text-xs text-muted-foreground">{similar.roaster_name}</p>}
+										{similar.reasons && similar.reasons.length > 0 && (
+											<p className="text-xs text-muted-foreground">{similar.reasons.join(' · ')}</p>
 										)}
-										<p className="text-xs text-muted-foreground">{Math.round((similar.score ?? 0) * 100)}% match</p>
 									</CardContent>
 								</Card>
 							</Link>

@@ -15,7 +15,7 @@ func TestScore_IdenticalCoffees(t *testing.T) {
 		Variety:      "bourbon",
 		RegionID:     ptr(int32(1)),
 	}
-	score := Score(a, a)
+	score, _ := Score(a, a)
 	if score < 0.99 {
 		t.Errorf("identical coffees should score ~1.0, got %.4f", score)
 	}
@@ -36,7 +36,7 @@ func TestScore_CompletelyDifferent(t *testing.T) {
 		Variety:      "catimor",
 		RegionID:     ptr(int32(99)),
 	}
-	score := Score(a, b)
+	score, _ := Score(a, b)
 	if score > 0.15 {
 		t.Errorf("very different coffees should score low, got %.4f", score)
 	}
@@ -49,7 +49,7 @@ func TestScore_FlavourGroupPartialCredit(t *testing.T) {
 	b := CoffeeAttrs{
 		TastingNotes: []string{"strawberry", "chocolate"},
 	}
-	score := Score(a, b)
+	score, _ := Score(a, b)
 
 	// "chocolate" is exact match. "blueberry" and "strawberry" share "berry" group.
 	// Union = 3 (blueberry, strawberry, chocolate)
@@ -64,7 +64,7 @@ func TestScore_FlavourGroupPartialCredit(t *testing.T) {
 func TestScore_RoastOneStepApart(t *testing.T) {
 	a := CoffeeAttrs{RoastLevel: "light"}
 	b := CoffeeAttrs{RoastLevel: "medium-light"}
-	score := Score(a, b)
+	score, _ := Score(a, b)
 
 	// Only roast contributes: 0.5 * 0.15 = 0.075
 	expected := 0.5 * weightRoast
@@ -76,7 +76,7 @@ func TestScore_RoastOneStepApart(t *testing.T) {
 func TestScore_RoastTwoStepsApart(t *testing.T) {
 	a := CoffeeAttrs{RoastLevel: "light"}
 	b := CoffeeAttrs{RoastLevel: "medium"}
-	score := Score(a, b)
+	score, _ := Score(a, b)
 	if score > 0.001 {
 		t.Errorf("two-step roast should contribute 0, got %.4f", score)
 	}

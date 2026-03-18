@@ -478,7 +478,7 @@ func applyNoteAliases(note string) string {
 	if v, ok := noteAliases[key]; ok {
 		return v
 	}
-	return note
+	return key
 }
 
 // parseFloat is a minimal float parser to avoid importing strconv in the hot path.

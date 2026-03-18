@@ -390,7 +390,7 @@ func (h *Handler) GetCoffee(c *gin.Context) {
 		candidates = append(candidates, attrs)
 	}
 
-	ranked := similarity.Rank(source, candidates, 6)
+	ranked := similarity.Rank(source, candidates, 3)
 
 	// Resolve ranked IDs to response objects
 	if len(ranked) > 0 {
@@ -417,6 +417,7 @@ func (h *Handler) GetCoffee(c *gin.Context) {
 				TastingNotes: sr.TastingNotes,
 				Variety:      sr.Variety.String,
 				Score:        sc.Score,
+				Reasons:      sc.Reasons,
 			})
 		}
 		resp.SimilarCoffees = similar

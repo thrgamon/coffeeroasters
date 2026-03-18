@@ -119,6 +119,7 @@ type SimilarCoffee struct {
 	TastingNotes []string `json:"tasting_notes,omitempty"`
 	Variety      string   `json:"variety,omitempty"`
 	Score        float64  `json:"score"`
+	Reasons      []string `json:"reasons,omitempty"`
 }
 
 type CoffeeListResponse struct {

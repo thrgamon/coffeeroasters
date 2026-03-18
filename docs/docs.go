@@ -998,6 +998,12 @@ const docTemplate = `{
                 "process": {
                     "type": "string"
                 },
+                "reasons": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "roast_level": {
                     "type": "string"
                 },

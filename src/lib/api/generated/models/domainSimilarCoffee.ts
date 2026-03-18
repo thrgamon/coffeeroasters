@@ -10,6 +10,7 @@ export interface DomainSimilarCoffee {
   image_url?: string;
   name?: string;
   process?: string;
+  reasons?: string[];
   roast_level?: string;
   roaster_name?: string;
   roaster_slug?: string;

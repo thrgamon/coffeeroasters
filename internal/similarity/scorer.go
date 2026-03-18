@@ -20,10 +20,11 @@ const (
 	maxRegionDistanceKm = 500.0
 )
 
-// ScoredCoffee pairs a coffee ID with its similarity score.
+// ScoredCoffee pairs a coffee ID with its similarity score and reasons.
 type ScoredCoffee struct {
 	CoffeeID int64
 	Score    float64
+	Reasons  []string
 }
 
 // CoffeeAttrs holds the attributes used for similarity scoring.
@@ -48,17 +49,47 @@ var roastOrdinal = map[string]int{
 	"dark":        4,
 }
 
-// Score computes a weighted similarity between a source coffee and a candidate.
-func Score(source, candidate CoffeeAttrs) float64 {
+// Score computes a weighted similarity between a source coffee and a candidate,
+// returning the total score and human-readable reasons explaining the match.
+func Score(source, candidate CoffeeAttrs) (float64, []string) {
 	var total float64
+	var reasons []string
 
-	total += weightTastingNotes * tastingNoteSimilarity(source.TastingNotes, candidate.TastingNotes)
-	total += weightProcess * exactMatch(source.Process, candidate.Process)
-	total += weightRoast * roastSimilarity(source.RoastLevel, candidate.RoastLevel)
-	total += weightVariety * varietySimilarity(source.Variety, candidate.Variety)
-	total += weightRegion * regionSimilarity(source, candidate)
+	tn := tastingNoteSimilarity(source.TastingNotes, candidate.TastingNotes)
+	total += weightTastingNotes * tn
+	if tn > 0 {
+		reasons = append(reasons, "similar flavour notes")
+	}
 
-	return total
+	proc := exactMatch(source.Process, candidate.Process)
+	total += weightProcess * proc
+	if proc > 0 {
+		reasons = append(reasons, "same processing method")
+	}
+
+	roast := roastSimilarity(source.RoastLevel, candidate.RoastLevel)
+	total += weightRoast * roast
+	if roast >= 1.0 {
+		reasons = append(reasons, "same roast level")
+	} else if roast > 0 {
+		reasons = append(reasons, "similar roast level")
+	}
+
+	variety := varietySimilarity(source.Variety, candidate.Variety)
+	total += weightVariety * variety
+	if variety > 0 {
+		reasons = append(reasons, "same variety")
+	}
+
+	region := regionSimilarity(source, candidate)
+	total += weightRegion * region
+	if region >= 1.0 {
+		reasons = append(reasons, "from the same region")
+	} else if region > 0 {
+		reasons = append(reasons, "from a nearby region")
+	}
+
+	return total, reasons
 }
 
 // Rank scores all candidates against the source and returns the top N sorted
@@ -71,9 +102,9 @@ func Rank(source CoffeeAttrs, candidates []CoffeeAttrs, limit int) []ScoredCoffe
 		if c.CoffeeID == source.CoffeeID {
 			continue
 		}
-		s := Score(source, c)
+		s, reasons := Score(source, c)
 		if s >= minScoreThreshold {
-			scored = append(scored, ScoredCoffee{CoffeeID: c.CoffeeID, Score: s})
+			scored = append(scored, ScoredCoffee{CoffeeID: c.CoffeeID, Score: s, Reasons: reasons})
 		}
 	}
 

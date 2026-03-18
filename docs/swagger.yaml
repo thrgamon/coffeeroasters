@@ -308,6 +308,10 @@ definitions:
         type: string
       process:
         type: string
+      reasons:
+        items:
+          type: string
+        type: array
       roast_level:
         type: string
       roaster_name:
