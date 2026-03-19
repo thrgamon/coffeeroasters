@@ -577,6 +577,9 @@
                 "country_name": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -684,6 +687,9 @@
                     "type": "string"
                 },
                 "country_name": {
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "id": {

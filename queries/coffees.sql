@@ -8,6 +8,7 @@ INSERT INTO coffees (
     country_code, region_id, producer_id, producer_raw,
     variety, species,
     price_per_100g_min, price_per_100g_max, is_blend,
+    description,
     last_seen_at
 )
 VALUES (
@@ -18,6 +19,7 @@ VALUES (
     $20, $21, $22, $23,
     $24, $25,
     $26, $27, $28,
+    $29,
     now()
 )
 ON CONFLICT (roaster_id, name) DO UPDATE SET
@@ -47,6 +49,7 @@ ON CONFLICT (roaster_id, name) DO UPDATE SET
     price_per_100g_min = EXCLUDED.price_per_100g_min,
     price_per_100g_max = EXCLUDED.price_per_100g_max,
     is_blend = EXCLUDED.is_blend,
+    description = EXCLUDED.description,
     last_seen_at = now(),
     last_changed_at = CASE
         WHEN coffees.price_cents IS DISTINCT FROM EXCLUDED.price_cents
@@ -113,6 +116,7 @@ SELECT
     c.producer_raw, c.region_id, c.producer_id,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
+    c.description,
     c.first_seen_at, c.last_seen_at,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
@@ -265,8 +269,17 @@ WHERE id = $1;
 -- name: ListCoffeesForSimilarity :many
 SELECT
     c.id, c.tasting_notes, c.process, c.roast_level, c.variety,
-    c.region_id, reg.latitude, reg.longitude
+    c.region_id, reg.latitude, reg.longitude,
+    c.embedding
 FROM coffees c
 JOIN roasters r ON r.id = c.roaster_id
 LEFT JOIN regions reg ON reg.id = c.region_id
 WHERE c.in_stock = true AND r.opted_out = false;
+
+-- name: ListCoffeesNeedingEmbedding :many
+SELECT c.id, c.description
+FROM coffees c
+WHERE c.description IS NOT NULL AND c.description != '' AND c.embedding IS NULL;
+
+-- name: UpdateCoffeeEmbedding :exec
+UPDATE coffees SET embedding = $2 WHERE id = $1;

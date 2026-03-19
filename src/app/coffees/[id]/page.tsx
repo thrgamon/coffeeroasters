@@ -118,6 +118,13 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 					</div>
 				)}
 
+				{coffee.description && (
+					<div>
+						<h3 className="mb-1 text-sm font-medium">About this coffee</h3>
+						<p className="text-sm text-muted-foreground whitespace-pre-line">{coffee.description}</p>
+					</div>
+				)}
+
 				{coffee.blend_components && coffee.blend_components.length > 0 && (
 					<div>
 						<h3 className="mb-1 text-sm font-medium">Blend components</h3>

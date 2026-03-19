@@ -159,6 +159,7 @@ SELECT
     c.producer_raw, c.region_id, c.producer_id,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
+    c.description,
     c.first_seen_at, c.last_seen_at,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
@@ -199,6 +200,7 @@ type GetCoffeeByIDRow struct {
 	PricePer100gMin pgtype.Int4 `json:"price_per_100g_min"`
 	PricePer100gMax pgtype.Int4 `json:"price_per_100g_max"`
 	IsBlend         bool        `json:"is_blend"`
+	Description     pgtype.Text `json:"description"`
 	FirstSeenAt     time.Time   `json:"first_seen_at"`
 	LastSeenAt      time.Time   `json:"last_seen_at"`
 	RoasterName     string      `json:"roaster_name"`
@@ -238,6 +240,7 @@ func (q *Queries) GetCoffeeByID(ctx context.Context, id int64) (GetCoffeeByIDRow
 		&i.PricePer100gMin,
 		&i.PricePer100gMax,
 		&i.IsBlend,
+		&i.Description,
 		&i.FirstSeenAt,
 		&i.LastSeenAt,
 		&i.RoasterName,
@@ -731,7 +734,8 @@ func (q *Queries) ListCoffeesByRoaster(ctx context.Context, slug string) ([]List
 const listCoffeesForSimilarity = `-- name: ListCoffeesForSimilarity :many
 SELECT
     c.id, c.tasting_notes, c.process, c.roast_level, c.variety,
-    c.region_id, reg.latitude, reg.longitude
+    c.region_id, reg.latitude, reg.longitude,
+    c.embedding
 FROM coffees c
 JOIN roasters r ON r.id = c.roaster_id
 LEFT JOIN regions reg ON reg.id = c.region_id
@@ -747,6 +751,7 @@ type ListCoffeesForSimilarityRow struct {
 	RegionID     pgtype.Int4   `json:"region_id"`
 	Latitude     pgtype.Float8 `json:"latitude"`
 	Longitude    pgtype.Float8 `json:"longitude"`
+	Embedding    []float64     `json:"embedding"`
 }
 
 func (q *Queries) ListCoffeesForSimilarity(ctx context.Context) ([]ListCoffeesForSimilarityRow, error) {
@@ -767,6 +772,7 @@ func (q *Queries) ListCoffeesForSimilarity(ctx context.Context) ([]ListCoffeesFo
 			&i.RegionID,
 			&i.Latitude,
 			&i.Longitude,
+			&i.Embedding,
 		); err != nil {
 			return nil, err
 		}
@@ -800,6 +806,37 @@ func (q *Queries) ListCoffeesNeedingBackfill(ctx context.Context) ([]ListCoffees
 	for rows.Next() {
 		var i ListCoffeesNeedingBackfillRow
 		if err := rows.Scan(&i.ID, &i.OriginRaw, &i.RegionRaw); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCoffeesNeedingEmbedding = `-- name: ListCoffeesNeedingEmbedding :many
+SELECT c.id, c.description
+FROM coffees c
+WHERE c.description IS NOT NULL AND c.description != '' AND c.embedding IS NULL
+`
+
+type ListCoffeesNeedingEmbeddingRow struct {
+	ID          int64       `json:"id"`
+	Description pgtype.Text `json:"description"`
+}
+
+func (q *Queries) ListCoffeesNeedingEmbedding(ctx context.Context) ([]ListCoffeesNeedingEmbeddingRow, error) {
+	rows, err := q.db.Query(ctx, listCoffeesNeedingEmbedding)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListCoffeesNeedingEmbeddingRow{}
+	for rows.Next() {
+		var i ListCoffeesNeedingEmbeddingRow
+		if err := rows.Scan(&i.ID, &i.Description); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -973,6 +1010,20 @@ func (q *Queries) SearchCoffees(ctx context.Context, arg SearchCoffeesParams) ([
 	return items, nil
 }
 
+const updateCoffeeEmbedding = `-- name: UpdateCoffeeEmbedding :exec
+UPDATE coffees SET embedding = $2 WHERE id = $1
+`
+
+type UpdateCoffeeEmbeddingParams struct {
+	ID        int64     `json:"id"`
+	Embedding []float64 `json:"embedding"`
+}
+
+func (q *Queries) UpdateCoffeeEmbedding(ctx context.Context, arg UpdateCoffeeEmbeddingParams) error {
+	_, err := q.db.Exec(ctx, updateCoffeeEmbedding, arg.ID, arg.Embedding)
+	return err
+}
+
 const updateCoffeeOrigin = `-- name: UpdateCoffeeOrigin :exec
 UPDATE coffees
 SET country_code = $2, region_id = $3
@@ -1016,6 +1067,7 @@ INSERT INTO coffees (
     country_code, region_id, producer_id, producer_raw,
     variety, species,
     price_per_100g_min, price_per_100g_max, is_blend,
+    description,
     last_seen_at
 )
 VALUES (
@@ -1026,6 +1078,7 @@ VALUES (
     $20, $21, $22, $23,
     $24, $25,
     $26, $27, $28,
+    $29,
     now()
 )
 ON CONFLICT (roaster_id, name) DO UPDATE SET
@@ -1055,6 +1108,7 @@ ON CONFLICT (roaster_id, name) DO UPDATE SET
     price_per_100g_min = EXCLUDED.price_per_100g_min,
     price_per_100g_max = EXCLUDED.price_per_100g_max,
     is_blend = EXCLUDED.is_blend,
+    description = EXCLUDED.description,
     last_seen_at = now(),
     last_changed_at = CASE
         WHEN coffees.price_cents IS DISTINCT FROM EXCLUDED.price_cents
@@ -1095,6 +1149,7 @@ type UpsertCoffeeParams struct {
 	PricePer100gMin pgtype.Int4 `json:"price_per_100g_min"`
 	PricePer100gMax pgtype.Int4 `json:"price_per_100g_max"`
 	IsBlend         bool        `json:"is_blend"`
+	Description     pgtype.Text `json:"description"`
 }
 
 type UpsertCoffeeRow struct {
@@ -1133,6 +1188,7 @@ func (q *Queries) UpsertCoffee(ctx context.Context, arg UpsertCoffeeParams) (Ups
 		arg.PricePer100gMin,
 		arg.PricePer100gMax,
 		arg.IsBlend,
+		arg.Description,
 	)
 	var i UpsertCoffeeRow
 	err := row.Scan(&i.IsNew, &i.ID)

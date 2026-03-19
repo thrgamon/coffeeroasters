@@ -57,6 +57,8 @@ type Coffee struct {
 	PricePer100gMin pgtype.Int4 `json:"price_per_100g_min"`
 	PricePer100gMax pgtype.Int4 `json:"price_per_100g_max"`
 	IsBlend         bool        `json:"is_blend"`
+	Description     pgtype.Text `json:"description"`
+	Embedding       []float64   `json:"embedding"`
 }
 
 type Country struct {

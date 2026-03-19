@@ -17,6 +17,7 @@ import (
 
 	"github.com/thrgamon/coffeeroasters/internal/classify"
 	"github.com/thrgamon/coffeeroasters/internal/db"
+	"github.com/thrgamon/coffeeroasters/internal/embedding"
 	"github.com/thrgamon/coffeeroasters/internal/geocode"
 	"github.com/thrgamon/coffeeroasters/internal/scraper"
 )
@@ -107,6 +108,13 @@ func main() {
 		classified, classifyFailed := classifier.BackfillUnclassified(ctx, queries)
 		if classified > 0 || classifyFailed > 0 {
 			fmt.Printf("Variety classify: %d classified, %d failed\n", classified, classifyFailed)
+		}
+
+		// Embed descriptions for similarity scoring
+		embedder := embedding.NewEmbedder(&openaiClient)
+		embedded, embedFailed := embedder.BackfillPending(ctx, queries)
+		if embedded > 0 || embedFailed > 0 {
+			fmt.Printf("Embedding: %d embedded, %d failed\n", embedded, embedFailed)
 		}
 	}
 

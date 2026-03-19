@@ -314,6 +314,7 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 			PricePer100gMin: int4Val(int32(per100gMin)),
 			PricePer100gMax: int4Val(int32(per100gMax)),
 			IsBlend:         raw.IsBlend,
+			Description:     textVal(raw.Description),
 		})
 		if err != nil {
 			slog.Warn("upsert coffee failed", "name", raw.Name, "error", err)

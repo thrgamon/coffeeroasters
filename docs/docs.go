@@ -584,6 +584,9 @@ const docTemplate = `{
                 "country_name": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -691,6 +694,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "country_name": {
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "id": {

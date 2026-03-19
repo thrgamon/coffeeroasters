@@ -3,15 +3,18 @@ package similarity
 import (
 	"math"
 	"sort"
+
+	"github.com/thrgamon/coffeeroasters/internal/embedding"
 )
 
 // Weights for each similarity dimension.
 const (
-	weightTastingNotes = 0.40
+	weightTastingNotes = 0.30
 	weightProcess      = 0.15
 	weightRoast        = 0.15
 	weightVariety      = 0.15
 	weightRegion       = 0.15
+	weightEmbedding    = 0.10
 
 	// Minimum score threshold for inclusion in results.
 	minScoreThreshold = 0.15
@@ -37,6 +40,7 @@ type CoffeeAttrs struct {
 	RegionID     *int32
 	Latitude     *float64
 	Longitude    *float64
+	Embedding    []float64
 }
 
 // roastOrdinal maps canonical roast levels to an ordinal value for distance
@@ -87,6 +91,12 @@ func Score(source, candidate CoffeeAttrs) (float64, []string) {
 		reasons = append(reasons, "from the same region")
 	} else if region > 0 {
 		reasons = append(reasons, "from a nearby region")
+	}
+
+	emb := embeddingSimilarity(source.Embedding, candidate.Embedding)
+	total += weightEmbedding * emb
+	if emb > 0.5 {
+		reasons = append(reasons, "similar flavour profile")
 	}
 
 	return total, reasons
@@ -283,6 +293,17 @@ func RankFromMultiple(sources []CoffeeAttrs, candidates []CoffeeAttrs, limit int
 	}
 
 	return scored
+}
+
+func embeddingSimilarity(a, b []float64) float64 {
+	if len(a) == 0 || len(b) == 0 {
+		return 0
+	}
+	sim := embedding.CosineSimilarity(a, b)
+	if sim < 0 {
+		return 0
+	}
+	return sim
 }
 
 func abs(x int) int {

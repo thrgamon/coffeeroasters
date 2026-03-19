@@ -51,6 +51,7 @@ type BatchProduct struct {
 	TastingNotes    *string          `json:"tasting_notes" jsonschema:"description=Comma-separated tasting notes. Null if not stated."`
 	Variety         *string          `json:"variety" jsonschema:"description=Coffee variety. Null if not stated."`
 	Producer        *string          `json:"producer" jsonschema:"description=Farm, estate, cooperative, or washing station name. Null if not stated."`
+	Description     *string          `json:"description" jsonschema:"description=The roaster's flavour writeup or descriptive text about this coffee. Copy the relevant prose as-is. Null if no descriptive text beyond structured data."`
 	IsBlend         bool             `json:"is_blend" jsonschema:"description=True if this coffee is a blend of beans from multiple origins or farms."`
 	BlendComponents []BlendComponent `json:"blend_components" jsonschema:"description=For blends only: the individual origin components. Empty array if not a blend or components are not stated."`
 }
@@ -73,6 +74,7 @@ type PageProduct struct {
 	TastingNotes    *string          `json:"tasting_notes" jsonschema:"description=Comma-separated tasting notes. Null if not stated."`
 	Variety         *string          `json:"variety" jsonschema:"description=Coffee variety. Null if not stated."`
 	Producer        *string          `json:"producer" jsonschema:"description=Farm, estate, cooperative, or washing station name. Null if not stated."`
+	Description     *string          `json:"description" jsonschema:"description=The roaster's flavour writeup or descriptive text about this coffee. Copy the relevant prose as-is. Null if no descriptive text beyond structured data."`
 	PriceText       *string          `json:"price_text" jsonschema:"description=Price as displayed (e.g. $32.00). Null if not found."`
 	WeightText      *string          `json:"weight_text" jsonschema:"description=Weight as displayed (e.g. 250g). Null if not found."`
 	InStock         bool             `json:"in_stock" jsonschema:"description=Whether the product appears to be in stock"`
@@ -115,6 +117,7 @@ For each coffee product, extract:
 - tasting_notes: comma-separated flavour descriptors
 - variety: coffee cultivar/variety
 - producer: farm, estate, cooperative, or washing station name
+- description: the roaster's descriptive prose about this coffee (flavour writeups, producer story, brewing notes). Copy the text as-is. Null if none present.
 - is_blend: true if the coffee is a blend of beans from multiple origins or farms
 - blend_components: for blends, list each origin component with country, region, variety, and percentage if stated
 
@@ -136,6 +139,7 @@ For the coffee product on this page, extract:
 - tasting_notes: comma-separated flavour descriptors
 - variety: coffee cultivar/variety (e.g. Caturra, SL28, Gesha, Heirloom, Castillo)
 - producer: farm name, estate name, cooperative, or washing station name
+- description: the roaster's descriptive prose about this coffee (flavour writeups, producer story, brewing notes). Copy the text as-is. Null if none present.
 - price_text: the displayed price (e.g. "$32.00")
 - weight_text: the displayed weight (e.g. "250g")
 - in_stock: whether it appears available for purchase
@@ -151,6 +155,7 @@ const pageSystemPrompt = `You extract coffee product listings from Australian sp
 For each coffee product you find on the page, extract:
 - name: the product name
 - origin, region, process, roast_level, tasting_notes, variety, producer: as described
+- description: the roaster's descriptive prose about this coffee (flavour writeups, producer story, brewing notes). Copy the text as-is. Null if none present.
 - price_text: the displayed price (e.g. "$32.00")
 - weight_text: the displayed weight (e.g. "250g")
 - in_stock: whether it appears available for purchase

@@ -16,8 +16,25 @@ func TestScore_IdenticalCoffees(t *testing.T) {
 		RegionID:     ptr(int32(1)),
 	}
 	score, _ := Score(a, a)
+	// Without embeddings, max score is 0.90 (all dimensions except embedding)
+	if score < 0.89 || score > 0.91 {
+		t.Errorf("identical coffees without embeddings should score ~0.90, got %.4f", score)
+	}
+}
+
+func TestScore_IdenticalCoffeesWithEmbeddings(t *testing.T) {
+	emb := []float64{0.1, 0.2, 0.3, 0.4}
+	a := CoffeeAttrs{
+		TastingNotes: []string{"blueberry", "chocolate", "caramel"},
+		Process:      "natural",
+		RoastLevel:   "light",
+		Variety:      "bourbon",
+		RegionID:     ptr(int32(1)),
+		Embedding:    emb,
+	}
+	score, _ := Score(a, a)
 	if score < 0.99 {
-		t.Errorf("identical coffees should score ~1.0, got %.4f", score)
+		t.Errorf("identical coffees with embeddings should score ~1.0, got %.4f", score)
 	}
 }
 
@@ -55,9 +72,9 @@ func TestScore_FlavourGroupPartialCredit(t *testing.T) {
 	// Union = 3 (blueberry, strawberry, chocolate)
 	// Exact = 1 (chocolate), Group = 1 (blueberry->berry matches strawberry->berry)
 	// Note similarity = (1 + 0.5) / 3 = 0.5
-	// Total = 0.5 * 0.40 = 0.20
-	if score < 0.15 || score > 0.25 {
-		t.Errorf("partial flavour group credit score = %.4f, expected ~0.20", score)
+	// Total = 0.5 * 0.30 = 0.15
+	if score < 0.10 || score > 0.20 {
+		t.Errorf("partial flavour group credit score = %.4f, expected ~0.15", score)
 	}
 }
 
@@ -267,6 +284,39 @@ func TestRankFromMultiple_EmptySources(t *testing.T) {
 	results := RankFromMultiple(nil, candidates, 10)
 	if len(results) != 0 {
 		t.Errorf("expected 0 results with no sources, got %d", len(results))
+	}
+}
+
+func TestScore_EmbeddingOnlyOneHas(t *testing.T) {
+	a := CoffeeAttrs{
+		Embedding: []float64{0.1, 0.2, 0.3},
+	}
+	b := CoffeeAttrs{}
+	score, _ := Score(a, b)
+	// Embedding dimension contributes 0 when one side is missing
+	if score > 0.001 {
+		t.Errorf("one-sided embedding should contribute 0, got %.4f", score)
+	}
+}
+
+func TestScore_EmbeddingBothPresent(t *testing.T) {
+	emb := []float64{0.1, 0.2, 0.3, 0.4}
+	a := CoffeeAttrs{Embedding: emb}
+	b := CoffeeAttrs{Embedding: emb}
+	score, reasons := Score(a, b)
+	// Identical embeddings: cosine similarity = 1.0, contribution = 0.10
+	expected := weightEmbedding * 1.0
+	if math.Abs(score-expected) > 0.001 {
+		t.Errorf("identical embeddings score = %.4f, expected %.4f", score, expected)
+	}
+	found := false
+	for _, r := range reasons {
+		if r == "similar flavour profile" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("expected 'similar flavour profile' reason for identical embeddings")
 	}
 }
 

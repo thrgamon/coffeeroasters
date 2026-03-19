@@ -255,7 +255,11 @@ func (h *Handler) listSimilarCoffees(c *gin.Context, similarToStr string, pageSi
 
 	candidates := make([]similarity.CoffeeAttrs, 0, len(simRows))
 	for _, sr := range simRows {
-		candidates = append(candidates, simRowToAttrs(sr))
+		attrs := simRowToAttrs(sr)
+		if sr.ID == sourceID {
+			source.Embedding = attrs.Embedding
+		}
+		candidates = append(candidates, attrs)
 	}
 
 	ranked := similarity.Rank(source, candidates, pageSize+offset)
@@ -443,7 +447,11 @@ func (h *Handler) GetCoffee(c *gin.Context) {
 	candidates := make([]similarity.CoffeeAttrs, 0, len(simRows))
 	for _, sr := range simRows {
 		candidateIndex[sr.ID] = sr
-		candidates = append(candidates, simRowToAttrs(sr))
+		attrs := simRowToAttrs(sr)
+		if sr.ID == id {
+			source.Embedding = attrs.Embedding
+		}
+		candidates = append(candidates, attrs)
 	}
 
 	ranked := similarity.Rank(source, candidates, 3)
@@ -547,6 +555,7 @@ func coffeeDetailRowToResponse(row db.GetCoffeeByIDRow) domain.CoffeeResponse {
 		PricePer100gMax: row.PricePer100gMax.Int32,
 		IsBlend:         row.IsBlend,
 		InStock:         row.InStock,
+		Description:     row.Description.String,
 	}
 }
 
@@ -732,6 +741,7 @@ func simRowToAttrs(sr db.ListCoffeesForSimilarityRow) similarity.CoffeeAttrs {
 		Process:      sr.Process.String,
 		RoastLevel:   sr.RoastLevel.String,
 		Variety:      sr.Variety.String,
+		Embedding:    sr.Embedding,
 	}
 	if sr.RegionID.Valid {
 		attrs.RegionID = &sr.RegionID.Int32
