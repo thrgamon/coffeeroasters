@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -233,6 +234,8 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 	// Upsert each coffee
 	var added, updated int
 	for _, raw := range coffees {
+		sanitizeRawCoffee(&raw)
+
 		process := normalise.NormaliseProcess(raw.ProcessRaw)
 		roastLevel := normalise.NormaliseRoastLevel(raw.RoastRaw)
 		tastingNotes := normalise.NormaliseTastingNotes(raw.TastingNotes)
@@ -393,6 +396,38 @@ func loadRoasterConfigs(path string) ([]domain.RoasterConfig, error) {
 	}
 
 	return f.Roasters, nil
+}
+
+// stripNullBytes removes null bytes that OpenAI structured output occasionally
+// embeds in strings. Postgres rejects these with "invalid byte sequence for
+// encoding UTF8: 0x00".
+func stripNullBytes(s string) string {
+	return strings.ReplaceAll(s, "\x00", "")
+}
+
+// sanitizeRawCoffee strips null bytes from all string fields on a RawCoffee,
+// including nested RawBlendComponent strings.
+func sanitizeRawCoffee(raw *RawCoffee) {
+	raw.Name = stripNullBytes(raw.Name)
+	raw.ProductURL = stripNullBytes(raw.ProductURL)
+	raw.ImageURL = stripNullBytes(raw.ImageURL)
+	raw.OriginRaw = stripNullBytes(raw.OriginRaw)
+	raw.RegionRaw = stripNullBytes(raw.RegionRaw)
+	raw.VarietyRaw = stripNullBytes(raw.VarietyRaw)
+	raw.ProducerRaw = stripNullBytes(raw.ProducerRaw)
+	raw.ProcessRaw = stripNullBytes(raw.ProcessRaw)
+	raw.RoastRaw = stripNullBytes(raw.RoastRaw)
+	raw.TastingNotes = stripNullBytes(raw.TastingNotes)
+	raw.Description = stripNullBytes(raw.Description)
+	raw.PriceRaw = stripNullBytes(raw.PriceRaw)
+	raw.Currency = stripNullBytes(raw.Currency)
+	raw.WeightRaw = stripNullBytes(raw.WeightRaw)
+
+	for i := range raw.BlendComponents {
+		raw.BlendComponents[i].Origin = stripNullBytes(raw.BlendComponents[i].Origin)
+		raw.BlendComponents[i].Region = stripNullBytes(raw.BlendComponents[i].Region)
+		raw.BlendComponents[i].Variety = stripNullBytes(raw.BlendComponents[i].Variety)
+	}
 }
 
 func textVal(s string) pgtype.Text {
