@@ -1,8 +1,8 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useTransition } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -37,6 +37,7 @@ interface CoffeeFiltersProps {
 export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const [isPending, startTransition] = useTransition();
 
 	const q = searchParams.get('q') ?? '';
 	const origin = searchParams.get('origin') ?? '';
@@ -53,7 +54,9 @@ export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 				params.delete(key);
 			}
 			params.delete('page');
-			router.push(`/coffees?${params.toString()}`);
+			startTransition(() => {
+				router.push(`/coffees?${params.toString()}`);
+			});
 		},
 		[router, searchParams],
 	);
@@ -129,6 +132,7 @@ export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 						))}
 					</SelectContent>
 				</Select>
+				{isPending && <Loader2 className="size-5 animate-spin self-center text-muted-foreground" />}
 			</div>
 			{activeFilters.length > 0 && (
 				<div className="flex flex-wrap gap-2">
