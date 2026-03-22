@@ -188,7 +188,7 @@ roasters:
     shop_url: https://villino.com.au/shop/
     state: TAS
     fetch_method: html
-    active: true
+    active: false  # needs content_selector configured
 
   - slug: zimmah
     name: Zimmah Coffee
@@ -196,7 +196,7 @@ roasters:
     shop_url: https://zimmah.com.au/shop/
     state: TAS
     fetch_method: html
-    active: true
+    active: false  # needs content_selector configured
 
   # NT
   - slug: dtown-coffee
@@ -210,7 +210,7 @@ roasters:
   - slug: chico-loco
     name: Chico Loco Coffee
     website: https://chicolocoroasters.com
-    shop_url: https://chico-loco-coffee-roasters-nt.myshopify.com/collections/all
+    shop_url: https://chico-loco-coffee-roasters-nt.myshopify.com/collections/all  # custom domain redirects to Shopify subdomain
     state: NT
     fetch_method: shopify_json
     active: true
