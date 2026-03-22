@@ -27,10 +27,6 @@ roast?: string;
  */
 variety?: string;
 /**
- * Filter by stock status
- */
-in_stock?: boolean;
-/**
  * Coffee ID to find similar coffees for
  */
 similar_to?: number;

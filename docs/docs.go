@@ -87,21 +87,12 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Get current user",
+                "summary": "Get current user (returns null user when unauthenticated)",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.UserResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/domain.MeResponse"
                         }
                     }
                 }
@@ -187,12 +178,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Filter by variety",
                         "name": "variety",
-                        "in": "query"
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Filter by stock status",
-                        "name": "in_stock",
                         "in": "query"
                     },
                     {
@@ -836,6 +821,14 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.MeResponse": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "$ref": "#/definitions/domain.UserResponse"
+                }
+            }
+        },
         "domain.NearbyRegion": {
             "type": "object",
             "properties": {
@@ -978,6 +971,9 @@ const docTemplate = `{
         "domain.RoasterResponse": {
             "type": "object",
             "properties": {
+                "coffee_count": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "integer"
                 },

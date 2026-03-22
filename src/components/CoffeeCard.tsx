@@ -10,7 +10,7 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 
 	return (
 		<Link href={`/coffees/${coffee.id}`} className="block">
-			<Card className="shadow-sm transition-all hover:shadow-md hover:bg-muted/50">
+			<Card className="h-full flex flex-col shadow-sm transition-all hover:shadow-md hover:bg-muted/50">
 				<CardHeader className="pb-1">
 					<div className="flex items-start justify-between gap-1">
 						<CardTitle className="text-base leading-snug">{coffee.name}</CardTitle>
@@ -18,7 +18,7 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 					</div>
 					{coffee.roaster_name && <p className="text-xs text-muted-foreground">{coffee.roaster_name}</p>}
 				</CardHeader>
-				<CardContent className="space-y-2 pt-0">
+				<CardContent className="flex-1 space-y-2 pt-0">
 					{origin && <p className="text-sm font-medium text-foreground/70">{origin}</p>}
 
 					<div className="flex flex-wrap gap-1">

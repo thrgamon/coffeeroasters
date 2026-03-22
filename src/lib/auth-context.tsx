@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			.then(async (res) => {
 				if (res.ok) {
 					const data = await res.json();
-					setUser(data.user ?? data);
+					setUser(data.user ?? null);
 				}
 			})
 			.catch(() => {})

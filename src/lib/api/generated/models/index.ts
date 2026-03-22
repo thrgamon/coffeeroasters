@@ -14,6 +14,7 @@ export * from './domainCountryDetailResponse';
 export * from './domainCountryListResponse';
 export * from './domainCountryResponse';
 export * from './domainLoginRequest';
+export * from './domainMeResponse';
 export * from './domainNearbyRegion';
 export * from './domainProducerDetailResponse';
 export * from './domainRegionDetailResponse';
