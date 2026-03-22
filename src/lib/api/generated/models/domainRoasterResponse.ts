@@ -6,6 +6,7 @@
  */
 
 export interface DomainRoasterResponse {
+  coffee_count?: number;
   id?: number;
   name?: string;
   slug?: string;

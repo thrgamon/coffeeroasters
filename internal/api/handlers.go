@@ -36,7 +36,7 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 		authGroup.POST("/register", h.Register)
 		authGroup.POST("/login", h.Login)
 		authGroup.POST("/logout", h.Logout)
-		authGroup.GET("/me", auth.RequireAuth(h.auth), h.Me)
+		authGroup.GET("/me", h.Me)
 	}
 
 	// Public read-only endpoints
@@ -136,24 +136,29 @@ func (h *Handler) Logout(c *gin.Context) {
 }
 
 // Me godoc
-// @Summary Get current user
+// @Summary Get current user (returns null user when unauthenticated)
 // @Tags auth
 // @Produce json
-// @Success 200 {object} domain.UserResponse
-// @Failure 401 {object} map[string]string
+// @Success 200 {object} domain.MeResponse
 // @Router /api/auth/me [get]
 func (h *Handler) Me(c *gin.Context) {
-	userID, ok := auth.GetUserID(c)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "not authenticated"})
+	token, err := c.Cookie("session_token")
+	if err != nil || token == "" {
+		c.JSON(http.StatusOK, domain.MeResponse{})
 		return
 	}
 
-	email, _ := c.Get("user_email")
-	c.JSON(http.StatusOK, domain.UserResponse{
-		ID:    userID,
-		Email: email.(string),
-	})
+	session, err := h.auth.ValidateSession(c.Request.Context(), token)
+	if err != nil {
+		c.JSON(http.StatusOK, domain.MeResponse{})
+		return
+	}
+
+	user := &domain.UserResponse{
+		ID:    session.UserID,
+		Email: session.UserEmail,
+	}
+	c.JSON(http.StatusOK, domain.MeResponse{User: user})
 }
 
 // Dashboard godoc

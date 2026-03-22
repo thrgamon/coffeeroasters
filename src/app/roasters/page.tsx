@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import RoasterFilters from '@/components/RoasterFilters';
@@ -5,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DomainRoasterListResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
+
+export const metadata: Metadata = { title: 'Roasters | Coffeeroasters' };
 
 interface RoastersPageProps {
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -36,11 +39,18 @@ export default async function RoastersPage({ searchParams }: RoastersPageProps) 
 								<CardHeader>
 									<CardTitle className="text-lg">{roaster.name}</CardTitle>
 								</CardHeader>
-								<CardContent className="flex items-center gap-2">
-									{roaster.state && <Badge variant="secondary">{roaster.state}</Badge>}
-									{roaster.website && (
-										<span className="text-sm text-muted-foreground">{new URL(roaster.website).hostname}</span>
-									)}
+								<CardContent className="space-y-2">
+									<div className="flex items-center gap-2">
+										{roaster.state && <Badge variant="secondary">{roaster.state}</Badge>}
+										{roaster.website && (
+											<span className="text-sm text-muted-foreground">{new URL(roaster.website).hostname}</span>
+										)}
+									</div>
+									{roaster.coffee_count ? (
+										<p className="text-sm text-muted-foreground">
+											{roaster.coffee_count} coffee{roaster.coffee_count !== 1 ? 's' : ''} in stock
+										</p>
+									) : null}
 								</CardContent>
 							</Card>
 						</Link>

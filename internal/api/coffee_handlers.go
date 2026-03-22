@@ -14,6 +14,14 @@ import (
 	"github.com/thrgamon/coffeeroasters/internal/similarity"
 )
 
+func textPtr(s string) pgtype.Text {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return pgtype.Text{}
+	}
+	return pgtype.Text{String: s, Valid: true}
+}
+
 // ListRoasters godoc
 // @Summary List all active roasters
 // @Tags roasters
@@ -35,11 +43,12 @@ func (h *Handler) ListRoasters(c *gin.Context) {
 		}
 		for _, r := range rows {
 			resp.Roasters = append(resp.Roasters, domain.RoasterResponse{
-				ID:      r.ID,
-				Slug:    r.Slug,
-				Name:    r.Name,
-				Website: r.Website,
-				State:   r.State.String,
+				ID:          r.ID,
+				Slug:        r.Slug,
+				Name:        r.Name,
+				Website:     r.Website,
+				State:       r.State.String,
+				CoffeeCount: r.CoffeeCount,
 			})
 		}
 	} else {
@@ -50,11 +59,12 @@ func (h *Handler) ListRoasters(c *gin.Context) {
 		}
 		for _, r := range rows {
 			resp.Roasters = append(resp.Roasters, domain.RoasterResponse{
-				ID:      r.ID,
-				Slug:    r.Slug,
-				Name:    r.Name,
-				Website: r.Website,
-				State:   r.State.String,
+				ID:          r.ID,
+				Slug:        r.Slug,
+				Name:        r.Name,
+				Website:     r.Website,
+				State:       r.State.String,
+				CoffeeCount: r.CoffeeCount,
 			})
 		}
 	}
@@ -116,7 +126,6 @@ func (h *Handler) GetRoaster(c *gin.Context) {
 // @Param process query string false "Filter by process"
 // @Param roast query string false "Filter by roast level"
 // @Param variety query string false "Filter by variety"
-// @Param in_stock query boolean false "Filter by stock status"
 // @Param similar_to query int false "Coffee ID to find similar coffees for"
 // @Param liked query string false "Comma-separated liked coffee IDs for recommendations"
 // @Param page query int false "Page number (default 1)"
@@ -138,7 +147,6 @@ func (h *Handler) ListCoffees(c *gin.Context) {
 	process := c.Query("process")
 	roast := c.Query("roast")
 	varietyFilter := c.Query("variety")
-	inStockStr := c.Query("in_stock")
 	similarToStr := c.Query("similar_to")
 
 	var resp domain.CoffeeListResponse
@@ -156,61 +164,24 @@ func (h *Handler) ListCoffees(c *gin.Context) {
 		return
 	}
 
-	if q != "" {
-		// Full-text search
-		rows, err := h.queries.SearchCoffees(ctx, db.SearchCoffeesParams{
-			PlaintoTsquery: q,
-			Limit:          int32(pageSize),
-			Offset:         int32(offset),
-		})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "search failed"})
-			return
-		}
-		for _, row := range rows {
-			resp.Coffees = append(resp.Coffees, searchRowToResponse(row))
-		}
-		resp.TotalCount = int64(len(rows)) // approximate for search
-	} else if origin != "" || process != "" || roast != "" || varietyFilter != "" || inStockStr != "" {
-		// Filter (default to in-stock only unless explicitly set)
-		inStock := pgtype.Bool{Bool: true, Valid: true}
-		if inStockStr != "" {
-			v, _ := strconv.ParseBool(inStockStr)
-			inStock = pgtype.Bool{Bool: v, Valid: true}
-		}
-
-		rows, err := h.queries.FilterCoffees(ctx, db.FilterCoffeesParams{
-			Column1: origin,
-			Column2: process,
-			Column3: roast,
-			Column4: inStock.Bool,
-			Column5: varietyFilter,
-			Limit:   int32(pageSize),
-			Offset:  int32(offset),
-		})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "filter failed"})
-			return
-		}
-		for _, row := range rows {
-			resp.Coffees = append(resp.Coffees, filterRowToResponse(row))
-		}
-		resp.TotalCount = int64(len(rows))
-	} else {
-		// List all
-		rows, err := h.queries.ListCoffees(ctx, db.ListCoffeesParams{
-			Limit:  int32(pageSize),
-			Offset: int32(offset),
-		})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list coffees"})
-			return
-		}
-		for _, row := range rows {
-			resp.Coffees = append(resp.Coffees, listRowToResponse(row))
-		}
-		total, _ := h.queries.CountCoffees(ctx)
-		resp.TotalCount = total
+	rows, err := h.queries.ListCoffeesFiltered(ctx, db.ListCoffeesFilteredParams{
+		Query:   textPtr(q),
+		Origin:  textPtr(origin),
+		Process: textPtr(process),
+		Roast:   textPtr(roast),
+		Variety: textPtr(varietyFilter),
+		Lim:     int32(pageSize),
+		Off:     int32(offset),
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list coffees"})
+		return
+	}
+	for _, row := range rows {
+		resp.Coffees = append(resp.Coffees, filteredRowToResponse(row))
+	}
+	if len(rows) > 0 {
+		resp.TotalCount = rows[0].TotalCount
 	}
 
 	if resp.Coffees == nil {
@@ -255,7 +226,11 @@ func (h *Handler) listSimilarCoffees(c *gin.Context, similarToStr string, pageSi
 
 	candidates := make([]similarity.CoffeeAttrs, 0, len(simRows))
 	for _, sr := range simRows {
-		candidates = append(candidates, simRowToAttrs(sr))
+		attrs := simRowToAttrs(sr)
+		if sr.ID == sourceID {
+			source.Embedding = attrs.Embedding
+		}
+		candidates = append(candidates, attrs)
 	}
 
 	ranked := similarity.Rank(source, candidates, pageSize+offset)
@@ -443,7 +418,11 @@ func (h *Handler) GetCoffee(c *gin.Context) {
 	candidates := make([]similarity.CoffeeAttrs, 0, len(simRows))
 	for _, sr := range simRows {
 		candidateIndex[sr.ID] = sr
-		candidates = append(candidates, simRowToAttrs(sr))
+		attrs := simRowToAttrs(sr)
+		if sr.ID == id {
+			source.Embedding = attrs.Embedding
+		}
+		candidates = append(candidates, attrs)
 	}
 
 	ranked := similarity.Rank(source, candidates, 3)
@@ -547,10 +526,11 @@ func coffeeDetailRowToResponse(row db.GetCoffeeByIDRow) domain.CoffeeResponse {
 		PricePer100gMax: row.PricePer100gMax.Int32,
 		IsBlend:         row.IsBlend,
 		InStock:         row.InStock,
+		Description:     row.Description.String,
 	}
 }
 
-func listRowToResponse(row db.ListCoffeesRow) domain.CoffeeResponse {
+func filteredRowToResponse(row db.ListCoffeesFilteredRow) domain.CoffeeResponse {
 	return domain.CoffeeResponse{
 		ID:              row.ID,
 		RoasterID:       row.RoasterID,
@@ -608,63 +588,6 @@ func coffeeRowToResponse(row db.ListCoffeesByRoasterRow) domain.CoffeeResponse {
 	}
 }
 
-func searchRowToResponse(row db.SearchCoffeesRow) domain.CoffeeResponse {
-	return domain.CoffeeResponse{
-		ID:              row.ID,
-		RoasterID:       row.RoasterID,
-		RoasterName:     row.RoasterName,
-		RoasterSlug:     row.RoasterSlug,
-		Name:            row.Name,
-		ProductURL:      row.ProductUrl.String,
-		ImageURL:        row.ImageUrl.String,
-		CountryCode:     row.CountryCode.String,
-		CountryName:     row.CountryName.String,
-		RegionID:        row.CoffeeRegionID.Int32,
-		RegionName:      row.RegionName.String,
-		ProducerID:      row.CoffeeProducerID.Int32,
-		ProducerName:    row.ProducerName.String,
-		Process:         row.Process.String,
-		RoastLevel:      row.RoastLevel.String,
-		TastingNotes:    row.TastingNotes,
-		Variety:         row.Variety.String,
-		Species:         row.Species.String,
-		PriceCents:      row.PriceCents.Int32,
-		WeightGrams:     row.WeightGrams.Int32,
-		PricePer100gMin: row.PricePer100gMin.Int32,
-		PricePer100gMax: row.PricePer100gMax.Int32,
-		IsBlend:         row.IsBlend,
-		InStock:         row.InStock,
-	}
-}
-
-func filterRowToResponse(row db.FilterCoffeesRow) domain.CoffeeResponse {
-	return domain.CoffeeResponse{
-		ID:              row.ID,
-		RoasterID:       row.RoasterID,
-		RoasterName:     row.RoasterName,
-		RoasterSlug:     row.RoasterSlug,
-		Name:            row.Name,
-		ProductURL:      row.ProductUrl.String,
-		ImageURL:        row.ImageUrl.String,
-		CountryCode:     row.CountryCode.String,
-		CountryName:     row.CountryName.String,
-		RegionID:        row.CoffeeRegionID.Int32,
-		RegionName:      row.RegionName.String,
-		ProducerID:      row.CoffeeProducerID.Int32,
-		ProducerName:    row.ProducerName.String,
-		Process:         row.Process.String,
-		RoastLevel:      row.RoastLevel.String,
-		TastingNotes:    row.TastingNotes,
-		Variety:         row.Variety.String,
-		Species:         row.Species.String,
-		PriceCents:      row.PriceCents.Int32,
-		WeightGrams:     row.WeightGrams.Int32,
-		PricePer100gMin: row.PricePer100gMin.Int32,
-		PricePer100gMax: row.PricePer100gMax.Int32,
-		IsBlend:         row.IsBlend,
-		InStock:         row.InStock,
-	}
-}
 
 // Helper for country/region/producer list row responses
 func countryListRowToResponse(row db.ListCoffeesByCountryRow) domain.CoffeeResponse {
@@ -732,6 +655,7 @@ func simRowToAttrs(sr db.ListCoffeesForSimilarityRow) similarity.CoffeeAttrs {
 		Process:      sr.Process.String,
 		RoastLevel:   sr.RoastLevel.String,
 		Variety:      sr.Variety.String,
+		Embedding:    sr.Embedding,
 	}
 	if sr.RegionID.Valid {
 		attrs.RegionID = &sr.RegionID.Int32

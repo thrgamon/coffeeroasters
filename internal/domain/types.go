@@ -21,6 +21,10 @@ type AuthResponse struct {
 	User UserResponse `json:"user" validate:"required"`
 }
 
+type MeResponse struct {
+	User *UserResponse `json:"user"`
+}
+
 // --- Scraper ---
 
 // FetchMethod determines how a roaster's products are fetched.
@@ -54,11 +58,12 @@ type RoastersFile struct {
 // --- API Responses ---
 
 type RoasterResponse struct {
-	ID      int32  `json:"id"`
-	Slug    string `json:"slug"`
-	Name    string `json:"name"`
-	Website string `json:"website"`
-	State   string `json:"state,omitempty"`
+	ID          int32  `json:"id"`
+	Slug        string `json:"slug"`
+	Name        string `json:"name"`
+	Website     string `json:"website"`
+	State       string `json:"state,omitempty"`
+	CoffeeCount int32  `json:"coffee_count,omitempty"`
 }
 
 type CoffeeResponse struct {
@@ -86,6 +91,7 @@ type CoffeeResponse struct {
 	PricePer100gMax int32    `json:"price_per_100g_max,omitempty"`
 	IsBlend         bool     `json:"is_blend"`
 	InStock         bool     `json:"in_stock"`
+	Description     string   `json:"description,omitempty"`
 	SimilarityScore float64  `json:"similarity_score,omitempty"`
 }
 

@@ -1,8 +1,15 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import CoffeeCard from '@/components/CoffeeCard';
 import { Badge } from '@/components/ui/badge';
 import type { DomainCountryDetailResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
+
+export async function generateMetadata({ params }: { params: Promise<{ code: string }> }): Promise<Metadata> {
+	const { code } = await params;
+	const data = await apiFetch<DomainCountryDetailResponse>(`/api/countries/${code}`);
+	return { title: `${data.name} | Coffeeroasters` };
+}
 
 export default async function CountryDetailPage({ params }: { params: Promise<{ code: string }> }) {
 	const { code } = await params;
@@ -22,13 +29,19 @@ export default async function CountryDetailPage({ params }: { params: Promise<{ 
 				<section className="space-y-4">
 					<h2 className="text-xl font-semibold">Regions</h2>
 					<div className="flex flex-wrap gap-2">
-						{data.regions.map((region) => (
-							<Link key={region.id} href={`/regions/${region.id}`}>
-								<Badge variant="outline" className="cursor-pointer hover:bg-accent">
-									{region.name} ({region.coffee_count})
+						{data.regions.map((region) =>
+							region.coffee_count && region.coffee_count > 0 ? (
+								<Link key={region.id} href={`/regions/${region.id}`}>
+									<Badge variant="outline" className="cursor-pointer hover:bg-accent">
+										{region.name} ({region.coffee_count})
+									</Badge>
+								</Link>
+							) : (
+								<Badge key={region.id} variant="outline" className="text-muted-foreground">
+									{region.name} (0)
 								</Badge>
-							</Link>
-						))}
+							),
+						)}
 					</div>
 				</section>
 			)}

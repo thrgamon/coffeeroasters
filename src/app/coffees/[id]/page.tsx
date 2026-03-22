@@ -1,4 +1,5 @@
 import { Bean, Droplets, Flame, Globe, Grape, Layers, Sprout } from 'lucide-react';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import CoffeeTrackButton from '@/components/CoffeeTrackButton';
@@ -6,6 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import type { DomainCoffeeDetailResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+	const { id } = await params;
+	const coffee = await apiFetch<DomainCoffeeDetailResponse>(`/api/coffees/${id}`);
+	return { title: `${coffee.name} | Coffeeroasters` };
+}
 
 export default async function CoffeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
@@ -36,12 +43,24 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 							)}
 						</div>
 						{coffee.roaster_name && (
-							<Link
-								href={`/roasters/${coffee.roaster_slug}`}
-								className="text-lg text-muted-foreground hover:text-foreground"
-							>
-								{coffee.roaster_name}
-							</Link>
+							<div className="flex items-center gap-3">
+								<Link
+									href={`/roasters/${coffee.roaster_slug}`}
+									className="text-lg text-muted-foreground hover:text-foreground"
+								>
+									{coffee.roaster_name}
+								</Link>
+								{coffee.product_url && (
+									<a
+										href={coffee.product_url}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="inline-block rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90"
+									>
+										View on roaster site
+									</a>
+								)}
+							</div>
 						)}
 						<div className="flex flex-wrap gap-2">
 							{coffee.country_name && (
@@ -118,6 +137,13 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 					</div>
 				)}
 
+				{coffee.description && (
+					<div>
+						<h3 className="mb-1 text-sm font-medium">About this coffee</h3>
+						<p className="text-sm text-muted-foreground whitespace-pre-line">{coffee.description}</p>
+					</div>
+				)}
+
 				{coffee.blend_components && coffee.blend_components.length > 0 && (
 					<div>
 						<h3 className="mb-1 text-sm font-medium">Blend components</h3>
@@ -172,17 +198,6 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 						</span>
 					) : null}
 				</div>
-
-				{coffee.product_url && (
-					<a
-						href={coffee.product_url}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="inline-block rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90"
-					>
-						View on roaster site
-					</a>
-				)}
 			</div>
 
 			{coffee.similar_coffees && coffee.similar_coffees.length > 0 && (

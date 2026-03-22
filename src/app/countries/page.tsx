@@ -1,8 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DomainCountryListResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
+export const metadata: Metadata = { title: 'Countries | Coffeeroasters' };
 export const dynamic = 'force-dynamic';
 
 export default async function CountriesPage() {

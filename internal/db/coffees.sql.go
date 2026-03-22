@@ -27,129 +27,6 @@ func (q *Queries) CountCoffees(ctx context.Context) (int64, error) {
 	return count, err
 }
 
-const filterCoffees = `-- name: FilterCoffees :many
-SELECT
-    c.id, c.roaster_id, c.name, c.product_url, c.image_url,
-    c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
-    c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
-    c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
-    r.name AS roaster_name, r.slug AS roaster_slug,
-    co.name AS country_name,
-    reg.name AS region_name, reg.id AS coffee_region_id,
-    p.name AS producer_name, p.id AS coffee_producer_id
-FROM coffees c
-JOIN roasters r ON r.id = c.roaster_id
-LEFT JOIN countries co ON co.code = c.country_code
-LEFT JOIN regions reg ON reg.id = c.region_id
-LEFT JOIN producers p ON p.id = c.producer_id
-WHERE r.opted_out = false
-    AND ($1::text IS NULL OR c.country_code = $1
-        OR (c.is_blend AND EXISTS (
-            SELECT 1 FROM blend_components bc
-            WHERE bc.coffee_id = c.id AND bc.country_code = $1)))
-    AND ($2::text IS NULL OR c.process = $2)
-    AND ($3::text IS NULL OR c.roast_level = $3)
-    AND ($4::boolean IS NULL OR c.in_stock = $4)
-    AND ($5::text IS NULL OR c.variety = $5)
-ORDER BY c.name
-LIMIT $6 OFFSET $7
-`
-
-type FilterCoffeesParams struct {
-	Column1 string `json:"column_1"`
-	Column2 string `json:"column_2"`
-	Column3 string `json:"column_3"`
-	Column4 bool   `json:"column_4"`
-	Column5 string `json:"column_5"`
-	Limit   int32  `json:"limit"`
-	Offset  int32  `json:"offset"`
-}
-
-type FilterCoffeesRow struct {
-	ID               int64       `json:"id"`
-	RoasterID        int32       `json:"roaster_id"`
-	Name             string      `json:"name"`
-	ProductUrl       pgtype.Text `json:"product_url"`
-	ImageUrl         pgtype.Text `json:"image_url"`
-	CountryCode      pgtype.Text `json:"country_code"`
-	OriginRaw        pgtype.Text `json:"origin_raw"`
-	RegionRaw        pgtype.Text `json:"region_raw"`
-	Process          pgtype.Text `json:"process"`
-	RoastLevel       pgtype.Text `json:"roast_level"`
-	TastingNotes     []string    `json:"tasting_notes"`
-	PriceCents       pgtype.Int4 `json:"price_cents"`
-	WeightGrams      pgtype.Int4 `json:"weight_grams"`
-	InStock          bool        `json:"in_stock"`
-	Variety          pgtype.Text `json:"variety"`
-	Species          pgtype.Text `json:"species"`
-	PricePer100gMin  pgtype.Int4 `json:"price_per_100g_min"`
-	PricePer100gMax  pgtype.Int4 `json:"price_per_100g_max"`
-	IsBlend          bool        `json:"is_blend"`
-	RoasterName      string      `json:"roaster_name"`
-	RoasterSlug      string      `json:"roaster_slug"`
-	CountryName      pgtype.Text `json:"country_name"`
-	RegionName       pgtype.Text `json:"region_name"`
-	CoffeeRegionID   pgtype.Int4 `json:"coffee_region_id"`
-	ProducerName     pgtype.Text `json:"producer_name"`
-	CoffeeProducerID pgtype.Int4 `json:"coffee_producer_id"`
-}
-
-func (q *Queries) FilterCoffees(ctx context.Context, arg FilterCoffeesParams) ([]FilterCoffeesRow, error) {
-	rows, err := q.db.Query(ctx, filterCoffees,
-		arg.Column1,
-		arg.Column2,
-		arg.Column3,
-		arg.Column4,
-		arg.Column5,
-		arg.Limit,
-		arg.Offset,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []FilterCoffeesRow{}
-	for rows.Next() {
-		var i FilterCoffeesRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.RoasterID,
-			&i.Name,
-			&i.ProductUrl,
-			&i.ImageUrl,
-			&i.CountryCode,
-			&i.OriginRaw,
-			&i.RegionRaw,
-			&i.Process,
-			&i.RoastLevel,
-			&i.TastingNotes,
-			&i.PriceCents,
-			&i.WeightGrams,
-			&i.InStock,
-			&i.Variety,
-			&i.Species,
-			&i.PricePer100gMin,
-			&i.PricePer100gMax,
-			&i.IsBlend,
-			&i.RoasterName,
-			&i.RoasterSlug,
-			&i.CountryName,
-			&i.RegionName,
-			&i.CoffeeRegionID,
-			&i.ProducerName,
-			&i.CoffeeProducerID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getCoffeeByID = `-- name: GetCoffeeByID :one
 SELECT
     c.id, c.roaster_id, c.name, c.product_url, c.image_url,
@@ -159,6 +36,7 @@ SELECT
     c.producer_raw, c.region_id, c.producer_id,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
+    c.description,
     c.first_seen_at, c.last_seen_at,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
@@ -199,6 +77,7 @@ type GetCoffeeByIDRow struct {
 	PricePer100gMin pgtype.Int4 `json:"price_per_100g_min"`
 	PricePer100gMax pgtype.Int4 `json:"price_per_100g_max"`
 	IsBlend         bool        `json:"is_blend"`
+	Description     pgtype.Text `json:"description"`
 	FirstSeenAt     time.Time   `json:"first_seen_at"`
 	LastSeenAt      time.Time   `json:"last_seen_at"`
 	RoasterName     string      `json:"roaster_name"`
@@ -238,6 +117,7 @@ func (q *Queries) GetCoffeeByID(ctx context.Context, id int64) (GetCoffeeByIDRow
 		&i.PricePer100gMin,
 		&i.PricePer100gMax,
 		&i.IsBlend,
+		&i.Description,
 		&i.FirstSeenAt,
 		&i.LastSeenAt,
 		&i.RoasterName,
@@ -247,109 +127,6 @@ func (q *Queries) GetCoffeeByID(ctx context.Context, id int64) (GetCoffeeByIDRow
 		&i.ProducerName,
 	)
 	return i, err
-}
-
-const listCoffees = `-- name: ListCoffees :many
-SELECT
-    c.id, c.roaster_id, c.name, c.product_url, c.image_url,
-    c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
-    c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
-    c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
-    r.name AS roaster_name, r.slug AS roaster_slug,
-    co.name AS country_name,
-    reg.name AS region_name, reg.id AS coffee_region_id,
-    p.name AS producer_name, p.id AS coffee_producer_id
-FROM coffees c
-JOIN roasters r ON r.id = c.roaster_id
-LEFT JOIN countries co ON co.code = c.country_code
-LEFT JOIN regions reg ON reg.id = c.region_id
-LEFT JOIN producers p ON p.id = c.producer_id
-WHERE r.opted_out = false
-    AND c.in_stock = true
-ORDER BY c.name
-LIMIT $1 OFFSET $2
-`
-
-type ListCoffeesParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
-}
-
-type ListCoffeesRow struct {
-	ID               int64       `json:"id"`
-	RoasterID        int32       `json:"roaster_id"`
-	Name             string      `json:"name"`
-	ProductUrl       pgtype.Text `json:"product_url"`
-	ImageUrl         pgtype.Text `json:"image_url"`
-	CountryCode      pgtype.Text `json:"country_code"`
-	OriginRaw        pgtype.Text `json:"origin_raw"`
-	RegionRaw        pgtype.Text `json:"region_raw"`
-	Process          pgtype.Text `json:"process"`
-	RoastLevel       pgtype.Text `json:"roast_level"`
-	TastingNotes     []string    `json:"tasting_notes"`
-	PriceCents       pgtype.Int4 `json:"price_cents"`
-	WeightGrams      pgtype.Int4 `json:"weight_grams"`
-	InStock          bool        `json:"in_stock"`
-	Variety          pgtype.Text `json:"variety"`
-	Species          pgtype.Text `json:"species"`
-	PricePer100gMin  pgtype.Int4 `json:"price_per_100g_min"`
-	PricePer100gMax  pgtype.Int4 `json:"price_per_100g_max"`
-	IsBlend          bool        `json:"is_blend"`
-	RoasterName      string      `json:"roaster_name"`
-	RoasterSlug      string      `json:"roaster_slug"`
-	CountryName      pgtype.Text `json:"country_name"`
-	RegionName       pgtype.Text `json:"region_name"`
-	CoffeeRegionID   pgtype.Int4 `json:"coffee_region_id"`
-	ProducerName     pgtype.Text `json:"producer_name"`
-	CoffeeProducerID pgtype.Int4 `json:"coffee_producer_id"`
-}
-
-func (q *Queries) ListCoffees(ctx context.Context, arg ListCoffeesParams) ([]ListCoffeesRow, error) {
-	rows, err := q.db.Query(ctx, listCoffees, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []ListCoffeesRow{}
-	for rows.Next() {
-		var i ListCoffeesRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.RoasterID,
-			&i.Name,
-			&i.ProductUrl,
-			&i.ImageUrl,
-			&i.CountryCode,
-			&i.OriginRaw,
-			&i.RegionRaw,
-			&i.Process,
-			&i.RoastLevel,
-			&i.TastingNotes,
-			&i.PriceCents,
-			&i.WeightGrams,
-			&i.InStock,
-			&i.Variety,
-			&i.Species,
-			&i.PricePer100gMin,
-			&i.PricePer100gMax,
-			&i.IsBlend,
-			&i.RoasterName,
-			&i.RoasterSlug,
-			&i.CountryName,
-			&i.RegionName,
-			&i.CoffeeRegionID,
-			&i.ProducerName,
-			&i.CoffeeProducerID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const listCoffeesByCountry = `-- name: ListCoffeesByCountry :many
@@ -728,10 +505,144 @@ func (q *Queries) ListCoffeesByRoaster(ctx context.Context, slug string) ([]List
 	return items, nil
 }
 
+const listCoffeesFiltered = `-- name: ListCoffeesFiltered :many
+SELECT
+    c.id, c.roaster_id, c.name, c.product_url, c.image_url,
+    c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
+    c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
+    c.variety, c.species,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
+    r.name AS roaster_name, r.slug AS roaster_slug,
+    co.name AS country_name,
+    reg.name AS region_name, reg.id AS coffee_region_id,
+    p.name AS producer_name, p.id AS coffee_producer_id,
+    COUNT(*) OVER() AS total_count
+FROM coffees c
+JOIN roasters r ON r.id = c.roaster_id
+LEFT JOIN countries co ON co.code = c.country_code
+LEFT JOIN regions reg ON reg.id = c.region_id
+LEFT JOIN producers p ON p.id = c.producer_id
+WHERE r.opted_out = false
+    AND c.in_stock = true
+    AND ($1::text IS NULL
+         OR c.search_vector @@ plainto_tsquery('english', $1))
+    AND ($2::text IS NULL
+         OR c.country_code = $2
+         OR (c.is_blend AND EXISTS (
+             SELECT 1 FROM blend_components bc
+             WHERE bc.coffee_id = c.id AND bc.country_code = $2)))
+    AND ($3::text IS NULL OR c.process = $3)
+    AND ($4::text IS NULL OR c.roast_level = $4)
+    AND ($5::text IS NULL OR c.variety = $5)
+ORDER BY
+    CASE WHEN $1::text IS NOT NULL
+        THEN ts_rank(c.search_vector, plainto_tsquery('english', $1))
+    END DESC NULLS LAST,
+    c.name
+LIMIT $7 OFFSET $6
+`
+
+type ListCoffeesFilteredParams struct {
+	Query   pgtype.Text `json:"query"`
+	Origin  pgtype.Text `json:"origin"`
+	Process pgtype.Text `json:"process"`
+	Roast   pgtype.Text `json:"roast"`
+	Variety pgtype.Text `json:"variety"`
+	Off     int32       `json:"off"`
+	Lim     int32       `json:"lim"`
+}
+
+type ListCoffeesFilteredRow struct {
+	ID               int64       `json:"id"`
+	RoasterID        int32       `json:"roaster_id"`
+	Name             string      `json:"name"`
+	ProductUrl       pgtype.Text `json:"product_url"`
+	ImageUrl         pgtype.Text `json:"image_url"`
+	CountryCode      pgtype.Text `json:"country_code"`
+	OriginRaw        pgtype.Text `json:"origin_raw"`
+	RegionRaw        pgtype.Text `json:"region_raw"`
+	Process          pgtype.Text `json:"process"`
+	RoastLevel       pgtype.Text `json:"roast_level"`
+	TastingNotes     []string    `json:"tasting_notes"`
+	PriceCents       pgtype.Int4 `json:"price_cents"`
+	WeightGrams      pgtype.Int4 `json:"weight_grams"`
+	InStock          bool        `json:"in_stock"`
+	Variety          pgtype.Text `json:"variety"`
+	Species          pgtype.Text `json:"species"`
+	PricePer100gMin  pgtype.Int4 `json:"price_per_100g_min"`
+	PricePer100gMax  pgtype.Int4 `json:"price_per_100g_max"`
+	IsBlend          bool        `json:"is_blend"`
+	RoasterName      string      `json:"roaster_name"`
+	RoasterSlug      string      `json:"roaster_slug"`
+	CountryName      pgtype.Text `json:"country_name"`
+	RegionName       pgtype.Text `json:"region_name"`
+	CoffeeRegionID   pgtype.Int4 `json:"coffee_region_id"`
+	ProducerName     pgtype.Text `json:"producer_name"`
+	CoffeeProducerID pgtype.Int4 `json:"coffee_producer_id"`
+	TotalCount       int64       `json:"total_count"`
+}
+
+func (q *Queries) ListCoffeesFiltered(ctx context.Context, arg ListCoffeesFilteredParams) ([]ListCoffeesFilteredRow, error) {
+	rows, err := q.db.Query(ctx, listCoffeesFiltered,
+		arg.Query,
+		arg.Origin,
+		arg.Process,
+		arg.Roast,
+		arg.Variety,
+		arg.Off,
+		arg.Lim,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListCoffeesFilteredRow{}
+	for rows.Next() {
+		var i ListCoffeesFilteredRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.RoasterID,
+			&i.Name,
+			&i.ProductUrl,
+			&i.ImageUrl,
+			&i.CountryCode,
+			&i.OriginRaw,
+			&i.RegionRaw,
+			&i.Process,
+			&i.RoastLevel,
+			&i.TastingNotes,
+			&i.PriceCents,
+			&i.WeightGrams,
+			&i.InStock,
+			&i.Variety,
+			&i.Species,
+			&i.PricePer100gMin,
+			&i.PricePer100gMax,
+			&i.IsBlend,
+			&i.RoasterName,
+			&i.RoasterSlug,
+			&i.CountryName,
+			&i.RegionName,
+			&i.CoffeeRegionID,
+			&i.ProducerName,
+			&i.CoffeeProducerID,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listCoffeesForSimilarity = `-- name: ListCoffeesForSimilarity :many
 SELECT
     c.id, c.tasting_notes, c.process, c.roast_level, c.variety,
-    c.region_id, reg.latitude, reg.longitude
+    c.region_id, reg.latitude, reg.longitude,
+    c.embedding
 FROM coffees c
 JOIN roasters r ON r.id = c.roaster_id
 LEFT JOIN regions reg ON reg.id = c.region_id
@@ -747,6 +658,7 @@ type ListCoffeesForSimilarityRow struct {
 	RegionID     pgtype.Int4   `json:"region_id"`
 	Latitude     pgtype.Float8 `json:"latitude"`
 	Longitude    pgtype.Float8 `json:"longitude"`
+	Embedding    []float64     `json:"embedding"`
 }
 
 func (q *Queries) ListCoffeesForSimilarity(ctx context.Context) ([]ListCoffeesForSimilarityRow, error) {
@@ -767,6 +679,7 @@ func (q *Queries) ListCoffeesForSimilarity(ctx context.Context) ([]ListCoffeesFo
 			&i.RegionID,
 			&i.Latitude,
 			&i.Longitude,
+			&i.Embedding,
 		); err != nil {
 			return nil, err
 		}
@@ -800,6 +713,37 @@ func (q *Queries) ListCoffeesNeedingBackfill(ctx context.Context) ([]ListCoffees
 	for rows.Next() {
 		var i ListCoffeesNeedingBackfillRow
 		if err := rows.Scan(&i.ID, &i.OriginRaw, &i.RegionRaw); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCoffeesNeedingEmbedding = `-- name: ListCoffeesNeedingEmbedding :many
+SELECT c.id, c.description
+FROM coffees c
+WHERE c.description IS NOT NULL AND c.description != '' AND c.embedding IS NULL
+`
+
+type ListCoffeesNeedingEmbeddingRow struct {
+	ID          int64       `json:"id"`
+	Description pgtype.Text `json:"description"`
+}
+
+func (q *Queries) ListCoffeesNeedingEmbedding(ctx context.Context) ([]ListCoffeesNeedingEmbeddingRow, error) {
+	rows, err := q.db.Query(ctx, listCoffeesNeedingEmbedding)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListCoffeesNeedingEmbeddingRow{}
+	for rows.Next() {
+		var i ListCoffeesNeedingEmbeddingRow
+		if err := rows.Scan(&i.ID, &i.Description); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -868,109 +812,18 @@ func (q *Queries) ListDistinctOrigins(ctx context.Context) ([]pgtype.Text, error
 	return items, nil
 }
 
-const searchCoffees = `-- name: SearchCoffees :many
-SELECT
-    c.id, c.roaster_id, c.name, c.product_url, c.image_url,
-    c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
-    c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
-    c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
-    r.name AS roaster_name, r.slug AS roaster_slug,
-    co.name AS country_name,
-    reg.name AS region_name, reg.id AS coffee_region_id,
-    p.name AS producer_name, p.id AS coffee_producer_id
-FROM coffees c
-JOIN roasters r ON r.id = c.roaster_id
-LEFT JOIN countries co ON co.code = c.country_code
-LEFT JOIN regions reg ON reg.id = c.region_id
-LEFT JOIN producers p ON p.id = c.producer_id
-WHERE r.opted_out = false
-    AND c.in_stock = true
-    AND c.search_vector @@ plainto_tsquery('english', $1)
-ORDER BY ts_rank(c.search_vector, plainto_tsquery('english', $1)) DESC
-LIMIT $2 OFFSET $3
+const updateCoffeeEmbedding = `-- name: UpdateCoffeeEmbedding :exec
+UPDATE coffees SET embedding = $2 WHERE id = $1
 `
 
-type SearchCoffeesParams struct {
-	PlaintoTsquery string `json:"plainto_tsquery"`
-	Limit          int32  `json:"limit"`
-	Offset         int32  `json:"offset"`
+type UpdateCoffeeEmbeddingParams struct {
+	ID        int64     `json:"id"`
+	Embedding []float64 `json:"embedding"`
 }
 
-type SearchCoffeesRow struct {
-	ID               int64       `json:"id"`
-	RoasterID        int32       `json:"roaster_id"`
-	Name             string      `json:"name"`
-	ProductUrl       pgtype.Text `json:"product_url"`
-	ImageUrl         pgtype.Text `json:"image_url"`
-	CountryCode      pgtype.Text `json:"country_code"`
-	OriginRaw        pgtype.Text `json:"origin_raw"`
-	RegionRaw        pgtype.Text `json:"region_raw"`
-	Process          pgtype.Text `json:"process"`
-	RoastLevel       pgtype.Text `json:"roast_level"`
-	TastingNotes     []string    `json:"tasting_notes"`
-	PriceCents       pgtype.Int4 `json:"price_cents"`
-	WeightGrams      pgtype.Int4 `json:"weight_grams"`
-	InStock          bool        `json:"in_stock"`
-	Variety          pgtype.Text `json:"variety"`
-	Species          pgtype.Text `json:"species"`
-	PricePer100gMin  pgtype.Int4 `json:"price_per_100g_min"`
-	PricePer100gMax  pgtype.Int4 `json:"price_per_100g_max"`
-	IsBlend          bool        `json:"is_blend"`
-	RoasterName      string      `json:"roaster_name"`
-	RoasterSlug      string      `json:"roaster_slug"`
-	CountryName      pgtype.Text `json:"country_name"`
-	RegionName       pgtype.Text `json:"region_name"`
-	CoffeeRegionID   pgtype.Int4 `json:"coffee_region_id"`
-	ProducerName     pgtype.Text `json:"producer_name"`
-	CoffeeProducerID pgtype.Int4 `json:"coffee_producer_id"`
-}
-
-func (q *Queries) SearchCoffees(ctx context.Context, arg SearchCoffeesParams) ([]SearchCoffeesRow, error) {
-	rows, err := q.db.Query(ctx, searchCoffees, arg.PlaintoTsquery, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []SearchCoffeesRow{}
-	for rows.Next() {
-		var i SearchCoffeesRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.RoasterID,
-			&i.Name,
-			&i.ProductUrl,
-			&i.ImageUrl,
-			&i.CountryCode,
-			&i.OriginRaw,
-			&i.RegionRaw,
-			&i.Process,
-			&i.RoastLevel,
-			&i.TastingNotes,
-			&i.PriceCents,
-			&i.WeightGrams,
-			&i.InStock,
-			&i.Variety,
-			&i.Species,
-			&i.PricePer100gMin,
-			&i.PricePer100gMax,
-			&i.IsBlend,
-			&i.RoasterName,
-			&i.RoasterSlug,
-			&i.CountryName,
-			&i.RegionName,
-			&i.CoffeeRegionID,
-			&i.ProducerName,
-			&i.CoffeeProducerID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) UpdateCoffeeEmbedding(ctx context.Context, arg UpdateCoffeeEmbeddingParams) error {
+	_, err := q.db.Exec(ctx, updateCoffeeEmbedding, arg.ID, arg.Embedding)
+	return err
 }
 
 const updateCoffeeOrigin = `-- name: UpdateCoffeeOrigin :exec
@@ -1016,6 +869,7 @@ INSERT INTO coffees (
     country_code, region_id, producer_id, producer_raw,
     variety, species,
     price_per_100g_min, price_per_100g_max, is_blend,
+    description,
     last_seen_at
 )
 VALUES (
@@ -1026,6 +880,7 @@ VALUES (
     $20, $21, $22, $23,
     $24, $25,
     $26, $27, $28,
+    $29,
     now()
 )
 ON CONFLICT (roaster_id, name) DO UPDATE SET
@@ -1055,6 +910,7 @@ ON CONFLICT (roaster_id, name) DO UPDATE SET
     price_per_100g_min = EXCLUDED.price_per_100g_min,
     price_per_100g_max = EXCLUDED.price_per_100g_max,
     is_blend = EXCLUDED.is_blend,
+    description = EXCLUDED.description,
     last_seen_at = now(),
     last_changed_at = CASE
         WHEN coffees.price_cents IS DISTINCT FROM EXCLUDED.price_cents
@@ -1095,6 +951,7 @@ type UpsertCoffeeParams struct {
 	PricePer100gMin pgtype.Int4 `json:"price_per_100g_min"`
 	PricePer100gMax pgtype.Int4 `json:"price_per_100g_max"`
 	IsBlend         bool        `json:"is_blend"`
+	Description     pgtype.Text `json:"description"`
 }
 
 type UpsertCoffeeRow struct {
@@ -1133,6 +990,7 @@ func (q *Queries) UpsertCoffee(ctx context.Context, arg UpsertCoffeeParams) (Ups
 		arg.PricePer100gMin,
 		arg.PricePer100gMax,
 		arg.IsBlend,
+		arg.Description,
 	)
 	var i UpsertCoffeeRow
 	err := row.Scan(&i.IsNew, &i.ID)

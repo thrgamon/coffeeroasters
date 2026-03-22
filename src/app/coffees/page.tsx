@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import CoffeeCard from '@/components/CoffeeCard';
@@ -8,6 +9,8 @@ import type {
 	DomainCountryListResponse,
 } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
+
+export const metadata: Metadata = { title: 'Coffees | Coffeeroasters' };
 
 interface CoffeesPageProps {
 	searchParams: Promise<Record<string, string | string[] | undefined>>;

@@ -8,6 +8,7 @@
 export interface DomainCoffeeResponse {
   country_code?: string;
   country_name?: string;
+  description?: string;
   id?: number;
   image_url?: string;
   in_stock?: boolean;

@@ -26,9 +26,8 @@ import type {
 import type {
   DomainAuthResponse,
   DomainLoginRequest,
+  DomainMeResponse,
   DomainRegisterRequest,
-  DomainUserResponse,
-  GetApiAuthMe401,
   PostApiAuthLogin401,
   PostApiAuthLogout200,
   PostApiAuthRegister400
@@ -166,7 +165,7 @@ export const usePostApiAuthLogout = <TError = unknown,
       return useMutation(mutationOptions, queryClient);
     }
     /**
- * @summary Get current user
+ * @summary Get current user (returns null user when unauthenticated)
  */
 export const getApiAuthMe = (
     
@@ -174,7 +173,7 @@ export const getApiAuthMe = (
 ) => {
       
       
-      return customFetch<DomainUserResponse>(
+      return customFetch<DomainMeResponse>(
       {url: `/api/auth/me`, method: 'GET', signal
     },
       );
@@ -190,7 +189,7 @@ export const getGetApiAuthMeQueryKey = () => {
     }
 
     
-export const getGetApiAuthMeQueryOptions = <TData = Awaited<ReturnType<typeof getApiAuthMe>>, TError = GetApiAuthMe401>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthMe>>, TError, TData>>, }
+export const getGetApiAuthMeQueryOptions = <TData = Awaited<ReturnType<typeof getApiAuthMe>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthMe>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -209,10 +208,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type GetApiAuthMeQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAuthMe>>>
-export type GetApiAuthMeQueryError = GetApiAuthMe401
+export type GetApiAuthMeQueryError = unknown
 
 
-export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>, TError = GetApiAuthMe401>(
+export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>, TError = unknown>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthMe>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiAuthMe>>,
@@ -222,7 +221,7 @@ export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
-export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>, TError = GetApiAuthMe401>(
+export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>, TError = unknown>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthMe>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiAuthMe>>,
@@ -232,15 +231,15 @@ export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
-export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>, TError = GetApiAuthMe401>(
+export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>, TError = unknown>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthMe>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
 /**
- * @summary Get current user
+ * @summary Get current user (returns null user when unauthenticated)
  */
 
-export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>, TError = GetApiAuthMe401>(
+export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>, TError = unknown>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthMe>>, TError, TData>>, }
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {

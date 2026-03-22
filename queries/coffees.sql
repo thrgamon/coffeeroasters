@@ -8,6 +8,7 @@ INSERT INTO coffees (
     country_code, region_id, producer_id, producer_raw,
     variety, species,
     price_per_100g_min, price_per_100g_max, is_blend,
+    description,
     last_seen_at
 )
 VALUES (
@@ -18,6 +19,7 @@ VALUES (
     $20, $21, $22, $23,
     $24, $25,
     $26, $27, $28,
+    $29,
     now()
 )
 ON CONFLICT (roaster_id, name) DO UPDATE SET
@@ -47,6 +49,7 @@ ON CONFLICT (roaster_id, name) DO UPDATE SET
     price_per_100g_min = EXCLUDED.price_per_100g_min,
     price_per_100g_max = EXCLUDED.price_per_100g_max,
     is_blend = EXCLUDED.is_blend,
+    description = EXCLUDED.description,
     last_seen_at = now(),
     last_changed_at = CASE
         WHEN coffees.price_cents IS DISTINCT FROM EXCLUDED.price_cents
@@ -57,7 +60,7 @@ ON CONFLICT (roaster_id, name) DO UPDATE SET
     updated_at = now()
 RETURNING (xmax = 0) AS is_new, id;
 
--- name: ListCoffees :many
+-- name: ListCoffeesFiltered :many
 SELECT
     c.id, c.roaster_id, c.name, c.product_url, c.image_url,
     c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
@@ -67,7 +70,8 @@ SELECT
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
-    p.name AS producer_name, p.id AS coffee_producer_id
+    p.name AS producer_name, p.id AS coffee_producer_id,
+    COUNT(*) OVER() AS total_count
 FROM coffees c
 JOIN roasters r ON r.id = c.roaster_id
 LEFT JOIN countries co ON co.code = c.country_code
@@ -75,8 +79,22 @@ LEFT JOIN regions reg ON reg.id = c.region_id
 LEFT JOIN producers p ON p.id = c.producer_id
 WHERE r.opted_out = false
     AND c.in_stock = true
-ORDER BY c.name
-LIMIT $1 OFFSET $2;
+    AND (sqlc.narg('query')::text IS NULL
+         OR c.search_vector @@ plainto_tsquery('english', sqlc.narg('query')))
+    AND (sqlc.narg('origin')::text IS NULL
+         OR c.country_code = sqlc.narg('origin')
+         OR (c.is_blend AND EXISTS (
+             SELECT 1 FROM blend_components bc
+             WHERE bc.coffee_id = c.id AND bc.country_code = sqlc.narg('origin'))))
+    AND (sqlc.narg('process')::text IS NULL OR c.process = sqlc.narg('process'))
+    AND (sqlc.narg('roast')::text IS NULL OR c.roast_level = sqlc.narg('roast'))
+    AND (sqlc.narg('variety')::text IS NULL OR c.variety = sqlc.narg('variety'))
+ORDER BY
+    CASE WHEN sqlc.narg('query')::text IS NOT NULL
+        THEN ts_rank(c.search_vector, plainto_tsquery('english', sqlc.narg('query')))
+    END DESC NULLS LAST,
+    c.name
+LIMIT sqlc.arg('lim') OFFSET sqlc.arg('off');
 
 -- name: CountCoffees :one
 SELECT count(*)
@@ -113,6 +131,7 @@ SELECT
     c.producer_raw, c.region_id, c.producer_id,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
+    c.description,
     c.first_seen_at, c.last_seen_at,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
@@ -125,55 +144,6 @@ LEFT JOIN regions reg ON reg.id = c.region_id
 LEFT JOIN producers p ON p.id = c.producer_id
 WHERE c.id = $1;
 
--- name: SearchCoffees :many
-SELECT
-    c.id, c.roaster_id, c.name, c.product_url, c.image_url,
-    c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
-    c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
-    c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
-    r.name AS roaster_name, r.slug AS roaster_slug,
-    co.name AS country_name,
-    reg.name AS region_name, reg.id AS coffee_region_id,
-    p.name AS producer_name, p.id AS coffee_producer_id
-FROM coffees c
-JOIN roasters r ON r.id = c.roaster_id
-LEFT JOIN countries co ON co.code = c.country_code
-LEFT JOIN regions reg ON reg.id = c.region_id
-LEFT JOIN producers p ON p.id = c.producer_id
-WHERE r.opted_out = false
-    AND c.in_stock = true
-    AND c.search_vector @@ plainto_tsquery('english', $1)
-ORDER BY ts_rank(c.search_vector, plainto_tsquery('english', $1)) DESC
-LIMIT $2 OFFSET $3;
-
--- name: FilterCoffees :many
-SELECT
-    c.id, c.roaster_id, c.name, c.product_url, c.image_url,
-    c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
-    c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
-    c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
-    r.name AS roaster_name, r.slug AS roaster_slug,
-    co.name AS country_name,
-    reg.name AS region_name, reg.id AS coffee_region_id,
-    p.name AS producer_name, p.id AS coffee_producer_id
-FROM coffees c
-JOIN roasters r ON r.id = c.roaster_id
-LEFT JOIN countries co ON co.code = c.country_code
-LEFT JOIN regions reg ON reg.id = c.region_id
-LEFT JOIN producers p ON p.id = c.producer_id
-WHERE r.opted_out = false
-    AND ($1::text IS NULL OR c.country_code = $1
-        OR (c.is_blend AND EXISTS (
-            SELECT 1 FROM blend_components bc
-            WHERE bc.coffee_id = c.id AND bc.country_code = $1)))
-    AND ($2::text IS NULL OR c.process = $2)
-    AND ($3::text IS NULL OR c.roast_level = $3)
-    AND ($4::boolean IS NULL OR c.in_stock = $4)
-    AND ($5::text IS NULL OR c.variety = $5)
-ORDER BY c.name
-LIMIT $6 OFFSET $7;
 
 -- name: ListDistinctOrigins :many
 SELECT DISTINCT origin_raw
@@ -265,8 +235,17 @@ WHERE id = $1;
 -- name: ListCoffeesForSimilarity :many
 SELECT
     c.id, c.tasting_notes, c.process, c.roast_level, c.variety,
-    c.region_id, reg.latitude, reg.longitude
+    c.region_id, reg.latitude, reg.longitude,
+    c.embedding
 FROM coffees c
 JOIN roasters r ON r.id = c.roaster_id
 LEFT JOIN regions reg ON reg.id = c.region_id
 WHERE c.in_stock = true AND r.opted_out = false;
+
+-- name: ListCoffeesNeedingEmbedding :many
+SELECT c.id, c.description
+FROM coffees c
+WHERE c.description IS NOT NULL AND c.description != '' AND c.embedding IS NULL;
+
+-- name: UpdateCoffeeEmbedding :exec
+UPDATE coffees SET embedding = $2 WHERE id = $1;

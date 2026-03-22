@@ -1,8 +1,15 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import CoffeeCard from '@/components/CoffeeCard';
 import { Badge } from '@/components/ui/badge';
 import type { DomainRegionDetailResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+	const { id } = await params;
+	const data = await apiFetch<DomainRegionDetailResponse>(`/api/regions/${id}`);
+	return { title: `${data.name} | Coffeeroasters` };
+}
 
 export default async function RegionDetailPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
@@ -37,22 +44,33 @@ export default async function RegionDetailPage({ params }: { params: Promise<{ i
 				<section className="space-y-4">
 					<h2 className="text-xl font-semibold">Nearby Regions</h2>
 					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-						{data.nearby_regions.map((region) => (
-							<Link
-								key={region.id}
-								href={`/regions/${region.id}`}
-								className="flex items-center justify-between rounded-lg border p-4 shadow-sm hover:shadow-md hover:bg-muted/50 transition-all"
-							>
-								<div>
-									<p className="font-medium">{region.name}</p>
-									<p className="text-sm text-muted-foreground">{region.country_name}</p>
-									<p className="text-sm text-muted-foreground">
-										{region.coffee_count} coffee{region.coffee_count !== 1 ? 's' : ''}
-									</p>
+						{data.nearby_regions.map((region) =>
+							region.coffee_count && region.coffee_count > 0 ? (
+								<Link
+									key={region.id}
+									href={`/regions/${region.id}`}
+									className="flex items-center justify-between rounded-lg border p-4 shadow-sm hover:shadow-md hover:bg-muted/50 transition-all"
+								>
+									<div>
+										<p className="font-medium">{region.name}</p>
+										<p className="text-sm text-muted-foreground">{region.country_name}</p>
+										<p className="text-sm text-muted-foreground">
+											{region.coffee_count} coffee{region.coffee_count !== 1 ? 's' : ''}
+										</p>
+									</div>
+									<Badge variant="outline">{region.distance_km} km</Badge>
+								</Link>
+							) : (
+								<div key={region.id} className="flex items-center justify-between rounded-lg border p-4 shadow-sm">
+									<div>
+										<p className="font-medium text-muted-foreground">{region.name}</p>
+										<p className="text-sm text-muted-foreground">{region.country_name}</p>
+										<p className="text-sm text-muted-foreground">0 coffees</p>
+									</div>
+									<Badge variant="outline">{region.distance_km} km</Badge>
 								</div>
-								<Badge variant="outline">{region.distance_km} km</Badge>
-							</Link>
-						))}
+							),
+						)}
 					</div>
 				</section>
 			)}

@@ -74,11 +74,19 @@ func (q *Queries) GetRegionByID(ctx context.Context, id int32) (GetRegionByIDRow
 }
 
 const listCountriesWithCoffeeCount = `-- name: ListCountriesWithCoffeeCount :many
-SELECT co.code, co.name, count(c.id)::int AS coffee_count
+SELECT co.code, co.name, count(DISTINCT ac.id)::int AS coffee_count
 FROM countries co
-JOIN coffees c ON c.country_code = co.code
-JOIN roasters r ON r.id = c.roaster_id
-WHERE r.opted_out = false
+JOIN (
+    SELECT c.id, c.country_code AS match_code, c.roaster_id
+    FROM coffees c
+    WHERE c.in_stock = true
+    UNION
+    SELECT bc_c.id, bc.country_code AS match_code, bc_c.roaster_id
+    FROM blend_components bc
+    JOIN coffees bc_c ON bc_c.id = bc.coffee_id
+        AND bc_c.in_stock = true AND bc_c.is_blend = true
+) ac ON ac.match_code = co.code
+JOIN roasters r ON r.id = ac.roaster_id AND r.opted_out = false
 GROUP BY co.code, co.name
 ORDER BY co.name
 `
@@ -188,9 +196,9 @@ func (q *Queries) ListNearbyRegions(ctx context.Context, arg ListNearbyRegionsPa
 const listRegionsByCountry = `-- name: ListRegionsByCountry :many
 SELECT reg.id, reg.name, count(c.id)::int AS coffee_count
 FROM regions reg
-JOIN coffees c ON c.region_id = reg.id
-JOIN roasters r ON r.id = c.roaster_id
-WHERE reg.country_code = $1 AND r.opted_out = false
+LEFT JOIN coffees c ON c.region_id = reg.id AND c.in_stock = true
+LEFT JOIN roasters r ON r.id = c.roaster_id AND r.opted_out = false
+WHERE reg.country_code = $1
 GROUP BY reg.id, reg.name
 ORDER BY reg.name
 `

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import Link from 'next/link';
+import { MobileNav } from '@/components/MobileNav';
 import { AuthProvider } from '@/lib/auth-context';
 import { CoffeeTrackerProvider } from '@/lib/coffee-tracker';
 import { QueryProvider } from '@/lib/query-provider';
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en">
-			<body className="min-h-screen bg-background font-sans antialiased">
+			<body className="flex min-h-screen flex-col bg-background font-sans antialiased">
 				<QueryProvider>
 					<AuthProvider>
 						<CoffeeTrackerProvider>
@@ -22,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 									<Link href="/" className="text-lg font-semibold text-primary">
 										Coffeeroasters
 									</Link>
-									<div className="flex gap-6 text-sm text-muted-foreground">
+									<div className="hidden gap-6 text-sm text-muted-foreground sm:flex">
 										<Link href="/coffees" className="hover:text-foreground">
 											Coffees
 										</Link>
@@ -36,9 +37,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 											My coffees
 										</Link>
 									</div>
+									<div className="sm:hidden">
+										<MobileNav />
+									</div>
 								</div>
 							</nav>
-							<main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+							<main className="mx-auto flex-1 max-w-6xl px-4 py-8">{children}</main>
+							<footer className="border-t border-border">
+								<div className="mx-auto max-w-6xl px-4 py-4 text-center text-sm text-muted-foreground">
+									&copy; {new Date().getFullYear()} Coffeeroasters
+								</div>
+							</footer>
 						</CoffeeTrackerProvider>
 					</AuthProvider>
 				</QueryProvider>

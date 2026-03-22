@@ -72,3 +72,145 @@ roasters:
     content_selector: "li.product_item"
     detail_selector: ".gbtr_product_description"
     active: true
+
+  # NSW
+  - slug: little-marionette
+    name: The Little Marionette
+    website: https://thelittlemarionette.com
+    shop_url: https://thelittlemarionette.com/collections/coffee
+    state: NSW
+    fetch_method: shopify_json
+    active: true
+
+  - slug: skittle-lane
+    name: Skittle Lane
+    website: https://skittlelane.com
+    shop_url: https://skittlelane.com/collections/all
+    state: NSW
+    fetch_method: shopify_json
+    active: true
+
+  - slug: mecca-coffee
+    name: Mecca Coffee
+    website: https://www.mecca.coffee
+    shop_url: https://www.mecca.coffee/collections/specialty-coffee-beans
+    state: NSW
+    fetch_method: shopify_json
+    active: true
+
+  # QLD
+  - slug: wolff-coffee
+    name: Wolff Coffee Roasters
+    website: https://wolffcoffeeroasters.com.au
+    shop_url: https://wolffcoffeeroasters.com.au/collections/coffee
+    state: QLD
+    fetch_method: shopify_json
+    active: true
+
+  - slug: blackstar-coffee
+    name: Blackstar Coffee Roasters
+    website: https://blackstarcoffee.com.au
+    shop_url: https://blackstarcoffee.com.au/collections/all
+    state: QLD
+    fetch_method: shopify_json
+    active: true
+
+  - slug: passport-coffee
+    name: Passport Specialty Coffee
+    website: https://passportcoffee.com.au
+    shop_url: https://passportcoffee.com.au/collections/all
+    state: QLD
+    fetch_method: shopify_json
+    active: true
+
+  - slug: fonzie-abbott
+    name: Fonzie Abbott
+    website: https://fonzieabbott.com
+    shop_url: https://fonzieabbott.com/collections/coffee
+    state: QLD
+    fetch_method: shopify_json
+    active: true
+
+  # WA
+  - slug: twin-peaks
+    name: Twin Peaks Coffee Roasters
+    website: https://twinpeaks.net.au
+    shop_url: https://twinpeaks.net.au/collections/all
+    state: WA
+    fetch_method: shopify_json
+    active: true
+
+  - slug: micrology
+    name: Micrology Coffee Roasters
+    website: https://micrology.com.au
+    shop_url: https://micrology.com.au/collections/all-coffee
+    state: WA
+    fetch_method: shopify_json
+    active: true
+
+  # SA
+  - slug: monastery-coffee
+    name: Monastery Coffee
+    website: https://monastery.coffee
+    shop_url: https://monastery.coffee/collections/current-offerings
+    state: SA
+    fetch_method: shopify_json
+    active: true
+
+  - slug: soho-coffee
+    name: SOHO Coffee Roasters
+    website: https://sohocoffeeroasters.com.au
+    shop_url: https://sohocoffeeroasters.com.au/collections/coffee-beans
+    state: SA
+    fetch_method: shopify_json
+    active: true
+
+  - slug: 1645-coffee
+    name: 1645 Coffee Roasters
+    website: https://www.1645.com.au
+    shop_url: https://www.1645.com.au/collections/coffee
+    state: SA
+    fetch_method: shopify_json
+    active: true
+
+  - slug: altura-coffee
+    name: Altura Coffee Roasters
+    website: https://alturacoffee.com.au
+    shop_url: https://alturacoffee.com.au/collections/coffee
+    state: SA
+    fetch_method: shopify_json
+    active: true
+
+  # TAS
+  - slug: villino
+    name: Villino Coffee Roasters
+    website: https://villino.com.au
+    shop_url: https://villino.com.au/shop/
+    state: TAS
+    fetch_method: html
+    active: false  # needs content_selector configured
+
+  - slug: zimmah
+    name: Zimmah Coffee
+    website: https://zimmah.com.au
+    shop_url: https://zimmah.com.au/shop/
+    state: TAS
+    fetch_method: html
+    active: false  # needs content_selector configured
+
+  # NT
+  - slug: dtown-coffee
+    name: DTOWN Coffee Roasters
+    website: https://dtowncoffeeroasters.com
+    shop_url: https://dtowncoffeeroasters.com/collections/all
+    state: NT
+    fetch_method: shopify_json
+    active: true
+
+  - slug: chico-loco
+    name: Chico Loco Coffee
+    website: https://chicolocoroasters.com
+    shop_url: https://chico-loco-coffee-roasters-nt.myshopify.com/collections/all  # custom domain redirects to Shopify subdomain
+    state: NT
+    fetch_method: shopify_json
+    active: true

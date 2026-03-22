@@ -1,7 +1,9 @@
 'use client';
 
+import { Loader2, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useTransition } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { DomainCountryResponse } from '@/lib/api/generated/models';
@@ -35,6 +37,7 @@ interface CoffeeFiltersProps {
 export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const [isPending, startTransition] = useTransition();
 
 	const q = searchParams.get('q') ?? '';
 	const origin = searchParams.get('origin') ?? '';
@@ -51,71 +54,106 @@ export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 				params.delete(key);
 			}
 			params.delete('page');
-			router.push(`/coffees?${params.toString()}`);
+			startTransition(() => {
+				router.push(`/coffees?${params.toString()}`);
+			});
 		},
 		[router, searchParams],
 	);
 
+	const activeFilters: { key: string; label: string }[] = [];
+	if (q) activeFilters.push({ key: 'q', label: `Search: ${q}` });
+	if (origin) {
+		const countryName = countries.find((c) => c.code === origin)?.name ?? origin;
+		activeFilters.push({ key: 'origin', label: `Country: ${countryName}` });
+	}
+	if (process) activeFilters.push({ key: 'process', label: `Process: ${process}` });
+	if (roast) activeFilters.push({ key: 'roast', label: `Roast: ${roast}` });
+	if (variety) activeFilters.push({ key: 'variety', label: `Variety: ${variety}` });
+
 	return (
-		<div className="flex flex-wrap gap-3">
-			<Input
-				placeholder="Search coffees..."
-				defaultValue={q}
-				onChange={(e) => updateParams('q', e.target.value)}
-				className="w-64"
-			/>
-			<Select value={origin || 'all'} onValueChange={(v) => updateParams('origin', v === 'all' ? '' : v)}>
-				<SelectTrigger className="w-48">
-					<SelectValue placeholder="Country" />
-				</SelectTrigger>
-				<SelectContent>
-					<SelectItem value="all">All countries</SelectItem>
-					{countries.map((c) => (
-						<SelectItem key={c.code} value={c.code ?? ''}>
-							{c.name} ({c.coffee_count})
-						</SelectItem>
+		<div className="space-y-2">
+			<div className="flex flex-wrap gap-3">
+				<Input
+					placeholder="Search coffees..."
+					defaultValue={q}
+					onChange={(e) => updateParams('q', e.target.value)}
+					className="w-64"
+				/>
+				<Select value={origin || 'all'} onValueChange={(v) => updateParams('origin', v === 'all' ? '' : v)}>
+					<SelectTrigger className="w-48">
+						<SelectValue placeholder="Country" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">All countries</SelectItem>
+						{countries.map((c) => (
+							<SelectItem key={c.code} value={c.code ?? ''}>
+								{c.name} ({c.coffee_count})
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+				<Select value={process || 'all'} onValueChange={(v) => updateParams('process', v === 'all' ? '' : v)}>
+					<SelectTrigger className="w-40">
+						<SelectValue placeholder="Process" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">All processes</SelectItem>
+						{PROCESSES.map((p) => (
+							<SelectItem key={p} value={p}>
+								{p}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+				<Select value={roast || 'all'} onValueChange={(v) => updateParams('roast', v === 'all' ? '' : v)}>
+					<SelectTrigger className="w-40">
+						<SelectValue placeholder="Roast level" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">All roasts</SelectItem>
+						{ROAST_LEVELS.map((r) => (
+							<SelectItem key={r} value={r}>
+								{r}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+				<Select value={variety || 'all'} onValueChange={(v) => updateParams('variety', v === 'all' ? '' : v)}>
+					<SelectTrigger className="w-40">
+						<SelectValue placeholder="Variety" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">All varieties</SelectItem>
+						{VARIETIES.map((v) => (
+							<SelectItem key={v} value={v}>
+								{v}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+				{isPending && <Loader2 className="size-5 animate-spin self-center text-muted-foreground" />}
+			</div>
+			{activeFilters.length > 0 && (
+				<div className="flex flex-wrap gap-2">
+					{activeFilters.map((filter) => (
+						<Badge key={filter.key} variant="secondary" className="gap-1">
+							{filter.label}
+							<button
+								type="button"
+								onClick={(e) => {
+									e.preventDefault();
+									updateParams(filter.key, '');
+								}}
+								className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20"
+							>
+								<X className="size-3" />
+								<span className="sr-only">Remove {filter.label} filter</span>
+							</button>
+						</Badge>
 					))}
-				</SelectContent>
-			</Select>
-			<Select value={process || 'all'} onValueChange={(v) => updateParams('process', v === 'all' ? '' : v)}>
-				<SelectTrigger className="w-40">
-					<SelectValue placeholder="Process" />
-				</SelectTrigger>
-				<SelectContent>
-					<SelectItem value="all">All processes</SelectItem>
-					{PROCESSES.map((p) => (
-						<SelectItem key={p} value={p}>
-							{p}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
-			<Select value={roast || 'all'} onValueChange={(v) => updateParams('roast', v === 'all' ? '' : v)}>
-				<SelectTrigger className="w-40">
-					<SelectValue placeholder="Roast level" />
-				</SelectTrigger>
-				<SelectContent>
-					<SelectItem value="all">All roasts</SelectItem>
-					{ROAST_LEVELS.map((r) => (
-						<SelectItem key={r} value={r}>
-							{r}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
-			<Select value={variety || 'all'} onValueChange={(v) => updateParams('variety', v === 'all' ? '' : v)}>
-				<SelectTrigger className="w-40">
-					<SelectValue placeholder="Variety" />
-				</SelectTrigger>
-				<SelectContent>
-					<SelectItem value="all">All varieties</SelectItem>
-					{VARIETIES.map((v) => (
-						<SelectItem key={v} value={v}>
-							{v}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
+				</div>
+			)}
 		</div>
 	);
 }

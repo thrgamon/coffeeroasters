@@ -14,7 +14,7 @@ export default async function Home() {
 
 	return (
 		<div className="space-y-12">
-			<section className="space-y-4 text-center">
+			<section className="space-y-4 text-center rounded-xl bg-gradient-to-b from-muted/50 to-background px-6 py-12">
 				<h1 className="text-4xl font-bold">Coffeeroasters</h1>
 				<p className="text-lg text-muted-foreground">Discover specialty coffee from Australian indie roasters</p>
 				<div className="flex justify-center gap-8 text-sm text-muted-foreground">
