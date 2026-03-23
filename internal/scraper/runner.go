@@ -153,11 +153,31 @@ func (r *Runner) scrapeOne(ctx context.Context, cfg domain.RoasterConfig, opts R
 		}
 	}
 
+	// Load known source hashes for change detection (Shopify only)
+	knownHashes := make(map[string]string)
+	if cfg.FetchMethod == domain.FetchShopifyJSON && r.queries != nil && !opts.DryRun {
+		rows, hashErr := r.queries.GetSourceHashesByRoaster(ctx, cfg.Slug)
+		if hashErr != nil {
+			logger.Warn("failed to load source hashes, will re-extract all", "error", hashErr)
+		}
+		for _, row := range rows {
+			if row.ProductUrl.Valid && row.SourceHash.Valid {
+				knownHashes[row.ProductUrl.String] = row.SourceHash.String
+			}
+		}
+	}
+
 	// Fetch and extract
 	var coffees []RawCoffee
+	var unchanged []RawCoffee
 	switch cfg.FetchMethod {
 	case domain.FetchShopifyJSON:
-		coffees, err = FetchShopify(ctx, cfg, r.client, r.extractor, r.limiter)
+		var result *ShopifyFetchResult
+		result, err = FetchShopify(ctx, cfg, r.client, r.extractor, r.limiter, knownHashes)
+		if result != nil {
+			coffees = result.Changed
+			unchanged = result.Unchanged
+		}
 	case domain.FetchHTML:
 		coffees, err = FetchHTMLPage(ctx, cfg, r.client, r.extractor, r.limiter)
 	case domain.FetchHTMLDetail:
@@ -175,7 +195,8 @@ func (r *Runner) scrapeOne(ctx context.Context, cfg domain.RoasterConfig, opts R
 		}
 	}
 
-	logger.Info("scraped", "coffees", len(coffees))
+	totalCoffees := len(coffees) + len(unchanged)
+	logger.Info("scraped", "coffees", totalCoffees, "changed", len(coffees), "unchanged", len(unchanged))
 
 	if opts.DryRun {
 		for _, c := range coffees {
@@ -184,20 +205,23 @@ func (r *Runner) scrapeOne(ctx context.Context, cfg domain.RoasterConfig, opts R
 				c.Name, c.OriginRaw, c.RegionRaw, countryCode, regionName,
 				c.ProcessRaw, c.RoastRaw, c.PriceRaw, c.ProducerRaw)
 		}
+		for _, c := range unchanged {
+			fmt.Printf("  %s | (unchanged, skipped extraction)\n", c.Name)
+		}
 		return RunResult{
 			Slug:     cfg.Slug,
-			Coffees:  len(coffees),
+			Coffees:  totalCoffees,
 			Duration: time.Since(start),
 		}
 	}
 
 	// Upsert to DB
 	if r.queries != nil {
-		if err := r.upsertRoasterAndCoffees(ctx, cfg, coffees); err != nil {
+		if err := r.upsertRoasterAndCoffees(ctx, cfg, coffees, unchanged); err != nil {
 			logger.Error("db upsert failed", "error", err)
 			return RunResult{
 				Slug:     cfg.Slug,
-				Coffees:  len(coffees),
+				Coffees:  totalCoffees,
 				Duration: time.Since(start),
 				Err:      err,
 			}
@@ -206,12 +230,12 @@ func (r *Runner) scrapeOne(ctx context.Context, cfg domain.RoasterConfig, opts R
 
 	return RunResult{
 		Slug:     cfg.Slug,
-		Coffees:  len(coffees),
+		Coffees:  totalCoffees,
 		Duration: time.Since(start),
 	}
 }
 
-func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.RoasterConfig, coffees []RawCoffee) error {
+func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.RoasterConfig, coffees []RawCoffee, unchanged []RawCoffee) error {
 	start := time.Now()
 
 	// Upsert roaster
@@ -231,7 +255,28 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 		return fmt.Errorf("insert scrape run: %w", err)
 	}
 
-	// Upsert each coffee
+	// Lightweight update for unchanged products: refresh price, stock, and last_seen_at
+	// without re-running LLM extraction.
+	for _, raw := range unchanged {
+		priceCents, _ := normalise.NormalisePriceAUD(raw.PriceRaw)
+		weightGrams, _ := normalise.NormaliseWeightGrams(raw.WeightRaw)
+		if err := r.queries.UpdateCoffeeSeenAndPrice(ctx, db.UpdateCoffeeSeenAndPriceParams{
+			RoasterID:       roasterID,
+			Name:            raw.Name,
+			InStock:         raw.InStock,
+			PriceRaw:        textVal(raw.PriceRaw),
+			WeightRaw:       textVal(raw.WeightRaw),
+			PriceCents:      int4Val(int32(priceCents)),
+			WeightGrams:     int4Val(int32(weightGrams)),
+			PricePer100gMin: int4Val(int32(raw.PricePer100gMin)),
+			PricePer100gMax: int4Val(int32(raw.PricePer100gMax)),
+			ImageUrl:        textVal(raw.ImageURL),
+		}); err != nil {
+			slog.Warn("update unchanged coffee failed", "name", raw.Name, "error", err)
+		}
+	}
+
+	// Upsert each changed coffee (with full LLM extraction data)
 	var added, updated int
 	for _, raw := range coffees {
 		sanitizeRawCoffee(&raw)
@@ -318,6 +363,7 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 			PricePer100gMax: int4Val(int32(per100gMax)),
 			IsBlend:         raw.IsBlend,
 			Description:     textVal(raw.Description),
+			SourceHash:      textVal(raw.SourceHash),
 		})
 		if err != nil {
 			slog.Warn("upsert coffee failed", "name", raw.Name, "error", err)
@@ -372,7 +418,7 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 	err = r.queries.CompleteScrapeRun(ctx, db.CompleteScrapeRunParams{
 		ID:             runID,
 		Status:         "success",
-		CoffeesFound:   int4Val(int32(len(coffees))),
+		CoffeesFound:   int4Val(int32(len(coffees) + len(unchanged))),
 		CoffeesAdded:   int4Val(int32(added)),
 		CoffeesUpdated: int4Val(int32(updated)),
 		DurationMs:     int4Val(durationMs),

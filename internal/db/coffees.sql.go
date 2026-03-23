@@ -129,6 +129,38 @@ func (q *Queries) GetCoffeeByID(ctx context.Context, id int64) (GetCoffeeByIDRow
 	return i, err
 }
 
+const getSourceHashesByRoaster = `-- name: GetSourceHashesByRoaster :many
+SELECT c.product_url, c.source_hash
+FROM coffees c
+JOIN roasters r ON r.id = c.roaster_id
+WHERE r.slug = $1 AND c.source_hash IS NOT NULL AND c.product_url IS NOT NULL
+`
+
+type GetSourceHashesByRoasterRow struct {
+	ProductUrl pgtype.Text `json:"product_url"`
+	SourceHash pgtype.Text `json:"source_hash"`
+}
+
+func (q *Queries) GetSourceHashesByRoaster(ctx context.Context, slug string) ([]GetSourceHashesByRoasterRow, error) {
+	rows, err := q.db.Query(ctx, getSourceHashesByRoaster, slug)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetSourceHashesByRoasterRow{}
+	for rows.Next() {
+		var i GetSourceHashesByRoasterRow
+		if err := rows.Scan(&i.ProductUrl, &i.SourceHash); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listCoffeesByCountry = `-- name: ListCoffeesByCountry :many
 SELECT
     c.id, c.roaster_id, c.name, c.product_url, c.image_url,
@@ -843,6 +875,50 @@ func (q *Queries) UpdateCoffeeOrigin(ctx context.Context, arg UpdateCoffeeOrigin
 	return err
 }
 
+const updateCoffeeSeenAndPrice = `-- name: UpdateCoffeeSeenAndPrice :exec
+UPDATE coffees SET
+    last_seen_at = now(),
+    in_stock = $3,
+    price_raw = $4,
+    weight_raw = $5,
+    price_cents = $6,
+    weight_grams = $7,
+    price_per_100g_min = $8,
+    price_per_100g_max = $9,
+    image_url = $10,
+    updated_at = now()
+WHERE roaster_id = $1 AND name = $2
+`
+
+type UpdateCoffeeSeenAndPriceParams struct {
+	RoasterID       int32       `json:"roaster_id"`
+	Name            string      `json:"name"`
+	InStock         bool        `json:"in_stock"`
+	PriceRaw        pgtype.Text `json:"price_raw"`
+	WeightRaw       pgtype.Text `json:"weight_raw"`
+	PriceCents      pgtype.Int4 `json:"price_cents"`
+	WeightGrams     pgtype.Int4 `json:"weight_grams"`
+	PricePer100gMin pgtype.Int4 `json:"price_per_100g_min"`
+	PricePer100gMax pgtype.Int4 `json:"price_per_100g_max"`
+	ImageUrl        pgtype.Text `json:"image_url"`
+}
+
+func (q *Queries) UpdateCoffeeSeenAndPrice(ctx context.Context, arg UpdateCoffeeSeenAndPriceParams) error {
+	_, err := q.db.Exec(ctx, updateCoffeeSeenAndPrice,
+		arg.RoasterID,
+		arg.Name,
+		arg.InStock,
+		arg.PriceRaw,
+		arg.WeightRaw,
+		arg.PriceCents,
+		arg.WeightGrams,
+		arg.PricePer100gMin,
+		arg.PricePer100gMax,
+		arg.ImageUrl,
+	)
+	return err
+}
+
 const updateCoffeeVariety = `-- name: UpdateCoffeeVariety :exec
 UPDATE coffees
 SET variety = $2, species = $3
@@ -869,7 +945,7 @@ INSERT INTO coffees (
     country_code, region_id, producer_id, producer_raw,
     variety, species,
     price_per_100g_min, price_per_100g_max, is_blend,
-    description,
+    description, source_hash,
     last_seen_at
 )
 VALUES (
@@ -880,7 +956,7 @@ VALUES (
     $20, $21, $22, $23,
     $24, $25,
     $26, $27, $28,
-    $29,
+    $29, $30,
     now()
 )
 ON CONFLICT (roaster_id, name) DO UPDATE SET
@@ -911,6 +987,7 @@ ON CONFLICT (roaster_id, name) DO UPDATE SET
     price_per_100g_max = EXCLUDED.price_per_100g_max,
     is_blend = EXCLUDED.is_blend,
     description = EXCLUDED.description,
+    source_hash = EXCLUDED.source_hash,
     last_seen_at = now(),
     last_changed_at = CASE
         WHEN coffees.price_cents IS DISTINCT FROM EXCLUDED.price_cents
@@ -952,6 +1029,7 @@ type UpsertCoffeeParams struct {
 	PricePer100gMax pgtype.Int4 `json:"price_per_100g_max"`
 	IsBlend         bool        `json:"is_blend"`
 	Description     pgtype.Text `json:"description"`
+	SourceHash      pgtype.Text `json:"source_hash"`
 }
 
 type UpsertCoffeeRow struct {
@@ -991,6 +1069,7 @@ func (q *Queries) UpsertCoffee(ctx context.Context, arg UpsertCoffeeParams) (Ups
 		arg.PricePer100gMax,
 		arg.IsBlend,
 		arg.Description,
+		arg.SourceHash,
 	)
 	var i UpsertCoffeeRow
 	err := row.Scan(&i.IsNew, &i.ID)

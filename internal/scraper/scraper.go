@@ -43,6 +43,9 @@ type RawCoffee struct {
 	IsBlend         bool
 	BlendComponents []RawBlendComponent
 
+	// Content hash for change detection (SHA-256 of source HTML/body)
+	SourceHash string
+
 	// Metadata
 	ScrapedAt time.Time
 }

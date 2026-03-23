@@ -59,6 +59,7 @@ type Coffee struct {
 	IsBlend         bool        `json:"is_blend"`
 	Description     pgtype.Text `json:"description"`
 	Embedding       []float64   `json:"embedding"`
+	SourceHash      pgtype.Text `json:"source_hash"`
 }
 
 type Country struct {

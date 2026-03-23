@@ -8,7 +8,7 @@ INSERT INTO coffees (
     country_code, region_id, producer_id, producer_raw,
     variety, species,
     price_per_100g_min, price_per_100g_max, is_blend,
-    description,
+    description, source_hash,
     last_seen_at
 )
 VALUES (
@@ -19,7 +19,7 @@ VALUES (
     $20, $21, $22, $23,
     $24, $25,
     $26, $27, $28,
-    $29,
+    $29, $30,
     now()
 )
 ON CONFLICT (roaster_id, name) DO UPDATE SET
@@ -50,6 +50,7 @@ ON CONFLICT (roaster_id, name) DO UPDATE SET
     price_per_100g_max = EXCLUDED.price_per_100g_max,
     is_blend = EXCLUDED.is_blend,
     description = EXCLUDED.description,
+    source_hash = EXCLUDED.source_hash,
     last_seen_at = now(),
     last_changed_at = CASE
         WHEN coffees.price_cents IS DISTINCT FROM EXCLUDED.price_cents
@@ -249,3 +250,23 @@ WHERE c.description IS NOT NULL AND c.description != '' AND c.embedding IS NULL;
 
 -- name: UpdateCoffeeEmbedding :exec
 UPDATE coffees SET embedding = $2 WHERE id = $1;
+
+-- name: GetSourceHashesByRoaster :many
+SELECT c.product_url, c.source_hash
+FROM coffees c
+JOIN roasters r ON r.id = c.roaster_id
+WHERE r.slug = $1 AND c.source_hash IS NOT NULL AND c.product_url IS NOT NULL;
+
+-- name: UpdateCoffeeSeenAndPrice :exec
+UPDATE coffees SET
+    last_seen_at = now(),
+    in_stock = $3,
+    price_raw = $4,
+    weight_raw = $5,
+    price_cents = $6,
+    weight_grams = $7,
+    price_per_100g_min = $8,
+    price_per_100g_max = $9,
+    image_url = $10,
+    updated_at = now()
+WHERE roaster_id = $1 AND name = $2;
