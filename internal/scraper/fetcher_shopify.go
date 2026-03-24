@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -30,12 +31,12 @@ type shopifyProduct struct {
 }
 
 type shopifyVariant struct {
-	Price     string `json:"price"`
-	Available bool   `json:"available"`
-	Title     string `json:"title"`
-	Grams     int    `json:"grams"`
-	Weight    float64 `json:"weight"`
-	WeightUnit string `json:"weight_unit"`
+	Price      string  `json:"price"`
+	Available  bool    `json:"available"`
+	Title      string  `json:"title"`
+	Grams      int     `json:"grams"`
+	Weight     float64 `json:"weight"`
+	WeightUnit string  `json:"weight_unit"`
 }
 
 type shopifyImage struct {
@@ -48,10 +49,20 @@ type shopifyResponse struct {
 
 const shopifyBatchSize = 10
 
+// ShopifyFetchResult separates changed products (needing LLM extraction) from
+// unchanged ones (only price/stock updates needed).
+type ShopifyFetchResult struct {
+	Changed   []RawCoffee // Products with new/changed content, fully extracted
+	Unchanged []RawCoffee // Products with unchanged content, only Shopify JSON fields populated
+}
+
 // FetchShopify fetches products from a Shopify store's /products.json endpoint,
 // extracts structured data from the JSON, and uses the LLM to parse origin/
 // process/tasting notes from the HTML descriptions.
-func FetchShopify(ctx context.Context, cfg domain.RoasterConfig, client *http.Client, extractor *Extractor, limiter *RateLimiter) ([]RawCoffee, error) {
+//
+// knownHashes maps product_url -> source_hash for previously scraped products.
+// Products whose body_html hash matches a known hash skip LLM extraction.
+func FetchShopify(ctx context.Context, cfg domain.RoasterConfig, client *http.Client, extractor *Extractor, limiter *RateLimiter, knownHashes map[string]string) (*ShopifyFetchResult, error) {
 	var allProducts []shopifyProduct
 
 	baseURL := strings.TrimSuffix(cfg.ShopURL, "/")
@@ -119,17 +130,41 @@ func FetchShopify(ctx context.Context, cfg domain.RoasterConfig, client *http.Cl
 	}
 
 	if len(filtered) == 0 {
-		return nil, nil
+		return &ShopifyFetchResult{}, nil
 	}
 
-	// Build descriptions for LLM extraction in batches
-	var allCoffees []RawCoffee
-	for i := 0; i < len(filtered); i += shopifyBatchSize {
-		end := i + shopifyBatchSize
-		if end > len(filtered) {
-			end = len(filtered)
+	// Separate changed vs unchanged products based on body_html hash
+	var changed []shopifyProduct
+	result := &ShopifyFetchResult{}
+
+	for _, p := range filtered {
+		hash := hashBody(p.BodyHTML)
+		productURL := shopifyProductURL(cfg.Website, p.Handle)
+
+		if existing, ok := knownHashes[productURL]; ok && existing == hash {
+			// Unchanged: populate only Shopify JSON fields (no LLM extraction)
+			raw := shopifyJSONFields(cfg, p, hash)
+			result.Unchanged = append(result.Unchanged, raw)
+		} else {
+			changed = append(changed, p)
 		}
-		batch := filtered[i:end]
+	}
+
+	if len(changed) > 0 {
+		slog.Info("change detection",
+			"roaster", cfg.Slug,
+			"total", len(filtered),
+			"changed", len(changed),
+			"unchanged", len(result.Unchanged))
+	}
+
+	// Extract changed products via LLM in batches
+	for i := 0; i < len(changed); i += shopifyBatchSize {
+		end := i + shopifyBatchSize
+		if end > len(changed) {
+			end = len(changed)
+		}
+		batch := changed[i:end]
 
 		var descriptions []ProductDescription
 		for j, p := range batch {
@@ -158,64 +193,8 @@ func FetchShopify(ctx context.Context, cfg domain.RoasterConfig, client *http.Cl
 			}
 			sp := batch[ep.Index]
 
-			raw := RawCoffee{
-				Name:       ep.Name,
-				ProductURL: shopifyProductURL(cfg.Website, sp.Handle),
-				ScrapedAt:  time.Now(),
-				Currency:   "AUD",
-			}
-
-			if len(sp.Images) > 0 {
-				raw.ImageURL = sp.Images[0].Src
-			}
-
-			// Price, stock, and per-100g from Shopify JSON variants
-			if len(sp.Variants) > 0 {
-				var bestPer100g int64 = math.MaxInt64
-				var anyInStock bool
-				var minPer100g, maxPer100g int64
-
-				for _, v := range sp.Variants {
-					if v.Available {
-						anyInStock = true
-					}
-
-					priceCents, priceOK := normalise.NormalisePriceAUD(v.Price)
-					weightGrams, weightOK := normalise.NormaliseWeightGrams(shopifyWeight(v))
-					if !priceOK || !weightOK || weightGrams <= 0 {
-						continue
-					}
-
-					per100g := normalise.PricePer100g(priceCents, weightGrams)
-					if per100g <= 0 {
-						continue
-					}
-
-					if minPer100g == 0 || per100g < minPer100g {
-						minPer100g = per100g
-					}
-					if per100g > maxPer100g {
-						maxPer100g = per100g
-					}
-
-					if per100g < bestPer100g {
-						bestPer100g = per100g
-						raw.PriceRaw = v.Price
-						raw.WeightRaw = shopifyWeight(v)
-					}
-				}
-
-				raw.InStock = anyInStock
-				raw.PricePer100gMin = minPer100g
-				raw.PricePer100gMax = maxPer100g
-
-				// Fallback: if no variant had valid price+weight, use first variant
-				if bestPer100g == math.MaxInt64 {
-					raw.PriceRaw = sp.Variants[0].Price
-					raw.WeightRaw = shopifyWeight(sp.Variants[0])
-					raw.InStock = sp.Variants[0].Available
-				}
-			}
+			raw := shopifyJSONFields(cfg, sp, hashBody(sp.BodyHTML))
+			raw.Name = ep.Name
 
 			// Origin, process, tasting notes from LLM
 			if ep.Origin != nil {
@@ -263,11 +242,80 @@ func FetchShopify(ctx context.Context, cfg domain.RoasterConfig, client *http.Cl
 				}
 			}
 
-			allCoffees = append(allCoffees, raw)
+			result.Changed = append(result.Changed, raw)
 		}
 	}
 
-	return allCoffees, nil
+	return result, nil
+}
+
+// shopifyJSONFields builds a RawCoffee populated only from Shopify JSON data
+// (price, stock, weight, image). No LLM extraction fields.
+func shopifyJSONFields(cfg domain.RoasterConfig, sp shopifyProduct, hash string) RawCoffee {
+	raw := RawCoffee{
+		Name:       sp.Title,
+		ProductURL: shopifyProductURL(cfg.Website, sp.Handle),
+		SourceHash: hash,
+		ScrapedAt:  time.Now(),
+		Currency:   "AUD",
+	}
+
+	if len(sp.Images) > 0 {
+		raw.ImageURL = sp.Images[0].Src
+	}
+
+	if len(sp.Variants) > 0 {
+		var bestPer100g int64 = math.MaxInt64
+		var anyInStock bool
+		var minPer100g, maxPer100g int64
+
+		for _, v := range sp.Variants {
+			if v.Available {
+				anyInStock = true
+			}
+
+			priceCents, priceOK := normalise.NormalisePriceAUD(v.Price)
+			weightGrams, weightOK := normalise.NormaliseWeightGrams(shopifyWeight(v))
+			if !priceOK || !weightOK || weightGrams <= 0 {
+				continue
+			}
+
+			per100g := normalise.PricePer100g(priceCents, weightGrams)
+			if per100g <= 0 {
+				continue
+			}
+
+			if minPer100g == 0 || per100g < minPer100g {
+				minPer100g = per100g
+			}
+			if per100g > maxPer100g {
+				maxPer100g = per100g
+			}
+
+			if per100g < bestPer100g {
+				bestPer100g = per100g
+				raw.PriceRaw = v.Price
+				raw.WeightRaw = shopifyWeight(v)
+			}
+		}
+
+		raw.InStock = anyInStock
+		raw.PricePer100gMin = minPer100g
+		raw.PricePer100gMax = maxPer100g
+
+		if bestPer100g == math.MaxInt64 {
+			raw.PriceRaw = sp.Variants[0].Price
+			raw.WeightRaw = shopifyWeight(sp.Variants[0])
+			raw.InStock = sp.Variants[0].Available
+		}
+	}
+
+	return raw
+}
+
+func hashBody(body string) string {
+	h := sha256.Sum256([]byte(body))
+	return fmt.Sprintf("%x", h)
 }
 
 func shopifyProductURL(website, handle string) string {
@@ -288,4 +336,3 @@ func shopifyWeight(v shopifyVariant) string {
 	}
 	return ""
 }
-

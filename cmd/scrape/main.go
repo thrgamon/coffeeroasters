@@ -61,6 +61,12 @@ func main() {
 			log.Fatalf("ping database: %v", err)
 		}
 		cancel()
+
+		// Verify schema is up to date before running queries that depend on
+		// newer columns. Fails fast with a clear message if migrations are pending.
+		if err := verifySchema(ctx, pool); err != nil {
+			log.Fatalf("%v", err)
+		}
 	}
 
 	runner := scraper.NewRunner(pool, &openaiClient)
@@ -121,4 +127,17 @@ func main() {
 	if failed > 0 {
 		os.Exit(1)
 	}
+}
+
+// verifySchema checks that the coffees table has all columns the scraper
+// depends on. This catches missing migrations before we hit cryptic
+// "column does not exist" errors mid-scrape.
+func verifySchema(ctx context.Context, pool *pgxpool.Pool) error {
+	checkCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	_, err := pool.Exec(checkCtx, "SELECT description, source_hash FROM coffees LIMIT 0")
+	if err != nil {
+		return fmt.Errorf("schema out of date (run migrations): %w", err)
+	}
+	return nil
 }
