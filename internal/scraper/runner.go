@@ -251,10 +251,15 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 
 	// Upsert cafes from config
 	for _, cafe := range cfg.Cafes {
+		cafeType := cafe.Type
+		if cafeType == "" {
+			cafeType = "owned"
+		}
 		if _, err := r.queries.UpsertCafe(ctx, db.UpsertCafeParams{
 			RoasterID: roasterID,
 			Slug:      cafe.Slug,
 			Name:      cafe.Name,
+			Type:      cafeType,
 			Address:   textVal(cafe.Address),
 			Suburb:    textVal(cafe.Suburb),
 			State:     textVal(cafe.State),

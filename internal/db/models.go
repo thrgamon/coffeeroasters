@@ -16,6 +16,7 @@ type Cafe struct {
 	RoasterID  int32         `json:"roaster_id"`
 	Slug       string        `json:"slug"`
 	Name       string        `json:"name"`
+	Type       string        `json:"type"`
 	Address    pgtype.Text   `json:"address"`
 	Suburb     pgtype.Text   `json:"suburb"`
 	State      pgtype.Text   `json:"state"`

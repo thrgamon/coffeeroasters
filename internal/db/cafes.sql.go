@@ -23,7 +23,7 @@ func (q *Queries) CountCafes(ctx context.Context) (int64, error) {
 }
 
 const getCafeBySlug = `-- name: GetCafeBySlug :one
-SELECT c.id, c.roaster_id, c.slug, c.name, c.address, c.suburb, c.state, c.postcode,
+SELECT c.id, c.roaster_id, c.slug, c.name, c.type, c.address, c.suburb, c.state, c.postcode,
        c.latitude, c.longitude, c.phone, c.instagram, c.website_url, c.image_url,
        r.name AS roaster_name, r.slug AS roaster_slug
 FROM cafes c
@@ -36,6 +36,7 @@ type GetCafeBySlugRow struct {
 	RoasterID   int32         `json:"roaster_id"`
 	Slug        string        `json:"slug"`
 	Name        string        `json:"name"`
+	Type        string        `json:"type"`
 	Address     pgtype.Text   `json:"address"`
 	Suburb      pgtype.Text   `json:"suburb"`
 	State       pgtype.Text   `json:"state"`
@@ -58,6 +59,7 @@ func (q *Queries) GetCafeBySlug(ctx context.Context, slug string) (GetCafeBySlug
 		&i.RoasterID,
 		&i.Slug,
 		&i.Name,
+		&i.Type,
 		&i.Address,
 		&i.Suburb,
 		&i.State,
@@ -75,19 +77,20 @@ func (q *Queries) GetCafeBySlug(ctx context.Context, slug string) (GetCafeBySlug
 }
 
 const listCafes = `-- name: ListCafes :many
-SELECT c.id, c.slug, c.name, c.address, c.suburb, c.state, c.postcode,
+SELECT c.id, c.slug, c.name, c.type, c.address, c.suburb, c.state, c.postcode,
        c.latitude, c.longitude, c.phone, c.instagram, c.website_url, c.image_url,
        r.id AS roaster_id, r.name AS roaster_name, r.slug AS roaster_slug
 FROM cafes c
 JOIN roasters r ON r.id = c.roaster_id
 WHERE c.active = true AND r.active = true AND r.opted_out = false
-ORDER BY c.state, c.name
+ORDER BY c.type, c.state, c.name
 `
 
 type ListCafesRow struct {
 	ID          int32         `json:"id"`
 	Slug        string        `json:"slug"`
 	Name        string        `json:"name"`
+	Type        string        `json:"type"`
 	Address     pgtype.Text   `json:"address"`
 	Suburb      pgtype.Text   `json:"suburb"`
 	State       pgtype.Text   `json:"state"`
@@ -116,6 +119,7 @@ func (q *Queries) ListCafes(ctx context.Context) ([]ListCafesRow, error) {
 			&i.ID,
 			&i.Slug,
 			&i.Name,
+			&i.Type,
 			&i.Address,
 			&i.Suburb,
 			&i.State,
@@ -141,19 +145,20 @@ func (q *Queries) ListCafes(ctx context.Context) ([]ListCafesRow, error) {
 }
 
 const listCafesByState = `-- name: ListCafesByState :many
-SELECT c.id, c.slug, c.name, c.address, c.suburb, c.state, c.postcode,
+SELECT c.id, c.slug, c.name, c.type, c.address, c.suburb, c.state, c.postcode,
        c.latitude, c.longitude, c.phone, c.instagram, c.website_url, c.image_url,
        r.id AS roaster_id, r.name AS roaster_name, r.slug AS roaster_slug
 FROM cafes c
 JOIN roasters r ON r.id = c.roaster_id
 WHERE c.state = $1 AND c.active = true AND r.active = true AND r.opted_out = false
-ORDER BY c.name
+ORDER BY c.type, c.name
 `
 
 type ListCafesByStateRow struct {
 	ID          int32         `json:"id"`
 	Slug        string        `json:"slug"`
 	Name        string        `json:"name"`
+	Type        string        `json:"type"`
 	Address     pgtype.Text   `json:"address"`
 	Suburb      pgtype.Text   `json:"suburb"`
 	State       pgtype.Text   `json:"state"`
@@ -182,6 +187,7 @@ func (q *Queries) ListCafesByState(ctx context.Context, state pgtype.Text) ([]Li
 			&i.ID,
 			&i.Slug,
 			&i.Name,
+			&i.Type,
 			&i.Address,
 			&i.Suburb,
 			&i.State,
@@ -207,17 +213,18 @@ func (q *Queries) ListCafesByState(ctx context.Context, state pgtype.Text) ([]Li
 }
 
 const listCafesByRoaster = `-- name: ListCafesByRoaster :many
-SELECT c.id, c.slug, c.name, c.address, c.suburb, c.state, c.postcode,
+SELECT c.id, c.slug, c.name, c.type, c.address, c.suburb, c.state, c.postcode,
        c.latitude, c.longitude, c.phone, c.instagram, c.website_url, c.image_url
 FROM cafes c
 WHERE c.roaster_id = $1 AND c.active = true
-ORDER BY c.name
+ORDER BY c.type, c.name
 `
 
 type ListCafesByRoasterRow struct {
 	ID         int32         `json:"id"`
 	Slug       string        `json:"slug"`
 	Name       string        `json:"name"`
+	Type       string        `json:"type"`
 	Address    pgtype.Text   `json:"address"`
 	Suburb     pgtype.Text   `json:"suburb"`
 	State      pgtype.Text   `json:"state"`
@@ -243,6 +250,7 @@ func (q *Queries) ListCafesByRoaster(ctx context.Context, roasterID int32) ([]Li
 			&i.ID,
 			&i.Slug,
 			&i.Name,
+			&i.Type,
 			&i.Address,
 			&i.Suburb,
 			&i.State,
@@ -265,10 +273,11 @@ func (q *Queries) ListCafesByRoaster(ctx context.Context, roasterID int32) ([]Li
 }
 
 const upsertCafe = `-- name: UpsertCafe :one
-INSERT INTO cafes (roaster_id, slug, name, address, suburb, state, postcode, latitude, longitude, phone, instagram, website_url, image_url)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+INSERT INTO cafes (roaster_id, slug, name, type, address, suburb, state, postcode, latitude, longitude, phone, instagram, website_url, image_url)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 ON CONFLICT (roaster_id, slug) DO UPDATE SET
     name = EXCLUDED.name,
+    type = EXCLUDED.type,
     address = EXCLUDED.address,
     suburb = EXCLUDED.suburb,
     state = EXCLUDED.state,
@@ -287,6 +296,7 @@ type UpsertCafeParams struct {
 	RoasterID  int32         `json:"roaster_id"`
 	Slug       string        `json:"slug"`
 	Name       string        `json:"name"`
+	Type       string        `json:"type"`
 	Address    pgtype.Text   `json:"address"`
 	Suburb     pgtype.Text   `json:"suburb"`
 	State      pgtype.Text   `json:"state"`
@@ -304,6 +314,7 @@ func (q *Queries) UpsertCafe(ctx context.Context, arg UpsertCafeParams) (int32, 
 		arg.RoasterID,
 		arg.Slug,
 		arg.Name,
+		arg.Type,
 		arg.Address,
 		arg.Suburb,
 		arg.State,

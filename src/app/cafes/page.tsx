@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import CafeFilters from '@/components/CafeFilters';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { DomainCafeListResponse } from '@/lib/api/generated/models';
+import type { DomainCafeListResponse, DomainCafeResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
 export const metadata: Metadata = { title: 'Cafes | Coffeeroasters' };
@@ -23,13 +23,9 @@ export default async function CafesPage({ searchParams }: CafesPageProps) {
 
 	const data = await apiFetch<DomainCafeListResponse>(`/api/cafes${qs ? `?${qs}` : ''}`);
 
-	// Group cafes by state
-	const cafesByState = new Map<string, typeof data.cafes>();
-	for (const cafe of data.cafes ?? []) {
-		const s = cafe.state ?? 'Other';
-		if (!cafesByState.has(s)) cafesByState.set(s, []);
-		cafesByState.get(s)!.push(cafe);
-	}
+	const allCafes = data.cafes ?? [];
+	const ownedCafes = allCafes.filter((c) => c.type !== 'stockist');
+	const stockistCafes = allCafes.filter((c) => c.type === 'stockist');
 
 	return (
 		<div className="space-y-6">
@@ -39,25 +35,24 @@ export default async function CafesPage({ searchParams }: CafesPageProps) {
 				<CafeFilters />
 			</Suspense>
 
-			{data.cafes && data.cafes.length > 0 ? (
-				state ? (
-					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-						{data.cafes.map((cafe) => (
-							<CafeCard key={cafe.id} cafe={cafe} />
-						))}
-					</div>
-				) : (
-					Array.from(cafesByState.entries()).map(([stateKey, cafes]) => (
-						<section key={stateKey} className="space-y-3">
-							<h2 className="text-xl font-semibold">{stateKey}</h2>
-							<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-								{cafes!.map((cafe) => (
-									<CafeCard key={cafe.id} cafe={cafe} />
-								))}
-							</div>
-						</section>
-					))
-				)
+			{allCafes.length > 0 ? (
+				<>
+					{ownedCafes.length > 0 && (
+						<CafeSection
+							title="Roaster-owned cafes"
+							cafes={ownedCafes}
+							groupByState={!state}
+						/>
+					)}
+					{stockistCafes.length > 0 && (
+						<CafeSection
+							title="Stockists"
+							description="Independent cafes serving specialty roasters' coffee"
+							cafes={stockistCafes}
+							groupByState={!state}
+						/>
+					)}
+				</>
 			) : (
 				<p className="text-muted-foreground">No cafes found.</p>
 			)}
@@ -65,7 +60,61 @@ export default async function CafesPage({ searchParams }: CafesPageProps) {
 	);
 }
 
-function CafeCard({ cafe }: { cafe: NonNullable<DomainCafeListResponse['cafes']>[number] }) {
+function CafeSection({
+	title,
+	description,
+	cafes,
+	groupByState,
+}: {
+	title: string;
+	description?: string;
+	cafes: DomainCafeResponse[];
+	groupByState: boolean;
+}) {
+	if (groupByState) {
+		const byState = new Map<string, DomainCafeResponse[]>();
+		for (const cafe of cafes) {
+			const s = cafe.state ?? 'Other';
+			if (!byState.has(s)) byState.set(s, []);
+			byState.get(s)!.push(cafe);
+		}
+
+		return (
+			<section className="space-y-4">
+				<div>
+					<h2 className="text-xl font-semibold">{title}</h2>
+					{description && <p className="text-sm text-muted-foreground">{description}</p>}
+				</div>
+				{Array.from(byState.entries()).map(([stateKey, stateCafes]) => (
+					<div key={stateKey} className="space-y-3">
+						<h3 className="text-lg font-medium">{stateKey}</h3>
+						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+							{stateCafes.map((cafe) => (
+								<CafeCard key={cafe.id} cafe={cafe} />
+							))}
+						</div>
+					</div>
+				))}
+			</section>
+		);
+	}
+
+	return (
+		<section className="space-y-4">
+			<div>
+				<h2 className="text-xl font-semibold">{title}</h2>
+				{description && <p className="text-sm text-muted-foreground">{description}</p>}
+			</div>
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				{cafes.map((cafe) => (
+					<CafeCard key={cafe.id} cafe={cafe} />
+				))}
+			</div>
+		</section>
+	);
+}
+
+function CafeCard({ cafe }: { cafe: DomainCafeResponse }) {
 	return (
 		<Card className="shadow-sm transition-all hover:shadow-md hover:bg-muted/50">
 			<CardHeader>
@@ -74,6 +123,7 @@ function CafeCard({ cafe }: { cafe: NonNullable<DomainCafeListResponse['cafes']>
 			<CardContent className="space-y-2">
 				<div className="flex items-center gap-2">
 					{cafe.state && <Badge variant="secondary">{cafe.state}</Badge>}
+					{cafe.type === 'stockist' && <Badge variant="outline">Stockist</Badge>}
 					{cafe.suburb && <span className="text-sm text-muted-foreground">{cafe.suburb}</span>}
 				</div>
 				{cafe.address && <p className="text-sm text-muted-foreground">{cafe.address}</p>}

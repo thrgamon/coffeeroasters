@@ -40,6 +40,7 @@ const (
 type CafeConfig struct {
 	Slug     string `yaml:"slug"`
 	Name     string `yaml:"name"`
+	Type     string `yaml:"type,omitempty"` // owned (default) | stockist
 	Address  string `yaml:"address"`
 	Suburb   string `yaml:"suburb"`
 	State    string `yaml:"state"`
@@ -165,6 +166,7 @@ type CafeResponse struct {
 	RoasterSlug string   `json:"roaster_slug,omitempty"`
 	Slug        string   `json:"slug"`
 	Name        string   `json:"name"`
+	Type        string   `json:"type"`
 	Address     string   `json:"address,omitempty"`
 	Suburb      string   `json:"suburb,omitempty"`
 	State       string   `json:"state,omitempty"`

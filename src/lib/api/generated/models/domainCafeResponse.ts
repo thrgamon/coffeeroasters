@@ -12,6 +12,8 @@ export interface DomainCafeResponse {
   roaster_slug?: string;
   slug?: string;
   name?: string;
+  /** owned | stockist */
+  type?: string;
   address?: string;
   suburb?: string;
   state?: string;

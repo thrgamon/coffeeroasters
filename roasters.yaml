@@ -243,30 +243,12 @@ roasters:
     detail_selector: ".gbtr_product_description"
     active: true
     cafes:
-      - slug: small-batch-collingwood
-        name: Small Batch Collingwood
-        address: 195 Smith St, Collingwood VIC 3066
-        suburb: Collingwood
+      - slug: small-batch-roastery
+        name: Small Batch Roasting Co
+        address: 267 Johnston St, Abbotsford VIC 3067
+        suburb: Abbotsford
         state: VIC
-        postcode: "3066"
-      - slug: small-batch-prahran
-        name: Small Batch Chapel St
-        address: 377 Chapel St, South Yarra VIC 3141
-        suburb: South Yarra
-        state: VIC
-        postcode: "3141"
-      - slug: small-batch-lygon
-        name: Small Batch Lygon St
-        address: 677 Lygon St, Carlton North VIC 3054
-        suburb: Carlton North
-        state: VIC
-        postcode: "3054"
-      - slug: small-batch-flinders-lane
-        name: Small Batch Flinders Lane
-        address: 373 Flinders Ln, Melbourne VIC 3000
-        suburb: Melbourne
-        state: VIC
-        postcode: "3000"
+        postcode: "3067"
 
   # NSW
   - slug: little-marionette
