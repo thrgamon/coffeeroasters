@@ -11,6 +11,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Cafe struct {
+	ID         int32         `json:"id"`
+	RoasterID  int32         `json:"roaster_id"`
+	Slug       string        `json:"slug"`
+	Name       string        `json:"name"`
+	Address    pgtype.Text   `json:"address"`
+	Suburb     pgtype.Text   `json:"suburb"`
+	State      pgtype.Text   `json:"state"`
+	Postcode   pgtype.Text   `json:"postcode"`
+	Latitude   pgtype.Float8 `json:"latitude"`
+	Longitude  pgtype.Float8 `json:"longitude"`
+	Phone      pgtype.Text   `json:"phone"`
+	Instagram  pgtype.Text   `json:"instagram"`
+	WebsiteUrl pgtype.Text   `json:"website_url"`
+	ImageUrl   pgtype.Text   `json:"image_url"`
+	Active     bool          `json:"active"`
+	CreatedAt  time.Time     `json:"created_at"`
+	UpdatedAt  time.Time     `json:"updated_at"`
+}
+
 type BlendComponent struct {
 	ID          int32       `json:"id"`
 	CoffeeID    int32       `json:"coffee_id"`

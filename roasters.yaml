@@ -6,6 +6,25 @@ roasters:
     state: VIC
     fetch_method: shopify_json
     active: true
+    cafes:
+      - slug: seven-seeds-carlton
+        name: Seven Seeds
+        address: 114 Berkeley St, Carlton VIC 3053
+        suburb: Carlton
+        state: VIC
+        postcode: "3053"
+      - slug: brother-baba-budan
+        name: Brother Baba Budan
+        address: 359 Little Bourke St, Melbourne VIC 3000
+        suburb: Melbourne
+        state: VIC
+        postcode: "3000"
+      - slug: traveller
+        name: Traveller
+        address: 2/14 Crossley St, Melbourne VIC 3000
+        suburb: Melbourne
+        state: VIC
+        postcode: "3000"
 
   - slug: market-lane
     name: Market Lane
@@ -14,6 +33,37 @@ roasters:
     state: VIC
     fetch_method: html
     active: true
+    cafes:
+      - slug: market-lane-prahran
+        name: Market Lane Prahran Market
+        address: Prahran Market, 163 Commercial Rd, South Yarra VIC 3141
+        suburb: South Yarra
+        state: VIC
+        postcode: "3141"
+      - slug: market-lane-queen-vic
+        name: Market Lane Queen Victoria Market
+        address: Queen Victoria Market, String Bean Alley, Melbourne VIC 3000
+        suburb: Melbourne
+        state: VIC
+        postcode: "3000"
+      - slug: market-lane-carlton
+        name: Market Lane Carlton
+        address: 123-125 Faraday St, Carlton VIC 3053
+        suburb: Carlton
+        state: VIC
+        postcode: "3053"
+      - slug: market-lane-collins
+        name: Market Lane Collins St
+        address: 109 Collins St, Melbourne VIC 3000
+        suburb: Melbourne
+        state: VIC
+        postcode: "3000"
+      - slug: market-lane-south-melbourne
+        name: Market Lane South Melbourne Market
+        address: South Melbourne Market, 322-326 Coventry St, South Melbourne VIC 3205
+        suburb: South Melbourne
+        state: VIC
+        postcode: "3205"
 
   - slug: ona-coffee
     name: ONA Coffee
@@ -22,6 +72,19 @@ roasters:
     state: ACT
     fetch_method: shopify_json
     active: true
+    cafes:
+      - slug: ona-marylebone
+        name: ONA Marylebone
+        address: 6 Lonsdale St, Braddon ACT 2612
+        suburb: Braddon
+        state: ACT
+        postcode: "2612"
+      - slug: ona-fyshwick
+        name: ONA Fyshwick
+        address: 1/30 Geelong St, Fyshwick ACT 2609
+        suburb: Fyshwick
+        state: ACT
+        postcode: "2609"
 
   - slug: single-o
     name: Single O
@@ -30,6 +93,13 @@ roasters:
     state: NSW
     fetch_method: shopify_json
     active: true
+    cafes:
+      - slug: single-o-surry-hills
+        name: Single O Surry Hills
+        address: 60-64 Reservoir St, Surry Hills NSW 2010
+        suburb: Surry Hills
+        state: NSW
+        postcode: "2010"
 
   - slug: padre-coffee
     name: Padre Coffee
@@ -38,6 +108,19 @@ roasters:
     state: VIC
     fetch_method: shopify_json
     active: true
+    cafes:
+      - slug: padre-brunswick
+        name: Padre Brunswick
+        address: 438 Lygon St, Brunswick East VIC 3057
+        suburb: Brunswick East
+        state: VIC
+        postcode: "3057"
+      - slug: padre-cbd
+        name: Padre Melbourne CBD
+        address: 3/16-20 Russell Pl, Melbourne VIC 3000
+        suburb: Melbourne
+        state: VIC
+        postcode: "3000"
 
   - slug: proud-mary
     name: Proud Mary
@@ -46,6 +129,13 @@ roasters:
     state: VIC
     fetch_method: shopify_json
     active: true
+    cafes:
+      - slug: proud-mary-collingwood
+        name: Proud Mary Collingwood
+        address: 172 Oxford St, Collingwood VIC 3066
+        suburb: Collingwood
+        state: VIC
+        postcode: "3066"
 
   - slug: sample-coffee
     name: Sample Coffee
@@ -54,6 +144,13 @@ roasters:
     state: NSW
     fetch_method: shopify_json
     active: false  # products.json returns 500
+    cafes:
+      - slug: sample-coffee-st-peters
+        name: Sample Coffee St Peters
+        address: 118 Unwins Bridge Rd, St Peters NSW 2044
+        suburb: St Peters
+        state: NSW
+        postcode: "2044"
 
   - slug: dukes-coffee
     name: Dukes Coffee
@@ -62,6 +159,13 @@ roasters:
     state: VIC
     fetch_method: shopify_json
     active: false  # not on Shopify, returns HTML
+    cafes:
+      - slug: dukes-flinders-lane
+        name: Dukes Coffee Roasters
+        address: 247 Flinders Ln, Melbourne VIC 3000
+        suburb: Melbourne
+        state: VIC
+        postcode: "3000"
 
   - slug: small-batch
     name: Small Batch
@@ -72,6 +176,31 @@ roasters:
     content_selector: "li.product_item"
     detail_selector: ".gbtr_product_description"
     active: true
+    cafes:
+      - slug: small-batch-collingwood
+        name: Small Batch Collingwood
+        address: 195 Smith St, Collingwood VIC 3066
+        suburb: Collingwood
+        state: VIC
+        postcode: "3066"
+      - slug: small-batch-prahran
+        name: Small Batch Chapel St
+        address: 377 Chapel St, South Yarra VIC 3141
+        suburb: South Yarra
+        state: VIC
+        postcode: "3141"
+      - slug: small-batch-lygon
+        name: Small Batch Lygon St
+        address: 677 Lygon St, Carlton North VIC 3054
+        suburb: Carlton North
+        state: VIC
+        postcode: "3054"
+      - slug: small-batch-flinders-lane
+        name: Small Batch Flinders Lane
+        address: 373 Flinders Ln, Melbourne VIC 3000
+        suburb: Melbourne
+        state: VIC
+        postcode: "3000"
 
   # NSW
   - slug: little-marionette
@@ -97,6 +226,13 @@ roasters:
     state: NSW
     fetch_method: shopify_json
     active: true
+    cafes:
+      - slug: mecca-alexandria
+        name: Mecca Alexandria
+        address: 26 Bourke Rd, Alexandria NSW 2015
+        suburb: Alexandria
+        state: NSW
+        postcode: "2015"
 
   # QLD
   - slug: wolff-coffee

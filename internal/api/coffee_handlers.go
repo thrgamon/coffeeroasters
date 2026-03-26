@@ -105,6 +105,15 @@ func (h *Handler) GetRoaster(c *gin.Context) {
 		coffees = append(coffees, coffeeRowToResponse(row))
 	}
 
+	cafeRows, err := h.queries.ListCafesByRoaster(ctx, roaster.ID)
+	if err != nil {
+		cafeRows = nil // non-fatal
+	}
+	var cafes []domain.CafeResponse
+	for _, row := range cafeRows {
+		cafes = append(cafes, cafeByRoasterRowToResponse(row))
+	}
+
 	c.JSON(http.StatusOK, domain.RoasterDetailResponse{
 		Roaster: domain.RoasterResponse{
 			ID:      roaster.ID,
@@ -114,6 +123,7 @@ func (h *Handler) GetRoaster(c *gin.Context) {
 			State:   roaster.State.String,
 		},
 		Coffees: coffees,
+		Cafes:   cafes,
 	})
 }
 
@@ -475,6 +485,7 @@ func (h *Handler) GetStats(c *gin.Context) {
 
 	roasterCount, _ := h.queries.CountRoasters(ctx)
 	coffeeCount, _ := h.queries.CountCoffees(ctx)
+	cafeCount, _ := h.queries.CountCafes(ctx)
 	originRows, _ := h.queries.ListDistinctOrigins(ctx)
 
 	origins := make([]string, 0, len(originRows))
@@ -487,6 +498,7 @@ func (h *Handler) GetStats(c *gin.Context) {
 	c.JSON(http.StatusOK, domain.StatsResponse{
 		RoasterCount: roasterCount,
 		CoffeeCount:  coffeeCount,
+		CafeCount:    cafeCount,
 		Origins:      origins,
 	})
 }

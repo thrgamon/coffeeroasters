@@ -17,6 +17,7 @@ export default async function RoasterDetailPage({ params }: { params: Promise<{ 
 
 	const roaster = data.roaster;
 	const coffees = data.coffees ?? [];
+	const cafes = data.cafes ?? [];
 
 	return (
 		<div className="space-y-8">
@@ -39,6 +40,23 @@ export default async function RoasterDetailPage({ params }: { params: Promise<{ 
 					)}
 				</div>
 			</div>
+
+			{cafes.length > 0 && (
+				<section className="space-y-4">
+					<h2 className="text-xl font-semibold">
+						{cafes.length} cafe{cafes.length !== 1 ? 's' : ''}
+					</h2>
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{cafes.map((cafe) => (
+							<div key={cafe.id} className="rounded-lg border border-border p-4 space-y-1">
+								<p className="font-medium">{cafe.name}</p>
+								{cafe.address && <p className="text-sm text-muted-foreground">{cafe.address}</p>}
+								{cafe.phone && <p className="text-sm text-muted-foreground">{cafe.phone}</p>}
+							</div>
+						))}
+					</div>
+				</section>
+			)}
 
 			<section className="space-y-4">
 				<h2 className="text-xl font-semibold">
