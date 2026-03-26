@@ -90,6 +90,7 @@ WHERE r.opted_out = false
     AND (sqlc.narg('process')::text IS NULL OR c.process = sqlc.narg('process'))
     AND (sqlc.narg('roast')::text IS NULL OR c.roast_level = sqlc.narg('roast'))
     AND (sqlc.narg('variety')::text IS NULL OR c.variety = sqlc.narg('variety'))
+    AND (sqlc.narg('roaster_state')::text IS NULL OR r.state = sqlc.narg('roaster_state'))
 ORDER BY
     CASE WHEN sqlc.narg('query')::text IS NOT NULL
         THEN ts_rank(c.search_vector, plainto_tsquery('english', sqlc.narg('query')))

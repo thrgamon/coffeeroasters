@@ -566,22 +566,24 @@ WHERE r.opted_out = false
     AND ($3::text IS NULL OR c.process = $3)
     AND ($4::text IS NULL OR c.roast_level = $4)
     AND ($5::text IS NULL OR c.variety = $5)
+    AND ($6::text IS NULL OR r.state = $6)
 ORDER BY
     CASE WHEN $1::text IS NOT NULL
         THEN ts_rank(c.search_vector, plainto_tsquery('english', $1))
     END DESC NULLS LAST,
     c.name
-LIMIT $7 OFFSET $6
+LIMIT $8 OFFSET $7
 `
 
 type ListCoffeesFilteredParams struct {
-	Query   pgtype.Text `json:"query"`
-	Origin  pgtype.Text `json:"origin"`
-	Process pgtype.Text `json:"process"`
-	Roast   pgtype.Text `json:"roast"`
-	Variety pgtype.Text `json:"variety"`
-	Off     int32       `json:"off"`
-	Lim     int32       `json:"lim"`
+	Query        pgtype.Text `json:"query"`
+	Origin       pgtype.Text `json:"origin"`
+	Process      pgtype.Text `json:"process"`
+	Roast        pgtype.Text `json:"roast"`
+	Variety      pgtype.Text `json:"variety"`
+	RoasterState pgtype.Text `json:"roaster_state"`
+	Off          int32       `json:"off"`
+	Lim          int32       `json:"lim"`
 }
 
 type ListCoffeesFilteredRow struct {
@@ -621,6 +623,7 @@ func (q *Queries) ListCoffeesFiltered(ctx context.Context, arg ListCoffeesFilter
 		arg.Process,
 		arg.Roast,
 		arg.Variety,
+		arg.RoasterState,
 		arg.Off,
 		arg.Lim,
 	)
