@@ -10,6 +10,8 @@ import type { DomainCountryResponse } from '@/lib/api/generated/models';
 
 const PROCESSES = ['washed', 'natural', 'honey', 'anaerobic', 'wet-hulled', 'experimental'];
 const ROAST_LEVELS = ['light', 'medium-light', 'medium', 'medium-dark', 'dark'];
+const ROASTER_STATES = ['VIC', 'NSW', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'];
+
 const VARIETIES = [
 	'bourbon',
 	'typica',
@@ -44,6 +46,7 @@ export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 	const process = searchParams.get('process') ?? '';
 	const roast = searchParams.get('roast') ?? '';
 	const variety = searchParams.get('variety') ?? '';
+	const roasterState = searchParams.get('roaster_state') ?? '';
 
 	const updateParams = useCallback(
 		(key: string, value: string) => {
@@ -70,6 +73,7 @@ export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 	if (process) activeFilters.push({ key: 'process', label: `Process: ${process}` });
 	if (roast) activeFilters.push({ key: 'roast', label: `Roast: ${roast}` });
 	if (variety) activeFilters.push({ key: 'variety', label: `Variety: ${variety}` });
+	if (roasterState) activeFilters.push({ key: 'roaster_state', label: `Roaster location: ${roasterState}` });
 
 	return (
 		<div className="space-y-2">
@@ -128,6 +132,19 @@ export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 						{VARIETIES.map((v) => (
 							<SelectItem key={v} value={v}>
 								{v}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+				<Select value={roasterState || 'all'} onValueChange={(v) => updateParams('roaster_state', v === 'all' ? '' : v)}>
+					<SelectTrigger className="w-48">
+						<SelectValue placeholder="Roaster location" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">All locations</SelectItem>
+						{ROASTER_STATES.map((s) => (
+							<SelectItem key={s} value={s}>
+								{s}
 							</SelectItem>
 						))}
 					</SelectContent>

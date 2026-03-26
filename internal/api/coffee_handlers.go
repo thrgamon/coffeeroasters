@@ -126,6 +126,7 @@ func (h *Handler) GetRoaster(c *gin.Context) {
 // @Param process query string false "Filter by process"
 // @Param roast query string false "Filter by roast level"
 // @Param variety query string false "Filter by variety"
+// @Param roaster_state query string false "Filter by roaster AU state code (e.g. VIC, NSW)"
 // @Param similar_to query int false "Coffee ID to find similar coffees for"
 // @Param liked query string false "Comma-separated liked coffee IDs for recommendations"
 // @Param page query int false "Page number (default 1)"
@@ -147,6 +148,7 @@ func (h *Handler) ListCoffees(c *gin.Context) {
 	process := c.Query("process")
 	roast := c.Query("roast")
 	varietyFilter := c.Query("variety")
+	roasterState := c.Query("roaster_state")
 	similarToStr := c.Query("similar_to")
 
 	var resp domain.CoffeeListResponse
@@ -165,13 +167,14 @@ func (h *Handler) ListCoffees(c *gin.Context) {
 	}
 
 	rows, err := h.queries.ListCoffeesFiltered(ctx, db.ListCoffeesFilteredParams{
-		Query:   textPtr(q),
-		Origin:  textPtr(origin),
-		Process: textPtr(process),
-		Roast:   textPtr(roast),
-		Variety: textPtr(varietyFilter),
-		Lim:     int32(pageSize),
-		Off:     int32(offset),
+		Query:        textPtr(q),
+		Origin:       textPtr(origin),
+		Process:      textPtr(process),
+		Roast:        textPtr(roast),
+		Variety:      textPtr(varietyFilter),
+		RoasterState: textPtr(roasterState),
+		Lim:          int32(pageSize),
+		Off:          int32(offset),
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list coffees"})

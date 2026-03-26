@@ -25,6 +25,7 @@ export default async function CoffeesPage({ searchParams }: CoffeesPageProps) {
 	const process = typeof sp.process === 'string' ? sp.process : undefined;
 	const roast = typeof sp.roast === 'string' ? sp.roast : undefined;
 	const variety = typeof sp.variety === 'string' ? sp.variety : undefined;
+	const roasterState = typeof sp.roaster_state === 'string' ? sp.roaster_state : undefined;
 	const page = typeof sp.page === 'string' ? Number(sp.page) : 1;
 	const pageSize = 20;
 
@@ -39,6 +40,7 @@ export default async function CoffeesPage({ searchParams }: CoffeesPageProps) {
 		if (process) params.set('process', process);
 		if (roast) params.set('roast', roast);
 		if (variety) params.set('variety', variety);
+		if (roasterState) params.set('roaster_state', roasterState);
 	}
 
 	const [data, countries, sourceCoffee] = await Promise.all([
@@ -56,6 +58,7 @@ export default async function CoffeesPage({ searchParams }: CoffeesPageProps) {
 		if (process) next.set('process', process);
 		if (roast) next.set('roast', roast);
 		if (variety) next.set('variety', variety);
+		if (roasterState) next.set('roaster_state', roasterState);
 		if (similarTo) next.set('similar_to', similarTo);
 		if (p > 1) next.set('page', String(p));
 		const qs = next.toString();
