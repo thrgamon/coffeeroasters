@@ -36,6 +36,17 @@ const (
 	FetchHTMLDetail  FetchMethod = "html_detail"
 )
 
+// CafeConfig defines a cafe location from roasters.yaml.
+type CafeConfig struct {
+	Slug     string `yaml:"slug"`
+	Name     string `yaml:"name"`
+	Type     string `yaml:"type,omitempty"` // owned (default) | stockist
+	Address  string `yaml:"address"`
+	Suburb   string `yaml:"suburb"`
+	State    string `yaml:"state"`
+	Postcode string `yaml:"postcode"`
+}
+
 // RoasterConfig defines a roaster to scrape, loaded from roasters.yaml.
 type RoasterConfig struct {
 	Slug        string      `yaml:"slug"`
@@ -48,6 +59,7 @@ type RoasterConfig struct {
 	ContentSelector string      `yaml:"content_selector,omitempty"` // CSS selector for product listing area (HTML fetch)
 	DetailSelector  string      `yaml:"detail_selector,omitempty"`  // CSS selector for product detail content area (html_detail fetch)
 	Active          bool        `yaml:"active"`
+	Cafes           []CafeConfig `yaml:"cafes,omitempty"`
 }
 
 // RoastersFile is the top-level structure of roasters.yaml.
@@ -142,11 +154,44 @@ type RoasterListResponse struct {
 type RoasterDetailResponse struct {
 	Roaster RoasterResponse  `json:"roaster"`
 	Coffees []CoffeeResponse `json:"coffees"`
+	Cafes   []CafeResponse   `json:"cafes,omitempty"`
+}
+
+// --- Cafes ---
+
+type CafeResponse struct {
+	ID          int32    `json:"id"`
+	RoasterID   int32    `json:"roaster_id"`
+	RoasterName string   `json:"roaster_name,omitempty"`
+	RoasterSlug string   `json:"roaster_slug,omitempty"`
+	Slug        string   `json:"slug"`
+	Name        string   `json:"name"`
+	Type        string   `json:"type"`
+	Address     string   `json:"address,omitempty"`
+	Suburb      string   `json:"suburb,omitempty"`
+	State       string   `json:"state,omitempty"`
+	Postcode    string   `json:"postcode,omitempty"`
+	Latitude    *float64 `json:"latitude,omitempty"`
+	Longitude   *float64 `json:"longitude,omitempty"`
+	Phone       string   `json:"phone,omitempty"`
+	Instagram   string   `json:"instagram,omitempty"`
+	WebsiteURL  string   `json:"website_url,omitempty"`
+	ImageURL    string   `json:"image_url,omitempty"`
+}
+
+type CafeListResponse struct {
+	Cafes []CafeResponse `json:"cafes"`
+}
+
+type CafeDetailResponse struct {
+	CafeResponse
+	Coffees []CoffeeResponse `json:"coffees,omitempty"`
 }
 
 type StatsResponse struct {
 	RoasterCount int64    `json:"roaster_count"`
 	CoffeeCount  int64    `json:"coffee_count"`
+	CafeCount    int64    `json:"cafe_count"`
 	Origins      []string `json:"origins"`
 }
 

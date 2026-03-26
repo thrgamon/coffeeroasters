@@ -249,6 +249,26 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 		return fmt.Errorf("upsert roaster %s: %w", cfg.Slug, err)
 	}
 
+	// Upsert cafes from config
+	for _, cafe := range cfg.Cafes {
+		cafeType := cafe.Type
+		if cafeType == "" {
+			cafeType = "owned"
+		}
+		if _, err := r.queries.UpsertCafe(ctx, db.UpsertCafeParams{
+			RoasterID: roasterID,
+			Slug:      cafe.Slug,
+			Name:      cafe.Name,
+			Type:      cafeType,
+			Address:   textVal(cafe.Address),
+			Suburb:    textVal(cafe.Suburb),
+			State:     textVal(cafe.State),
+			Postcode:  textVal(cafe.Postcode),
+		}); err != nil {
+			slog.Warn("upsert cafe failed", "cafe", cafe.Slug, "error", err)
+		}
+	}
+
 	// Record scrape run
 	runID, err := r.queries.InsertScrapeRun(ctx, roasterID)
 	if err != nil {

@@ -4,10 +4,12 @@
  * Coffeeroasters API
  * OpenAPI spec version: 1.0
  */
+import type { DomainCafeResponse } from './domainCafeResponse';
 import type { DomainCoffeeResponse } from './domainCoffeeResponse';
 import type { DomainRoasterResponse } from './domainRoasterResponse';
 
 export interface DomainRoasterDetailResponse {
+  cafes?: DomainCafeResponse[];
   coffees?: DomainCoffeeResponse[];
   roaster?: DomainRoasterResponse;
 }

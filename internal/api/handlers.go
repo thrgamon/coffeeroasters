@@ -44,6 +44,8 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 	rg.GET("/roasters/:slug", h.GetRoaster)
 	rg.GET("/coffees", h.ListCoffees)
 	rg.GET("/coffees/:id", h.GetCoffee)
+	rg.GET("/cafes", h.ListCafes)
+	rg.GET("/cafes/:slug", h.GetCafe)
 	rg.GET("/stats", h.GetStats)
 	rg.GET("/countries", h.ListCountries)
 	rg.GET("/countries/:code", h.GetCountry)

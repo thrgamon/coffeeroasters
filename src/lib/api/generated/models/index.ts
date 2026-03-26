@@ -6,6 +6,8 @@
  */
 
 export * from './domainAuthResponse';
+export * from './domainCafeListResponse';
+export * from './domainCafeResponse';
 export * from './domainBlendComponentResponse';
 export * from './domainCoffeeDetailResponse';
 export * from './domainCoffeeListResponse';
