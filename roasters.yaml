@@ -25,6 +25,12 @@ roasters:
         suburb: Melbourne
         state: VIC
         postcode: "3000"
+      - slug: suburbia-bakery
+        name: Suburbia Bakery
+        address: 179 Grange Rd, Fairfield VIC 3078
+        suburb: Fairfield
+        state: VIC
+        postcode: "3078"
 
   - slug: market-lane
     name: Market Lane
@@ -34,36 +40,66 @@ roasters:
     fetch_method: html
     active: true
     cafes:
-      - slug: market-lane-prahran
-        name: Market Lane Prahran Market
-        address: Prahran Market, 163 Commercial Rd, South Yarra VIC 3141
-        suburb: South Yarra
+      - slug: market-lane-mitchell-house
+        name: Market Lane Mitchell House
+        address: 356 Lonsdale St, Melbourne VIC 3000
+        suburb: Melbourne
         state: VIC
-        postcode: "3141"
-      - slug: market-lane-queen-vic
-        name: Market Lane Queen Victoria Market
-        address: Queen Victoria Market, String Bean Alley, Melbourne VIC 3000
+        postcode: "3000"
+      - slug: market-lane-collins
+        name: Market Lane Collins St
+        address: 8 Collins St, Melbourne VIC 3000
         suburb: Melbourne
         state: VIC
         postcode: "3000"
       - slug: market-lane-carlton
         name: Market Lane Carlton
-        address: 123-125 Faraday St, Carlton VIC 3053
+        address: 176 Faraday St, Carlton VIC 3053
         suburb: Carlton
         state: VIC
         postcode: "3053"
-      - slug: market-lane-collins
-        name: Market Lane Collins St
-        address: 109 Collins St, Melbourne VIC 3000
-        suburb: Melbourne
+      - slug: market-lane-brunswick
+        name: Market Lane Brunswick
+        address: 383 Sydney Rd, Brunswick VIC 3056
+        suburb: Brunswick
         state: VIC
-        postcode: "3000"
+        postcode: "3056"
       - slug: market-lane-south-melbourne
-        name: Market Lane South Melbourne Market
-        address: South Melbourne Market, 322-326 Coventry St, South Melbourne VIC 3205
+        name: Market Lane South Melbourne
+        address: 305 Coventry St, South Melbourne VIC 3205
         suburb: South Melbourne
         state: VIC
         postcode: "3205"
+      - slug: market-lane-prahran-cafe
+        name: Market Lane Prahran Market Cafe
+        address: Shop 13, 163 Commercial Rd, South Yarra VIC 3141
+        suburb: South Yarra
+        state: VIC
+        postcode: "3141"
+      - slug: market-lane-prahran-stall
+        name: Market Lane Prahran Market Stall
+        address: Stall 108, 163 Commercial Rd, South Yarra VIC 3141
+        suburb: South Yarra
+        state: VIC
+        postcode: "3141"
+      - slug: market-lane-qvm-dairy-hall
+        name: Market Lane QVM Dairy Hall
+        address: Shops 73-76, Queen Victoria Market, Melbourne VIC 3000
+        suburb: Melbourne
+        state: VIC
+        postcode: "3000"
+      - slug: market-lane-qvm-victoria
+        name: Market Lane QVM Victoria St
+        address: 83-85 Victoria St, Melbourne VIC 3000
+        suburb: Melbourne
+        state: VIC
+        postcode: "3000"
+      - slug: market-lane-qvm-queen
+        name: Market Lane QVM Queen St
+        address: 462 Queen St, Melbourne VIC 3000
+        suburb: Melbourne
+        state: VIC
+        postcode: "3000"
 
   - slug: ona-coffee
     name: ONA Coffee
@@ -100,6 +136,12 @@ roasters:
         suburb: Surry Hills
         state: NSW
         postcode: "2010"
+      - slug: single-o-newstead
+        name: Single O Newstead
+        address: 16 Austin St, Newstead QLD 4006
+        suburb: Newstead
+        state: QLD
+        postcode: "4006"
 
   - slug: padre-coffee
     name: Padre Coffee
@@ -109,18 +151,36 @@ roasters:
     fetch_method: shopify_json
     active: true
     cafes:
+      - slug: padre-fitzroy
+        name: Padre St David Dairy
+        address: 16-18 St David St, Fitzroy VIC 3065
+        suburb: Fitzroy
+        state: VIC
+        postcode: "3065"
       - slug: padre-brunswick
-        name: Padre Brunswick
-        address: 438 Lygon St, Brunswick East VIC 3057
+        name: Padre Brunswick East
+        address: 438-440 Lygon St, Brunswick East VIC 3057
         suburb: Brunswick East
         state: VIC
         postcode: "3057"
-      - slug: padre-cbd
-        name: Padre Melbourne CBD
-        address: 3/16-20 Russell Pl, Melbourne VIC 3000
-        suburb: Melbourne
+      - slug: padre-south-melbourne
+        name: Padre South Melbourne Market
+        address: Stall 33, South Melbourne Market, South Melbourne VIC 3205
+        suburb: South Melbourne
         state: VIC
-        postcode: "3000"
+        postcode: "3205"
+      - slug: padre-noosa
+        name: Padre Noosa
+        address: 10 Eenie Creek Rd, Noosaville QLD 4566
+        suburb: Noosaville
+        state: QLD
+        postcode: "4566"
+      - slug: padre-paddington
+        name: Padre Paddington
+        address: 241A Glenmore Rd, Paddington NSW 2021
+        suburb: Paddington
+        state: NSW
+        postcode: "2021"
 
   - slug: proud-mary
     name: Proud Mary
@@ -131,8 +191,14 @@ roasters:
     active: true
     cafes:
       - slug: proud-mary-collingwood
-        name: Proud Mary Collingwood
+        name: Proud Mary
         address: 172 Oxford St, Collingwood VIC 3066
+        suburb: Collingwood
+        state: VIC
+        postcode: "3066"
+      - slug: aunty-pegs
+        name: Aunty Peg's
+        address: 5 Vere St, Collingwood VIC 3066
         suburb: Collingwood
         state: VIC
         postcode: "3066"
@@ -233,6 +299,12 @@ roasters:
         suburb: Alexandria
         state: NSW
         postcode: "2015"
+      - slug: mecca-paddington
+        name: Mecca Paddington
+        address: 4/2-16 Glenmore Rd, Paddington NSW 2021
+        suburb: Paddington
+        state: NSW
+        postcode: "2021"
 
   # QLD
   - slug: wolff-coffee
