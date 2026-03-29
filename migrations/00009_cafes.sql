@@ -1,3 +1,4 @@
+-- +goose Up
 -- Cafes: physical cafe locations associated with roasters
 -- type: 'owned' = run by the roaster, 'stockist' = independently run, serves the roaster's coffee
 CREATE TABLE cafes (
@@ -28,3 +29,11 @@ CREATE INDEX idx_cafes_state ON cafes(state) WHERE state IS NOT NULL;
 CREATE INDEX idx_cafes_active ON cafes(active) WHERE active = true;
 CREATE INDEX idx_cafes_slug ON cafes(slug);
 CREATE INDEX idx_cafes_type ON cafes(type);
+
+-- +goose Down
+DROP INDEX IF EXISTS idx_cafes_type;
+DROP INDEX IF EXISTS idx_cafes_slug;
+DROP INDEX IF EXISTS idx_cafes_active;
+DROP INDEX IF EXISTS idx_cafes_state;
+DROP INDEX IF EXISTS idx_cafes_roaster;
+DROP TABLE IF EXISTS cafes;
