@@ -21,7 +21,7 @@ import type {
 } from '.././models';
 
 
-export const getGetApiStatsResponseMock = (overrideResponse: Partial< DomainStatsResponse > = {}): DomainStatsResponse => ({coffee_count: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), origins: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined]), roaster_count: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getGetApiStatsResponseMock = (overrideResponse: Partial< DomainStatsResponse > = {}): DomainStatsResponse => ({cafe_count: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), coffee_count: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), origins: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined]), roaster_count: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
 
 export const getGetApiStatsMockHandler = (overrideResponse?: DomainStatsResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<DomainStatsResponse> | DomainStatsResponse), options?: RequestHandlerOptions) => {

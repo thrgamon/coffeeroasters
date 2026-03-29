@@ -6,9 +6,10 @@
  */
 
 export * from './domainAuthResponse';
+export * from './domainBlendComponentResponse';
+export * from './domainCafeDetailResponse';
 export * from './domainCafeListResponse';
 export * from './domainCafeResponse';
-export * from './domainBlendComponentResponse';
 export * from './domainCoffeeDetailResponse';
 export * from './domainCoffeeListResponse';
 export * from './domainCoffeeResponse';
@@ -29,6 +30,8 @@ export * from './domainSimilarCoffee';
 export * from './domainStatsResponse';
 export * from './domainUserResponse';
 export * from './getApiAuthMe401';
+export * from './getApiCafesParams';
+export * from './getApiCafesSlug404';
 export * from './getApiCoffeesId404';
 export * from './getApiCoffeesParams';
 export * from './getApiCountriesCode404';

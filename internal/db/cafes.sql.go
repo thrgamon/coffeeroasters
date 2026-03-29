@@ -144,6 +144,66 @@ func (q *Queries) ListCafes(ctx context.Context) ([]ListCafesRow, error) {
 	return items, nil
 }
 
+const listCafesByRoaster = `-- name: ListCafesByRoaster :many
+SELECT c.id, c.slug, c.name, c.type, c.address, c.suburb, c.state, c.postcode,
+       c.latitude, c.longitude, c.phone, c.instagram, c.website_url, c.image_url
+FROM cafes c
+WHERE c.roaster_id = $1 AND c.active = true
+ORDER BY c.type, c.name
+`
+
+type ListCafesByRoasterRow struct {
+	ID         int32         `json:"id"`
+	Slug       string        `json:"slug"`
+	Name       string        `json:"name"`
+	Type       string        `json:"type"`
+	Address    pgtype.Text   `json:"address"`
+	Suburb     pgtype.Text   `json:"suburb"`
+	State      pgtype.Text   `json:"state"`
+	Postcode   pgtype.Text   `json:"postcode"`
+	Latitude   pgtype.Float8 `json:"latitude"`
+	Longitude  pgtype.Float8 `json:"longitude"`
+	Phone      pgtype.Text   `json:"phone"`
+	Instagram  pgtype.Text   `json:"instagram"`
+	WebsiteUrl pgtype.Text   `json:"website_url"`
+	ImageUrl   pgtype.Text   `json:"image_url"`
+}
+
+func (q *Queries) ListCafesByRoaster(ctx context.Context, roasterID int32) ([]ListCafesByRoasterRow, error) {
+	rows, err := q.db.Query(ctx, listCafesByRoaster, roasterID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListCafesByRoasterRow{}
+	for rows.Next() {
+		var i ListCafesByRoasterRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Slug,
+			&i.Name,
+			&i.Type,
+			&i.Address,
+			&i.Suburb,
+			&i.State,
+			&i.Postcode,
+			&i.Latitude,
+			&i.Longitude,
+			&i.Phone,
+			&i.Instagram,
+			&i.WebsiteUrl,
+			&i.ImageUrl,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listCafesByState = `-- name: ListCafesByState :many
 SELECT c.id, c.slug, c.name, c.type, c.address, c.suburb, c.state, c.postcode,
        c.latitude, c.longitude, c.phone, c.instagram, c.website_url, c.image_url,
@@ -201,66 +261,6 @@ func (q *Queries) ListCafesByState(ctx context.Context, state pgtype.Text) ([]Li
 			&i.RoasterID,
 			&i.RoasterName,
 			&i.RoasterSlug,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listCafesByRoaster = `-- name: ListCafesByRoaster :many
-SELECT c.id, c.slug, c.name, c.type, c.address, c.suburb, c.state, c.postcode,
-       c.latitude, c.longitude, c.phone, c.instagram, c.website_url, c.image_url
-FROM cafes c
-WHERE c.roaster_id = $1 AND c.active = true
-ORDER BY c.type, c.name
-`
-
-type ListCafesByRoasterRow struct {
-	ID         int32         `json:"id"`
-	Slug       string        `json:"slug"`
-	Name       string        `json:"name"`
-	Type       string        `json:"type"`
-	Address    pgtype.Text   `json:"address"`
-	Suburb     pgtype.Text   `json:"suburb"`
-	State      pgtype.Text   `json:"state"`
-	Postcode   pgtype.Text   `json:"postcode"`
-	Latitude   pgtype.Float8 `json:"latitude"`
-	Longitude  pgtype.Float8 `json:"longitude"`
-	Phone      pgtype.Text   `json:"phone"`
-	Instagram  pgtype.Text   `json:"instagram"`
-	WebsiteUrl pgtype.Text   `json:"website_url"`
-	ImageUrl   pgtype.Text   `json:"image_url"`
-}
-
-func (q *Queries) ListCafesByRoaster(ctx context.Context, roasterID int32) ([]ListCafesByRoasterRow, error) {
-	rows, err := q.db.Query(ctx, listCafesByRoaster, roasterID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []ListCafesByRoasterRow{}
-	for rows.Next() {
-		var i ListCafesByRoasterRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.Slug,
-			&i.Name,
-			&i.Type,
-			&i.Address,
-			&i.Suburb,
-			&i.State,
-			&i.Postcode,
-			&i.Latitude,
-			&i.Longitude,
-			&i.Phone,
-			&i.Instagram,
-			&i.WebsiteUrl,
-			&i.ImageUrl,
 		); err != nil {
 			return nil, err
 		}

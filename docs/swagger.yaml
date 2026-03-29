@@ -22,6 +22,91 @@ definitions:
       variety:
         type: string
     type: object
+  domain.CafeDetailResponse:
+    properties:
+      address:
+        type: string
+      coffees:
+        items:
+          $ref: '#/definitions/domain.CoffeeResponse'
+        type: array
+      id:
+        type: integer
+      image_url:
+        type: string
+      instagram:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      phone:
+        type: string
+      postcode:
+        type: string
+      roaster_id:
+        type: integer
+      roaster_name:
+        type: string
+      roaster_slug:
+        type: string
+      slug:
+        type: string
+      state:
+        type: string
+      suburb:
+        type: string
+      type:
+        type: string
+      website_url:
+        type: string
+    type: object
+  domain.CafeListResponse:
+    properties:
+      cafes:
+        items:
+          $ref: '#/definitions/domain.CafeResponse'
+        type: array
+    type: object
+  domain.CafeResponse:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      instagram:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      phone:
+        type: string
+      postcode:
+        type: string
+      roaster_id:
+        type: integer
+      roaster_name:
+        type: string
+      roaster_slug:
+        type: string
+      slug:
+        type: string
+      state:
+        type: string
+      suburb:
+        type: string
+      type:
+        type: string
+      website_url:
+        type: string
+    type: object
   domain.CoffeeDetailResponse:
     properties:
       blend_components:
@@ -280,6 +365,10 @@ definitions:
     type: object
   domain.RoasterDetailResponse:
     properties:
+      cafes:
+        items:
+          $ref: '#/definitions/domain.CafeResponse'
+        type: array
       coffees:
         items:
           $ref: '#/definitions/domain.CoffeeResponse'
@@ -340,6 +429,8 @@ definitions:
     type: object
   domain.StatsResponse:
     properties:
+      cafe_count:
+        type: integer
       coffee_count:
         type: integer
       origins:
@@ -445,6 +536,47 @@ paths:
       summary: Register a new user
       tags:
       - auth
+  /api/cafes:
+    get:
+      parameters:
+      - description: Filter by AU state code (e.g. VIC, NSW)
+        in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.CafeListResponse'
+      summary: List all active cafes
+      tags:
+      - cafes
+  /api/cafes/{slug}:
+    get:
+      parameters:
+      - description: Cafe slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.CafeDetailResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a cafe by slug
+      tags:
+      - cafes
   /api/coffees:
     get:
       parameters:
@@ -467,6 +599,10 @@ paths:
       - description: Filter by variety
         in: query
         name: variety
+        type: string
+      - description: Filter by roaster AU state code (e.g. VIC, NSW)
+        in: query
+        name: roaster_state
         type: string
       - description: Coffee ID to find similar coffees for
         in: query

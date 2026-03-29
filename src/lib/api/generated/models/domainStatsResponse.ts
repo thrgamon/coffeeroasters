@@ -6,6 +6,7 @@
  */
 
 export interface DomainStatsResponse {
+  cafe_count?: number;
   coffee_count?: number;
   origins?: string[];
   roaster_count?: number;

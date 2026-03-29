@@ -136,7 +136,10 @@ export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 						))}
 					</SelectContent>
 				</Select>
-				<Select value={roasterState || 'all'} onValueChange={(v) => updateParams('roaster_state', v === 'all' ? '' : v)}>
+				<Select
+					value={roasterState || 'all'}
+					onValueChange={(v) => updateParams('roaster_state', v === 'all' ? '' : v)}
+				>
 					<SelectTrigger className="w-48">
 						<SelectValue placeholder="Roaster location" />
 					</SelectTrigger>

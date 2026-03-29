@@ -140,6 +140,70 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/cafes": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cafes"
+                ],
+                "summary": "List all active cafes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by AU state code (e.g. VIC, NSW)",
+                        "name": "state",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.CafeListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/cafes/{slug}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cafes"
+                ],
+                "summary": "Get a cafe by slug",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Cafe slug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.CafeDetailResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/coffees": {
             "get": {
                 "produces": [
@@ -178,6 +242,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Filter by variety",
                         "name": "variety",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by roaster AU state code (e.g. VIC, NSW)",
+                        "name": "roaster_state",
                         "in": "query"
                     },
                     {
@@ -550,6 +620,135 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "variety": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.CafeDetailResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "coffees": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.CoffeeResponse"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "instagram": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "postcode": {
+                    "type": "string"
+                },
+                "roaster_id": {
+                    "type": "integer"
+                },
+                "roaster_name": {
+                    "type": "string"
+                },
+                "roaster_slug": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "suburb": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "website_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.CafeListResponse": {
+            "type": "object",
+            "properties": {
+                "cafes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.CafeResponse"
+                    }
+                }
+            }
+        },
+        "domain.CafeResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "instagram": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "postcode": {
+                    "type": "string"
+                },
+                "roaster_id": {
+                    "type": "integer"
+                },
+                "roaster_name": {
+                    "type": "string"
+                },
+                "roaster_slug": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "suburb": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "website_url": {
                     "type": "string"
                 }
             }
@@ -946,6 +1145,12 @@ const docTemplate = `{
         "domain.RoasterDetailResponse": {
             "type": "object",
             "properties": {
+                "cafes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.CafeResponse"
+                    }
+                },
                 "coffees": {
                     "type": "array",
                     "items": {
@@ -1038,6 +1243,9 @@ const docTemplate = `{
         "domain.StatsResponse": {
             "type": "object",
             "properties": {
+                "cafe_count": {
+                    "type": "integer"
+                },
                 "coffee_count": {
                     "type": "integer"
                 },

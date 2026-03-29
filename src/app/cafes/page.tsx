@@ -38,11 +38,7 @@ export default async function CafesPage({ searchParams }: CafesPageProps) {
 			{allCafes.length > 0 ? (
 				<>
 					{ownedCafes.length > 0 && (
-						<CafeSection
-							title="Roaster-owned cafes"
-							cafes={ownedCafes}
-							groupByState={!state}
-						/>
+						<CafeSection title="Roaster-owned cafes" cafes={ownedCafes} groupByState={!state} />
 					)}
 					{stockistCafes.length > 0 && (
 						<CafeSection
@@ -76,7 +72,7 @@ function CafeSection({
 		for (const cafe of cafes) {
 			const s = cafe.state ?? 'Other';
 			if (!byState.has(s)) byState.set(s, []);
-			byState.get(s)!.push(cafe);
+			byState.get(s)?.push(cafe);
 		}
 
 		return (

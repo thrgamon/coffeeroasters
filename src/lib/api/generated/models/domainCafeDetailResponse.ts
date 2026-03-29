@@ -4,9 +4,11 @@
  * Coffeeroasters API
  * OpenAPI spec version: 1.0
  */
+import type { DomainCoffeeResponse } from './domainCoffeeResponse';
 
-export interface DomainCafeResponse {
+export interface DomainCafeDetailResponse {
   address?: string;
+  coffees?: DomainCoffeeResponse[];
   id?: number;
   image_url?: string;
   instagram?: string;

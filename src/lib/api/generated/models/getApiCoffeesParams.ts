@@ -27,6 +27,10 @@ roast?: string;
  */
 variety?: string;
 /**
+ * Filter by roaster AU state code (e.g. VIC, NSW)
+ */
+roaster_state?: string;
+/**
  * Coffee ID to find similar coffees for
  */
 similar_to?: number;

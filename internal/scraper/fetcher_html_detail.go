@@ -68,7 +68,7 @@ func extractProductURLs(ctx context.Context, cfg domain.RoasterConfig, client *h
 	if err != nil {
 		return nil, fmt.Errorf("GET %s: %w", cfg.ShopURL, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("GET %s: status %d", cfg.ShopURL, resp.StatusCode)
@@ -148,7 +148,7 @@ func fetchAndExtractProduct(ctx context.Context, cfg domain.RoasterConfig, clien
 	if err != nil {
 		return nil, fmt.Errorf("GET %s: %w", productURL, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("GET %s: status %d", productURL, resp.StatusCode)

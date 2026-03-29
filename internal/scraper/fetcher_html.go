@@ -29,7 +29,7 @@ func FetchHTMLPage(ctx context.Context, cfg domain.RoasterConfig, client *http.C
 	if err != nil {
 		return nil, fmt.Errorf("GET %s: %w", cfg.ShopURL, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("GET %s: status %d", cfg.ShopURL, resp.StatusCode)
