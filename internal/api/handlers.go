@@ -55,7 +55,7 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 	rg.GET("/producers/:id", h.GetProducer)
 
 	// Tasting note votes: public read (with optional auth enrichment), protected write
-	rg.GET("/coffees/:coffee_id/tasting-notes", h.OptionalAuth, h.GetTastingNoteVotes)
+	rg.GET("/coffees/:id/tasting-notes", h.OptionalAuth, h.GetTastingNoteVotes)
 
 	protected := rg.Group("")
 	protected.Use(auth.RequireAuth(h.auth))

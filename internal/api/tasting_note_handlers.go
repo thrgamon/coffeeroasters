@@ -82,7 +82,7 @@ func (h *Handler) RemoveTastingNoteVote(c *gin.Context) {
 // GetTastingNoteVotes returns crowdsourced tasting notes for a coffee, plus the
 // current user's votes if authenticated.
 func (h *Handler) GetTastingNoteVotes(c *gin.Context) {
-	coffeeID, err := strconv.ParseInt(c.Param("coffee_id"), 10, 64)
+	coffeeID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid coffee_id"})
 		return
