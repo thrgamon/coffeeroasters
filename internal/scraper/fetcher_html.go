@@ -70,6 +70,11 @@ func FetchHTMLPage(ctx context.Context, cfg domain.RoasterConfig, client *http.C
 		if !p.IsCoffee {
 			continue
 		}
+		if isExcludedByKeyword(p.Name) {
+			slog.Debug("excluded by keyword filter", "name", p.Name, "roaster", cfg.Slug)
+			skipped++
+			continue
+		}
 		raw := RawCoffee{
 			Name:      p.Name,
 			InStock:   p.InStock,

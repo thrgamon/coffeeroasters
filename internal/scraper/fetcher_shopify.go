@@ -191,6 +191,10 @@ func FetchShopify(ctx context.Context, cfg domain.RoasterConfig, client *http.Cl
 			if !ep.IsCoffee {
 				continue
 			}
+			if isExcludedByKeyword(ep.Name) {
+				slog.Debug("excluded by keyword filter", "name", ep.Name, "roaster", cfg.Slug)
+				continue
+			}
 			sp := batch[ep.Index]
 
 			raw := shopifyJSONFields(cfg, sp, hashBody(sp.BodyHTML))

@@ -180,6 +180,11 @@ func fetchAndExtractProduct(ctx context.Context, cfg domain.RoasterConfig, clien
 		return nil, nil
 	}
 
+	if product != nil && isExcludedByKeyword(product.Name) {
+		slog.Debug("excluded by keyword filter", "name", product.Name, "roaster", cfg.Slug, "url", productURL)
+		return nil, nil
+	}
+
 	raw := RawCoffee{
 		Name:       product.Name,
 		ProductURL: productURL,

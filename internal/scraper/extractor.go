@@ -42,7 +42,7 @@ type BlendComponent struct {
 // corresponds to the position in the input descriptions array.
 type BatchProduct struct {
 	Index           int              `json:"index" jsonschema:"description=Zero-based index matching the input description array"`
-	IsCoffee        bool             `json:"is_coffee" jsonschema:"description=True only if this is a single purchasable bag of coffee beans or ground coffee. False for subscriptions and recurring plans and sample packs and bundles and gift cards and equipment and merchandise and tea and vouchers and courses and accessories."`
+	IsCoffee        bool             `json:"is_coffee" jsonschema:"description=True only if this is a single purchasable bag of whole coffee beans. False for ground coffee, drip bags, instant coffee, cold brew, ready-to-drink, concentrates, capsules, pods, subscriptions, recurring plans, sample packs, bundles, gift cards, equipment, merchandise, apparel, tea, chocolate, vouchers, courses, and accessories."`
 	Name            string           `json:"name" jsonschema:"description=Product name"`
 	Origin          *string          `json:"origin" jsonschema:"description=Country or region of origin. Null if not stated. For blends with multiple origins use the blend_components array instead."`
 	Region          *string          `json:"region" jsonschema:"description=Specific growing region. Null if not stated."`
@@ -65,7 +65,7 @@ type PageExtraction struct {
 // PageProduct extends CoffeeProduct with pricing and URL data that must
 // be extracted from the HTML (since there is no Shopify JSON to provide it).
 type PageProduct struct {
-	IsCoffee        bool             `json:"is_coffee" jsonschema:"description=True only if this is a single purchasable bag of coffee beans or ground coffee. False for subscriptions and recurring plans and sample packs and bundles and gift cards and equipment and merchandise and tea and vouchers and courses and accessories."`
+	IsCoffee        bool             `json:"is_coffee" jsonschema:"description=True only if this is a single purchasable bag of whole coffee beans. False for ground coffee, drip bags, instant coffee, cold brew, ready-to-drink, concentrates, capsules, pods, subscriptions, recurring plans, sample packs, bundles, gift cards, equipment, merchandise, apparel, tea, chocolate, vouchers, courses, and accessories."`
 	Name            string           `json:"name" jsonschema:"description=Product name"`
 	Origin          *string          `json:"origin" jsonschema:"description=Country or region of origin. Null if not stated. For blends with multiple origins use the blend_components array instead."`
 	Region          *string          `json:"region" jsonschema:"description=Specific growing region. Null if not stated."`
@@ -105,8 +105,8 @@ func NewExtractor(client *openai.Client) *Extractor {
 
 const batchSystemPrompt = `You extract coffee product information from Australian specialty coffee roaster websites.
 
-Only extract products that are a single purchasable bag of coffee beans or ground coffee.
-Set is_coffee=true for these. Set is_coffee=false for everything else including: subscriptions, recurring plans, sample packs, mixed bundles, gift cards, equipment, merchandise, apparel, tea, chocolate, vouchers, accessories, cleaning products, courses, drip bags, and pods.
+Only extract products that are a single purchasable bag of whole coffee beans.
+Set is_coffee=true for these. Set is_coffee=false for everything else including: ground coffee, pre-ground coffee, drip bags, instant coffee, cold brew, ready-to-drink beverages, coffee concentrates, capsules, pods, subscriptions, recurring plans, sample packs, mixed bundles, gift cards, equipment, grinders, merchandise, apparel, tea, chocolate, vouchers, accessories, cleaning products, and courses.
 
 For each coffee product, extract:
 - name: the product name
@@ -147,8 +147,8 @@ For the coffee product on this page, extract:
 - blend_components: for blends, list each origin component with country, region, variety, and percentage if stated
 
 Use null for any field where the information is not clearly stated. Do not guess.
-Only extract if this is a single purchasable bag of coffee beans or ground coffee. Set is_coffee=true for these.
-Set is_coffee=false for everything else: subscriptions, recurring plans, sample packs, mixed bundles, gift cards, equipment, merchandise, tea, vouchers, accessories, pods, and drip bags.`
+Only extract if this is a single purchasable bag of whole coffee beans. Set is_coffee=true for these.
+Set is_coffee=false for everything else: ground coffee, pre-ground coffee, drip bags, instant coffee, cold brew, ready-to-drink beverages, coffee concentrates, capsules, pods, subscriptions, recurring plans, sample packs, mixed bundles, gift cards, equipment, grinders, merchandise, apparel, tea, chocolate, vouchers, accessories, cleaning products, and courses.`
 
 const pageSystemPrompt = `You extract coffee product listings from Australian specialty coffee roaster web pages.
 
@@ -166,8 +166,8 @@ For each coffee product you find on the page, extract:
 For blends, leave the top-level origin field null and populate blend_components instead.
 
 Use null for any field where the information is not clearly stated. Do not guess.
-Only extract products that are a single purchasable bag of coffee beans or ground coffee. Set is_coffee=true for these.
-Set is_coffee=false for everything else: subscriptions, recurring plans, sample packs, mixed bundles, gift cards, equipment, merchandise, tea, vouchers, accessories, pods, and drip bags.`
+Only extract products that are a single purchasable bag of whole coffee beans. Set is_coffee=true for these.
+Set is_coffee=false for everything else: ground coffee, pre-ground coffee, drip bags, instant coffee, cold brew, ready-to-drink beverages, coffee concentrates, capsules, pods, subscriptions, recurring plans, sample packs, mixed bundles, gift cards, equipment, grinders, merchandise, apparel, tea, chocolate, vouchers, accessories, cleaning products, and courses.`
 
 // ExtractFromDescriptions sends a batch of Shopify product descriptions to
 // GPT-4.1-mini and returns structured coffee data for each.
