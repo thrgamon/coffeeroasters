@@ -201,9 +201,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 				</div>
 			</div>
 
-			{coffee.id && (
-				<BrewRecipes coffeeId={coffee.id} brewRecipeRaw={coffee.brew_recipe_raw} />
-			)}
+			{coffee.id && <BrewRecipes coffeeId={coffee.id} brewRecipeRaw={coffee.brew_recipe_raw} />}
 
 			{coffee.similar_coffees && coffee.similar_coffees.length > 0 && (
 				<div className="space-y-3">

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -36,7 +37,7 @@ func (h *Handler) CreateBrewRecipe(c *gin.Context) {
 		UserID:          userID,
 		Title:           req.Title,
 		BrewMethod:      req.BrewMethod,
-		DoseGrams:       float8Val(req.DoseGrams),
+		DoseGrams:       numericVal(req.DoseGrams),
 		WaterMl:         int4PtrVal(req.WaterMl),
 		WaterTempC:      int4PtrVal(req.WaterTempC),
 		GrindSize:       textPtrVal(req.GrindSize),
@@ -81,7 +82,7 @@ func (h *Handler) UpdateBrewRecipe(c *gin.Context) {
 		UserID:          userID,
 		Title:           req.Title,
 		BrewMethod:      req.BrewMethod,
-		DoseGrams:       float8Val(req.DoseGrams),
+		DoseGrams:       numericVal(req.DoseGrams),
 		WaterMl:         int4PtrVal(req.WaterMl),
 		WaterTempC:      int4PtrVal(req.WaterTempC),
 		GrindSize:       textPtrVal(req.GrindSize),
@@ -186,7 +187,7 @@ func brewRecipeToResponse(r db.BrewRecipe) domain.BrewRecipeResponse {
 		UpdatedAt:  r.UpdatedAt.Format(time.RFC3339),
 	}
 	if r.DoseGrams.Valid {
-		resp.DoseGrams = &r.DoseGrams.Float64
+		resp.DoseGrams = numericToFloat64Ptr(r.DoseGrams)
 	}
 	if r.WaterMl.Valid {
 		v := r.WaterMl.Int32
@@ -222,7 +223,7 @@ func brewRecipeByCoffeeRowToResponse(row db.ListBrewRecipesByCoffeeRow) domain.B
 		UpdatedAt:  row.UpdatedAt.Format(time.RFC3339),
 	}
 	if row.DoseGrams.Valid {
-		resp.DoseGrams = &row.DoseGrams.Float64
+		resp.DoseGrams = numericToFloat64Ptr(row.DoseGrams)
 	}
 	if row.WaterMl.Valid {
 		v := row.WaterMl.Int32
@@ -260,7 +261,7 @@ func brewRecipeByUserRowToResponse(row db.ListBrewRecipesByUserRow) domain.BrewR
 		UpdatedAt:   row.UpdatedAt.Format(time.RFC3339),
 	}
 	if row.DoseGrams.Valid {
-		resp.DoseGrams = &row.DoseGrams.Float64
+		resp.DoseGrams = numericToFloat64Ptr(row.DoseGrams)
 	}
 	if row.WaterMl.Valid {
 		v := row.WaterMl.Int32
@@ -283,11 +284,24 @@ func brewRecipeByUserRowToResponse(row db.ListBrewRecipesByUserRow) domain.BrewR
 	return resp
 }
 
-func float8Val(v *float64) pgtype.Float8 {
+func numericVal(v *float64) pgtype.Numeric {
 	if v == nil {
-		return pgtype.Float8{}
+		return pgtype.Numeric{}
 	}
-	return pgtype.Float8{Float64: *v, Valid: true}
+	var n pgtype.Numeric
+	_ = n.Scan(fmt.Sprintf("%g", *v))
+	return n
+}
+
+func numericToFloat64Ptr(n pgtype.Numeric) *float64 {
+	if !n.Valid {
+		return nil
+	}
+	f8, err := n.Float64Value()
+	if err != nil || !f8.Valid {
+		return nil
+	}
+	return &f8.Float64
 }
 
 func int4PtrVal(v *int32) pgtype.Int4 {

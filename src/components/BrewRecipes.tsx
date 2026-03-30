@@ -80,6 +80,7 @@ export default function BrewRecipes({ coffeeId, brewRecipeRaw }: BrewRecipesProp
 				<h3 className="text-lg font-medium text-muted-foreground">Brew Recipes</h3>
 				{isLoggedIn && !showForm && (
 					<button
+						type="button"
 						onClick={() => setShowForm(true)}
 						className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground hover:bg-primary/90"
 					>
@@ -119,6 +120,7 @@ export default function BrewRecipes({ coffeeId, brewRecipeRaw }: BrewRecipesProp
 							</div>
 							{currentUserId === recipe.user_id && (
 								<button
+									type="button"
 									onClick={() => recipe.id && handleDelete(recipe.id)}
 									className="text-muted-foreground hover:text-destructive"
 								>
@@ -243,13 +245,13 @@ function BrewRecipeForm({
 		<Card>
 			<CardContent className="p-4">
 				<form onSubmit={handleSubmit} className="space-y-4">
-					<div>
-						<label className={labelClass}>Title *</label>
+					<label className="block">
+						<span className={labelClass}>Title *</span>
 						<input name="title" required placeholder="My go-to recipe" className={inputClass} />
-					</div>
+					</label>
 
-					<div>
-						<label className={labelClass}>Brew Method *</label>
+					<label className="block">
+						<span className={labelClass}>Brew Method *</span>
 						<select name="brew_method" required className={inputClass}>
 							{Object.entries(BREW_METHODS).map(([value, label]) => (
 								<option key={value} value={value}>
@@ -257,23 +259,23 @@ function BrewRecipeForm({
 								</option>
 							))}
 						</select>
-					</div>
+					</label>
 
 					<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-						<div>
-							<label className={labelClass}>Dose (g)</label>
+						<label className="block">
+							<span className={labelClass}>Dose (g)</span>
 							<input name="dose_grams" type="number" step="0.1" min="0" placeholder="18" className={inputClass} />
-						</div>
-						<div>
-							<label className={labelClass}>Water (ml)</label>
+						</label>
+						<label className="block">
+							<span className={labelClass}>Water (ml)</span>
 							<input name="water_ml" type="number" min="0" placeholder="250" className={inputClass} />
-						</div>
-						<div>
-							<label className={labelClass}>Temp (&deg;C)</label>
+						</label>
+						<label className="block">
+							<span className={labelClass}>Temp (&deg;C)</span>
 							<input name="water_temp_c" type="number" min="0" max="100" placeholder="93" className={inputClass} />
-						</div>
-						<div>
-							<label className={labelClass}>Grind Size</label>
+						</label>
+						<label className="block">
+							<span className={labelClass}>Grind Size</span>
 							<select name="grind_size" className={inputClass}>
 								<option value="">-</option>
 								<option value="fine">Fine</option>
@@ -282,22 +284,17 @@ function BrewRecipeForm({
 								<option value="medium-coarse">Medium-Coarse</option>
 								<option value="coarse">Coarse</option>
 							</select>
-						</div>
-						<div>
-							<label className={labelClass}>Brew Time (s)</label>
+						</label>
+						<label className="block">
+							<span className={labelClass}>Brew Time (s)</span>
 							<input name="brew_time_seconds" type="number" min="0" placeholder="210" className={inputClass} />
-						</div>
+						</label>
 					</div>
 
-					<div>
-						<label className={labelClass}>Notes</label>
-						<textarea
-							name="notes"
-							rows={3}
-							placeholder="Steps, tips, or anything else..."
-							className={inputClass}
-						/>
-					</div>
+					<label className="block">
+						<span className={labelClass}>Notes</span>
+						<textarea name="notes" rows={3} placeholder="Steps, tips, or anything else..." className={inputClass} />
+					</label>
 
 					{error && <p className="text-sm text-destructive">{error}</p>}
 

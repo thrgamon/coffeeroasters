@@ -91,7 +91,7 @@ type BrewRecipe struct {
 	UserID           int32         `json:"user_id"`
 	Title            string        `json:"title"`
 	BrewMethod       string        `json:"brew_method"`
-	DoseGrams        pgtype.Float8 `json:"dose_grams"`
+	DoseGrams        pgtype.Numeric `json:"dose_grams"`
 	WaterMl          pgtype.Int4   `json:"water_ml"`
 	WaterTempC       pgtype.Int4   `json:"water_temp_c"`
 	GrindSize        pgtype.Text   `json:"grind_size"`
