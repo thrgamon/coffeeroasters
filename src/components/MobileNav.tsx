@@ -27,7 +27,7 @@ export function MobileNav() {
 			<SheetTrigger aria-label="Open menu">
 				<Menu className="size-6 text-gold" />
 			</SheetTrigger>
-			<SheetContent side="right" className="bg-rich-mahogany border-2 border-gold">
+			<SheetContent side="right" className="bg-ink border-2 border-gold">
 				<SheetHeader>
 					<SheetTitle className="text-gold tracking-[0.2em] uppercase text-sm font-bold">Navigation</SheetTitle>
 				</SheetHeader>
@@ -39,7 +39,7 @@ export function MobileNav() {
 							onClick={() => setOpen(false)}
 							className={cn(
 								'px-3 py-2.5 text-sm font-bold uppercase tracking-[0.15em] transition-colors',
-								pathname === link.href ? 'bg-gold text-rich-mahogany' : 'text-snow/70 hover:text-gold',
+								pathname === link.href ? 'bg-gold text-ink' : 'text-paper/70 hover:text-gold',
 							)}
 						>
 							{link.label}

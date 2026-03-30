@@ -42,13 +42,13 @@ export default async function Home() {
 				<div className="flex flex-col sm:flex-row justify-center gap-4 mt-10 px-4">
 					<Link
 						href="/coffees"
-						className="bg-foreground px-8 py-3 text-sm font-bold uppercase tracking-[0.2em] text-primary hover:bg-foreground/80 transition-colors"
+						className="bg-primary px-8 py-3 text-sm font-bold uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/80 transition-colors"
 					>
 						Browse Coffees
 					</Link>
 					<Link
 						href="/roasters"
-						className="border-2 border-foreground px-8 py-3 text-sm font-bold uppercase tracking-[0.2em] text-foreground hover:bg-foreground hover:text-primary transition-colors"
+						className="border-2 border-foreground px-8 py-3 text-sm font-bold uppercase tracking-[0.2em] text-foreground hover:bg-foreground hover:text-paper transition-colors"
 					>
 						View Roasters
 					</Link>

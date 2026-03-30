@@ -2,53 +2,65 @@
 @import "tw-animate-css";
 
 @font-face {
-	font-family: 'Space Grotesk';
-	font-style: normal;
-	font-weight: 300 700;
-	font-display: swap;
-	src: url('https://fonts.gstatic.com/s/spacegrotesk/v16/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2') format('woff2');
-}
-
-@font-face {
-	font-family: 'Space Mono';
+	font-family: 'Bebas Neue';
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
-	src: url('https://fonts.gstatic.com/s/spacemono/v13/i7dPIFZifjKcF5UAWdDRYEF8RQ.woff2') format('woff2');
+	src: url('https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXooxW4.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'DM Sans';
+	font-style: normal;
+	font-weight: 300 700;
+	font-display: swap;
+	src: url('https://fonts.gstatic.com/s/dmsans/v15/rP2tp2ywxg089UriI5-g4vlH9VoD8CmsGOB6EYwbGA.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'JetBrains Mono';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FPPl01sGiJf94D.woff2') format('woff2');
 }
 
 :root {
-	--gold: #e8a838;
-	--grey-olive: #7a907e;
-	--dusty-rose: #d64933;
-	--rich-mahogany: #1a1b4b;
-	--snow: #f7f4ef;
+	--gold: #d4a03c;
+	--burnt-sienna: #c45a3c;
+	--deep-indigo: #141432;
+	--ink: #0d0d24;
+	--parchment: #f0e8d8;
+	--paper: #faf6ee;
+	--warm-grey: #8a7e72;
+	--soft-khaki: #d9d0c2;
 
-	--background: #f2ebe0;
-	--foreground: #1a1b4b;
-	--card: #f7f4ef;
-	--card-foreground: #1a1b4b;
-	--popover: #f7f4ef;
-	--popover-foreground: #1a1b4b;
-	--primary: #e8a838;
-	--primary-foreground: #1a1b4b;
-	--secondary: #e6dfd4;
-	--secondary-foreground: #1a1b4b;
-	--muted: #e6dfd4;
-	--muted-foreground: #7a907e;
-	--accent: #d64933;
-	--accent-foreground: #f7f4ef;
-	--destructive: #c0392b;
-	--destructive-foreground: #f7f4ef;
-	--border: #1a1b4b;
-	--input: #1a1b4b;
-	--ring: #e8a838;
+	--background: var(--parchment);
+	--foreground: var(--deep-indigo);
+	--card: var(--paper);
+	--card-foreground: var(--deep-indigo);
+	--popover: var(--paper);
+	--popover-foreground: var(--deep-indigo);
+	--primary: var(--gold);
+	--primary-foreground: var(--ink);
+	--secondary: var(--soft-khaki);
+	--secondary-foreground: var(--deep-indigo);
+	--muted: var(--soft-khaki);
+	--muted-foreground: var(--warm-grey);
+	--accent: var(--burnt-sienna);
+	--accent-foreground: var(--paper);
+	--destructive: #b03a2e;
+	--destructive-foreground: var(--paper);
+	--border: var(--soft-khaki);
+	--input: var(--soft-khaki);
+	--ring: var(--gold);
 	--radius: 0px;
 }
 
 @theme inline {
-	--font-sans: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
-	--font-mono: 'Space Mono', ui-monospace, monospace;
+	--font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+	--font-display: 'Bebas Neue', 'DM Sans', sans-serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -69,10 +81,11 @@
 	--color-input: var(--input);
 	--color-ring: var(--ring);
 	--color-gold: var(--gold);
-	--color-dusty-rose: var(--dusty-rose);
-	--color-grey-olive: var(--grey-olive);
-	--color-snow: var(--snow);
-	--color-rich-mahogany: var(--rich-mahogany);
+	--color-burnt-sienna: var(--burnt-sienna);
+	--color-warm-grey: var(--warm-grey);
+	--color-ink: var(--ink);
+	--color-parchment: var(--parchment);
+	--color-paper: var(--paper);
 	--radius-sm: 0px;
 	--radius-md: 0px;
 	--radius-lg: 0px;
@@ -81,7 +94,7 @@
 
 @layer base {
 	* {
-		@apply border-border transition-colors duration-100;
+		@apply border-border;
 	}
 	html {
 		overflow-x: hidden;
@@ -90,19 +103,26 @@
 		@apply bg-background text-foreground font-sans antialiased;
 		overflow-x: hidden;
 	}
+	/* Film grain overlay */
 	body::after {
 		content: '';
 		position: fixed;
 		inset: 0;
 		pointer-events: none;
 		z-index: 9999;
-		opacity: 0.04;
-		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+		opacity: 0.035;
+		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 		background-repeat: repeat;
-		background-size: 256px 256px;
+		background-size: 512px 512px;
 	}
-	h1, h2, h3 {
-		letter-spacing: 0.06em;
+	h1, h2 {
+		font-family: 'Bebas Neue', sans-serif;
+		letter-spacing: 0.04em;
+	}
+	h3 {
+		letter-spacing: 0.02em;
 		text-transform: uppercase;
+		font-weight: 600;
+		font-size: 0.875rem;
 	}
 }

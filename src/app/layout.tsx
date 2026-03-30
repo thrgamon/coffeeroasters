@@ -19,31 +19,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				<QueryProvider>
 					<AuthProvider>
 						<CoffeeTrackerProvider>
-							<nav className="bg-rich-mahogany">
+							<nav className="bg-ink">
 								<div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
 									<Link href="/" className="text-xl font-bold tracking-[0.25em] uppercase text-gold">
 										Coffeeroasters
 									</Link>
 									<div className="hidden gap-8 text-xs font-bold tracking-[0.2em] uppercase sm:flex">
-										<Link href="/coffees" className="text-snow/70 hover:text-gold transition-colors">
+										<Link href="/coffees" className="text-paper/70 hover:text-gold transition-colors">
 											Coffees
 										</Link>
-										<Link href="/roasters" className="text-snow/70 hover:text-gold transition-colors">
+										<Link href="/roasters" className="text-paper/70 hover:text-gold transition-colors">
 											Roasters
 										</Link>
-										<Link href="/cafes" className="text-snow/70 hover:text-gold transition-colors">
+										<Link href="/cafes" className="text-paper/70 hover:text-gold transition-colors">
 											Cafes
 										</Link>
-										<Link href="/countries" className="text-snow/70 hover:text-gold transition-colors">
+										<Link href="/countries" className="text-paper/70 hover:text-gold transition-colors">
 											Origins
 										</Link>
-										<Link href="/guide" className="text-snow/70 hover:text-gold transition-colors">
+										<Link href="/guide" className="text-paper/70 hover:text-gold transition-colors">
 											Guide
 										</Link>
-										<Link href="/find" className="text-snow/70 hover:text-gold transition-colors">
+										<Link href="/find" className="text-paper/70 hover:text-gold transition-colors">
 											Find
 										</Link>
-										<Link href="/my-coffees" className="text-snow/70 hover:text-gold transition-colors">
+										<Link href="/my-coffees" className="text-paper/70 hover:text-gold transition-colors">
 											My Coffees
 										</Link>
 										<UserNav />
@@ -54,8 +54,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 								</div>
 							</nav>
 							<main className="mx-auto flex-1 max-w-6xl px-4 py-10">{children}</main>
-							<footer className="bg-rich-mahogany">
-								<div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs tracking-[0.25em] uppercase font-bold text-grey-olive">
+							<footer className="bg-ink">
+								<div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs tracking-[0.25em] uppercase font-bold text-warm-grey">
 									&copy; {new Date().getFullYear()} Coffeeroasters
 								</div>
 							</footer>

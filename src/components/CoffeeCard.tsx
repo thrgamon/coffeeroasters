@@ -15,7 +15,7 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 
 	return (
 		<Link href={`/coffees/${coffee.id}`} className="block group">
-			<Card className="h-full flex flex-col border-2 border-foreground/20 bg-card transition-all hover:border-foreground">
+			<Card className="h-full flex flex-col border border-border bg-card transition-all hover:border-primary hover:shadow-md">
 				<CardHeader className="pb-1">
 					<div className="flex items-start justify-between gap-1">
 						<CardTitle className="text-base leading-snug text-foreground group-hover:text-accent transition-colors normal-case tracking-normal">
@@ -32,7 +32,7 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 						<Link
 							href={`/roasters/${coffee.roaster_slug}`}
 							onClick={(e) => e.stopPropagation()}
-							className="flex items-center gap-1.5 text-sm font-medium text-accent hover:text-foreground transition-colors"
+							className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
 						>
 							{coffee.roaster_logo_url && (
 								<Image
