@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import type { DomainCoffeeDetailResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
+import { cleanCoffeeName } from '@/lib/clean-name';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
 	const { id } = await params;
@@ -202,7 +203,9 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 							<Link key={similar.id} href={`/coffees/${similar.id}`}>
 								<Card className="h-full border-2 border-border bg-card transition-all hover:border-accent">
 									<CardContent className="p-4 space-y-1.5">
-										<p className="font-medium text-sm leading-snug text-foreground">{similar.name}</p>
+										<p className="font-medium text-sm leading-snug text-foreground">
+											{cleanCoffeeName(similar.name ?? '')}
+										</p>
 										{similar.roaster_name && <p className="text-xs text-accent">{similar.roaster_name}</p>}
 										{similar.reasons && similar.reasons.length > 0 && (
 											<p className="text-xs text-muted-foreground">{similar.reasons.join(' \u00b7 ')}</p>
