@@ -84,6 +84,15 @@ type Coffee struct {
 	IsDecaf         bool        `json:"is_decaf"`
 }
 
+type CoffeeAvailabilityLog struct {
+	ID         int64       `json:"id"`
+	CoffeeID   int64       `json:"coffee_id"`
+	InStock    bool        `json:"in_stock"`
+	PriceCents pgtype.Int4 `json:"price_cents"`
+	RecordedAt pgtype.Date `json:"recorded_at"`
+	CreatedAt  time.Time   `json:"created_at"`
+}
+
 type Country struct {
 	Code   string      `json:"code"`
 	Name   string      `json:"name"`
