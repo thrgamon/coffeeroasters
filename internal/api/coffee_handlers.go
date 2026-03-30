@@ -137,6 +137,7 @@ func (h *Handler) GetRoaster(c *gin.Context) {
 // @Param roast query string false "Filter by roast level"
 // @Param variety query string false "Filter by variety"
 // @Param roaster_state query string false "Filter by roaster AU state code (e.g. VIC, NSW)"
+// @Param decaf query string false "Decaf filter: 'only', 'exclude', or omit for all"
 // @Param similar_to query int false "Coffee ID to find similar coffees for"
 // @Param liked query string false "Comma-separated liked coffee IDs for recommendations"
 // @Param page query int false "Page number (default 1)"
@@ -159,6 +160,7 @@ func (h *Handler) ListCoffees(c *gin.Context) {
 	roast := c.Query("roast")
 	varietyFilter := c.Query("variety")
 	roasterState := c.Query("roaster_state")
+	decaf := c.Query("decaf")
 	similarToStr := c.Query("similar_to")
 
 	var resp domain.CoffeeListResponse
@@ -183,6 +185,7 @@ func (h *Handler) ListCoffees(c *gin.Context) {
 		Roast:        textPtr(roast),
 		Variety:      textPtr(varietyFilter),
 		RoasterState: textPtr(roasterState),
+		Decaf:        textPtr(decaf),
 		Lim:          int32(pageSize),
 		Off:          int32(offset),
 	})
@@ -540,6 +543,7 @@ func coffeeDetailRowToResponse(row db.GetCoffeeByIDRow) domain.CoffeeResponse {
 		PricePer100gMin: row.PricePer100gMin.Int32,
 		PricePer100gMax: row.PricePer100gMax.Int32,
 		IsBlend:         row.IsBlend,
+		IsDecaf:         row.IsDecaf,
 		InStock:         row.InStock,
 		Description:     row.Description.String,
 	}
@@ -570,6 +574,7 @@ func filteredRowToResponse(row db.ListCoffeesFilteredRow) domain.CoffeeResponse 
 		PricePer100gMin: row.PricePer100gMin.Int32,
 		PricePer100gMax: row.PricePer100gMax.Int32,
 		IsBlend:         row.IsBlend,
+		IsDecaf:         row.IsDecaf,
 		InStock:         row.InStock,
 	}
 }
@@ -599,6 +604,7 @@ func coffeeRowToResponse(row db.ListCoffeesByRoasterRow) domain.CoffeeResponse {
 		PricePer100gMin: row.PricePer100gMin.Int32,
 		PricePer100gMax: row.PricePer100gMax.Int32,
 		IsBlend:         row.IsBlend,
+		IsDecaf:         row.IsDecaf,
 		InStock:         row.InStock,
 	}
 }
@@ -630,6 +636,7 @@ func countryListRowToResponse(row db.ListCoffeesByCountryRow) domain.CoffeeRespo
 		PricePer100gMin: row.PricePer100gMin.Int32,
 		PricePer100gMax: row.PricePer100gMax.Int32,
 		IsBlend:         row.IsBlend,
+		IsDecaf:         row.IsDecaf,
 		InStock:         row.InStock,
 	}
 }
@@ -659,6 +666,7 @@ func regionListRowToResponse(row db.ListCoffeesByRegionRow) domain.CoffeeRespons
 		PricePer100gMin: row.PricePer100gMin.Int32,
 		PricePer100gMax: row.PricePer100gMax.Int32,
 		IsBlend:         row.IsBlend,
+		IsDecaf:         row.IsDecaf,
 		InStock:         row.InStock,
 	}
 }
@@ -736,6 +744,7 @@ func producerListRowToResponse(row db.ListCoffeesByProducerRow) domain.CoffeeRes
 		PricePer100gMin: row.PricePer100gMin.Int32,
 		PricePer100gMax: row.PricePer100gMax.Int32,
 		IsBlend:         row.IsBlend,
+		IsDecaf:         row.IsDecaf,
 		InStock:         row.InStock,
 	}
 }
