@@ -81,6 +81,7 @@ type Coffee struct {
 	Description     pgtype.Text `json:"description"`
 	Embedding       []float64   `json:"embedding"`
 	SourceHash      pgtype.Text `json:"source_hash"`
+	IsDecaf         bool        `json:"is_decaf"`
 }
 
 type Country struct {

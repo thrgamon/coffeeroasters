@@ -8,7 +8,7 @@ INSERT INTO coffees (
     country_code, region_id, producer_id, producer_raw,
     variety, species,
     price_per_100g_min, price_per_100g_max, is_blend,
-    description, source_hash,
+    description, source_hash, is_decaf,
     last_seen_at
 )
 VALUES (
@@ -19,7 +19,7 @@ VALUES (
     $20, $21, $22, $23,
     $24, $25,
     $26, $27, $28,
-    $29, $30,
+    $29, $30, $31,
     now()
 )
 ON CONFLICT (roaster_id, name) DO UPDATE SET
@@ -51,6 +51,7 @@ ON CONFLICT (roaster_id, name) DO UPDATE SET
     is_blend = EXCLUDED.is_blend,
     description = EXCLUDED.description,
     source_hash = EXCLUDED.source_hash,
+    is_decaf = EXCLUDED.is_decaf,
     last_seen_at = now(),
     last_changed_at = CASE
         WHEN coffees.price_cents IS DISTINCT FROM EXCLUDED.price_cents
@@ -67,7 +68,7 @@ SELECT
     c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
@@ -91,6 +92,9 @@ WHERE r.opted_out = false
     AND (sqlc.narg('roast')::text IS NULL OR c.roast_level = sqlc.narg('roast'))
     AND (sqlc.narg('variety')::text IS NULL OR c.variety = sqlc.narg('variety'))
     AND (sqlc.narg('roaster_state')::text IS NULL OR r.state = sqlc.narg('roaster_state'))
+    AND (sqlc.narg('decaf')::text IS NULL
+         OR (sqlc.narg('decaf') = 'only' AND c.is_decaf = true)
+         OR (sqlc.narg('decaf') = 'exclude' AND c.is_decaf = false))
 ORDER BY
     CASE WHEN sqlc.narg('query')::text IS NOT NULL
         THEN ts_rank(c.search_vector, plainto_tsquery('english', sqlc.narg('query')))
@@ -111,7 +115,7 @@ SELECT
     c.country_code, c.origin_raw, c.region_raw, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
@@ -132,7 +136,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.producer_raw, c.region_id, c.producer_id,
     c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
     c.description,
     c.first_seen_at, c.last_seen_at,
     r.name AS roaster_name, r.slug AS roaster_slug,
@@ -159,7 +163,7 @@ SELECT
     c.country_code, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
@@ -182,7 +186,7 @@ SELECT
     c.country_code, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
@@ -201,7 +205,7 @@ SELECT
     c.country_code, c.process, c.roast_level,
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
     r.name AS roaster_name, r.slug AS roaster_slug,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
@@ -271,3 +275,23 @@ UPDATE coffees SET
     image_url = $10,
     updated_at = now()
 WHERE roaster_id = $1 AND name = $2;
+
+-- name: ListCoffeesForFinder :many
+SELECT
+    c.id, c.roaster_id, c.name, c.product_url, c.image_url,
+    c.country_code, c.process, c.roast_level,
+    c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
+    c.variety, c.species,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
+    r.name AS roaster_name, r.slug AS roaster_slug,
+    co.name AS country_name,
+    reg.name AS region_name, reg.id AS coffee_region_id,
+    p.name AS producer_name, p.id AS coffee_producer_id
+FROM coffees c
+JOIN roasters r ON r.id = c.roaster_id
+LEFT JOIN countries co ON co.code = c.country_code
+LEFT JOIN regions reg ON reg.id = c.region_id
+LEFT JOIN producers p ON p.id = c.producer_id
+WHERE r.opted_out = false
+    AND c.in_stock = true
+ORDER BY c.name;
