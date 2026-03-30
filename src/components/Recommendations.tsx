@@ -20,7 +20,7 @@ export default function Recommendations() {
 	if (isLoading) {
 		return (
 			<section className="space-y-4">
-				<h2 className="text-2xl font-bold uppercase tracking-wider text-dusty-rose">Recommended for you</h2>
+				<h2 className="text-2xl font-bold uppercase tracking-wider text-accent">Recommended for you</h2>
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					{['rec-skel-1', 'rec-skel-2', 'rec-skel-3', 'rec-skel-4', 'rec-skel-5', 'rec-skel-6'].map((id) => (
 						<Skeleton key={id} className="h-48 rounded-lg" />
@@ -36,7 +36,7 @@ export default function Recommendations() {
 
 	return (
 		<section className="space-y-4">
-			<h2 className="text-2xl font-bold uppercase tracking-wider text-dusty-rose">Recommended for you</h2>
+			<h2 className="text-2xl font-bold uppercase tracking-wider text-accent">Recommended for you</h2>
 			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{data.coffees.map((coffee) => (
 					<CoffeeCard key={coffee.id} coffee={coffee} />

@@ -14,12 +14,12 @@ export default async function ProducerDetailPage({ params }: { params: Promise<{
 				{data.country_code && (
 					<Link
 						href={`/countries/${data.country_code}`}
-						className="text-sm text-grey-olive hover:text-gold transition-colors"
+						className="text-sm text-muted-foreground hover:text-foreground transition-colors"
 					>
 						&larr; {data.country_name}
 					</Link>
 				)}
-				<h1 className="text-3xl font-bold text-snow">{data.name}</h1>
+				<h1 className="text-3xl font-bold text-foreground">{data.name}</h1>
 				<div className="flex gap-2">
 					{data.country_name && (
 						<Link href={`/countries/${data.country_code}`}>
@@ -31,7 +31,7 @@ export default async function ProducerDetailPage({ params }: { params: Promise<{
 			</div>
 
 			<section className="space-y-4">
-				<h2 className="text-xl font-bold uppercase tracking-wider text-dusty-rose">
+				<h2 className="text-xl font-bold uppercase tracking-wider text-accent">
 					{data.coffees?.length ?? 0} coffee{(data.coffees?.length ?? 0) !== 1 ? 's' : ''}
 				</h2>
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

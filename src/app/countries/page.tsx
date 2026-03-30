@@ -14,8 +14,8 @@ export default async function CountriesPage() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold uppercase tracking-wider text-snow">Origins</h1>
-				<p className="mt-1 text-grey-olive">
+				<h1 className="text-3xl font-bold uppercase tracking-wider text-foreground">Origins</h1>
+				<p className="mt-1 text-muted-foreground">
 					{countries.length} coffee-producing countries, sorted by number of coffees available.
 				</p>
 			</div>
@@ -26,15 +26,15 @@ export default async function CountriesPage() {
 						<Link
 							key={country.code}
 							href={`/countries/${country.code}`}
-							className="flex items-baseline justify-between gap-2 rounded border border-border/50 bg-card/80 px-4 py-3 transition-all hover:border-gold/30 hover:shadow-[0_0_15px_rgba(255,213,0,0.05)]"
+							className="flex items-baseline justify-between gap-2 border-2 border-border bg-card px-4 py-3 transition-all hover:border-accent"
 						>
-							<span className="font-medium text-snow">{country.name}</span>
-							<span className="text-sm text-gold font-mono tabular-nums">{country.coffee_count}</span>
+							<span className="font-medium text-foreground">{country.name}</span>
+							<span className="text-sm text-foreground font-mono tabular-nums">{country.coffee_count}</span>
 						</Link>
 					))}
 				</div>
 			) : (
-				<p className="text-grey-olive">No countries found.</p>
+				<p className="text-muted-foreground">No countries found.</p>
 			)}
 		</div>
 	);

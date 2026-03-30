@@ -27,9 +27,9 @@ export function MobileNav() {
 			<SheetTrigger aria-label="Open menu">
 				<Menu className="size-6 text-gold" />
 			</SheetTrigger>
-			<SheetContent side="right" className="bg-rich-mahogany border-border/50">
+			<SheetContent side="right" className="bg-rich-mahogany border-2 border-gold">
 				<SheetHeader>
-					<SheetTitle className="text-gold tracking-widest uppercase text-sm">Navigation</SheetTitle>
+					<SheetTitle className="text-gold tracking-[0.2em] uppercase text-sm font-bold">Navigation</SheetTitle>
 				</SheetHeader>
 				<nav className="flex flex-col gap-1 px-4">
 					{navLinks.map((link) => (
@@ -38,10 +38,10 @@ export function MobileNav() {
 							href={link.href}
 							onClick={() => setOpen(false)}
 							className={cn(
-								'rounded px-3 py-2.5 text-sm font-medium uppercase tracking-wider transition-colors',
+								'px-3 py-2.5 text-sm font-bold uppercase tracking-[0.15em] transition-colors',
 								pathname === link.href
-									? 'bg-gold/10 text-gold'
-									: 'text-snow/60 hover:text-gold',
+									? 'bg-gold text-rich-mahogany'
+									: 'text-snow/70 hover:text-gold',
 							)}
 						>
 							{link.label}

@@ -99,8 +99,8 @@ export default function FindCoffeePage() {
 	if (loading) {
 		return (
 			<div className="container mx-auto px-4 py-16 flex flex-col items-center gap-4">
-				<div className="h-8 w-8 animate-spin rounded-full border-4 border-gold border-t-transparent" />
-				<p className="text-grey-olive font-mono text-sm uppercase tracking-wider">Finding your perfect coffees...</p>
+				<div className="h-8 w-8 animate-spin rounded-full border-4 border-foreground border-t-transparent" />
+				<p className="text-muted-foreground font-mono text-sm uppercase tracking-wider">Finding your perfect coffees...</p>
 			</div>
 		);
 	}
@@ -108,13 +108,13 @@ export default function FindCoffeePage() {
 	if (results !== null) {
 		return (
 			<div className="container mx-auto px-4 py-12 max-w-4xl">
-				<h2 className="text-2xl font-bold uppercase tracking-wider text-snow mb-2">Your matches</h2>
-				<p className="text-grey-olive mb-8">
+				<h2 className="text-2xl font-bold uppercase tracking-wider text-foreground mb-2">Your matches</h2>
+				<p className="text-muted-foreground mb-8">
 					Based on your preferences, here are the coffees we think you&apos;ll enjoy.
 				</p>
 
 				{results.length === 0 ? (
-					<p className="text-grey-olive">No matches found. Try different answers.</p>
+					<p className="text-muted-foreground">No matches found. Try different answers.</p>
 				) : (
 					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 						{results.map((coffee) => (
@@ -127,7 +127,7 @@ export default function FindCoffeePage() {
 					<button
 						type="button"
 						onClick={handleStartOver}
-						className="text-sm text-gold hover:underline transition-colors uppercase tracking-wider font-medium"
+						className="text-sm text-accent hover:text-foreground transition-colors uppercase tracking-wider font-medium"
 					>
 						Start over
 					</button>
@@ -141,26 +141,26 @@ export default function FindCoffeePage() {
 
 	return (
 		<div className="container mx-auto px-4 py-12 max-w-2xl">
-			<h1 className="text-3xl font-bold uppercase tracking-wider text-snow mb-2">Find your coffee</h1>
-			<p className="text-grey-olive mb-8">
+			<h1 className="text-3xl font-bold uppercase tracking-wider text-foreground mb-2">Find your coffee</h1>
+			<p className="text-muted-foreground mb-8">
 				Answer a few questions about what you enjoy and we&apos;ll match you with coffees you&apos;ll love.
 			</p>
 
 			<div className="mb-8">
-				<div className="flex justify-between text-xs text-grey-olive font-mono uppercase tracking-wider mb-2">
+				<div className="flex justify-between text-xs text-muted-foreground font-mono uppercase tracking-wider mb-2">
 					<span>
 						Step {step + 1} of {QUESTIONS.length}
 					</span>
 				</div>
 				<div className="h-1 w-full rounded-full bg-secondary overflow-hidden">
 					<div
-						className="h-full bg-gold rounded-full transition-all duration-300"
+						className="h-full bg-foreground rounded-full transition-all duration-300"
 						style={{ width: `${progress}%` }}
 					/>
 				</div>
 			</div>
 
-			<h2 className="text-xl font-bold text-snow mb-6">{question.title}</h2>
+			<h2 className="text-xl font-bold text-foreground mb-6">{question.title}</h2>
 
 			<div className="grid gap-4 sm:grid-cols-2">
 				{question.options.map((option) => {
@@ -172,12 +172,12 @@ export default function FindCoffeePage() {
 							onClick={() => handleSelect(question.key, option.value)}
 							className={`rounded border p-6 cursor-pointer transition-all text-left ${
 								selected
-									? 'border-gold bg-gold/10 shadow-[0_0_15px_rgba(255,213,0,0.1)]'
-									: 'border-border/50 hover:border-gold/30'
+									? 'border-foreground bg-foreground/5'
+									: 'border-2 border-border hover:border-accent'
 							}`}
 						>
-							<p className="font-bold text-snow">{option.label}</p>
-							{option.description && <p className="text-sm text-grey-olive mt-1">{option.description}</p>}
+							<p className="font-bold text-foreground">{option.label}</p>
+							{option.description && <p className="text-sm text-muted-foreground mt-1">{option.description}</p>}
 						</button>
 					);
 				})}
@@ -188,7 +188,7 @@ export default function FindCoffeePage() {
 					<button
 						type="button"
 						onClick={handleBack}
-						className="text-sm text-grey-olive hover:text-gold transition-colors uppercase tracking-wider"
+						className="text-sm text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
 					>
 						Back
 					</button>

@@ -24,26 +24,26 @@
 	--rich-mahogany: #280003;
 	--snow: #faf6f6;
 
-	--background: #1a0a0c;
-	--foreground: #faf6f6;
-	--card: #2a1215;
-	--card-foreground: #faf6f6;
-	--popover: #2a1215;
-	--popover-foreground: #faf6f6;
+	--background: #f5f0e8;
+	--foreground: #280003;
+	--card: #faf6f6;
+	--card-foreground: #280003;
+	--popover: #faf6f6;
+	--popover-foreground: #280003;
 	--primary: #ffd500;
 	--primary-foreground: #280003;
-	--secondary: #3d1a1e;
-	--secondary-foreground: #faf6f6;
-	--muted: #321418;
-	--muted-foreground: #a8918e;
+	--secondary: #ede8df;
+	--secondary-foreground: #280003;
+	--muted: #ede8df;
+	--muted-foreground: #848586;
 	--accent: #c2847a;
 	--accent-foreground: #280003;
-	--destructive: #ef4444;
+	--destructive: #c0392b;
 	--destructive-foreground: #faf6f6;
-	--border: #4a2228;
-	--input: #4a2228;
+	--border: #280003;
+	--input: #280003;
 	--ring: #ffd500;
-	--radius: 0.375rem;
+	--radius: 0px;
 }
 
 @theme inline {
@@ -73,70 +73,21 @@
 	--color-grey-olive: var(--grey-olive);
 	--color-snow: var(--snow);
 	--color-rich-mahogany: var(--rich-mahogany);
-	--radius-sm: calc(var(--radius) - 2px);
-	--radius-md: var(--radius);
-	--radius-lg: calc(var(--radius) + 2px);
-	--radius-xl: calc(var(--radius) + 6px);
+	--radius-sm: 0px;
+	--radius-md: 0px;
+	--radius-lg: 0px;
+	--radius-xl: 0px;
 }
 
 @layer base {
 	* {
-		@apply border-border transition-colors duration-150;
+		@apply border-border transition-colors duration-100;
 	}
 	body {
 		@apply bg-background text-foreground font-sans antialiased;
 	}
 	h1, h2, h3 {
-		letter-spacing: -0.02em;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
 	}
-}
-
-/* Retro glow utility */
-.glow-gold {
-	text-shadow: 0 0 20px rgba(255, 213, 0, 0.3), 0 0 40px rgba(255, 213, 0, 0.1);
-}
-
-.glow-rose {
-	text-shadow: 0 0 20px rgba(194, 132, 122, 0.4), 0 0 40px rgba(194, 132, 122, 0.15);
-}
-
-/* Retro blur/grain overlay */
-.retro-blur {
-	position: relative;
-}
-.retro-blur::before {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background: radial-gradient(ellipse at 30% 20%, rgba(255, 213, 0, 0.08) 0%, transparent 50%),
-		radial-gradient(ellipse at 70% 80%, rgba(194, 132, 122, 0.06) 0%, transparent 50%);
-	pointer-events: none;
-	z-index: 0;
-}
-
-/* Scan line effect for hero areas */
-.scanlines::after {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background: repeating-linear-gradient(
-		0deg,
-		transparent,
-		transparent 2px,
-		rgba(255, 213, 0, 0.015) 2px,
-		rgba(255, 213, 0, 0.015) 4px
-	);
-	pointer-events: none;
-	z-index: 1;
-}
-
-/* Noise texture */
-.noise::after {
-	content: '';
-	position: absolute;
-	inset: 0;
-	opacity: 0.03;
-	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-	pointer-events: none;
-	z-index: 1;
 }

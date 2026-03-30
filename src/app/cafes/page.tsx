@@ -29,7 +29,7 @@ export default async function CafesPage({ searchParams }: CafesPageProps) {
 
 	return (
 		<div className="space-y-6">
-			<h1 className="text-3xl font-bold uppercase tracking-wider text-snow">Cafes</h1>
+			<h1 className="text-3xl font-bold uppercase tracking-wider text-foreground">Cafes</h1>
 
 			<Suspense>
 				<CafeFilters />
@@ -50,7 +50,7 @@ export default async function CafesPage({ searchParams }: CafesPageProps) {
 					)}
 				</>
 			) : (
-				<p className="text-grey-olive">No cafes found.</p>
+				<p className="text-muted-foreground">No cafes found.</p>
 			)}
 		</div>
 	);
@@ -78,12 +78,12 @@ function CafeSection({
 		return (
 			<section className="space-y-4">
 				<div>
-					<h2 className="text-xl font-bold uppercase tracking-wider text-dusty-rose">{title}</h2>
-					{description && <p className="text-sm text-grey-olive">{description}</p>}
+					<h2 className="text-xl font-bold uppercase tracking-wider text-accent">{title}</h2>
+					{description && <p className="text-sm text-muted-foreground">{description}</p>}
 				</div>
 				{Array.from(byState.entries()).map(([stateKey, stateCafes]) => (
 					<div key={stateKey} className="space-y-3">
-						<h3 className="text-lg font-medium text-snow">{stateKey}</h3>
+						<h3 className="text-lg font-medium text-foreground">{stateKey}</h3>
 						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 							{stateCafes.map((cafe) => (
 								<CafeCard key={cafe.id} cafe={cafe} />
@@ -98,8 +98,8 @@ function CafeSection({
 	return (
 		<section className="space-y-4">
 			<div>
-				<h2 className="text-xl font-bold uppercase tracking-wider text-dusty-rose">{title}</h2>
-				{description && <p className="text-sm text-grey-olive">{description}</p>}
+				<h2 className="text-xl font-bold uppercase tracking-wider text-accent">{title}</h2>
+				{description && <p className="text-sm text-muted-foreground">{description}</p>}
 			</div>
 			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{cafes.map((cafe) => (
@@ -112,20 +112,20 @@ function CafeSection({
 
 function CafeCard({ cafe }: { cafe: DomainCafeResponse }) {
 	return (
-		<Card className="border-border/50 transition-all hover:border-gold/30 hover:shadow-[0_0_20px_rgba(255,213,0,0.05)]">
+		<Card className="border-2 border-border bg-card transition-all hover:border-accent">
 			<CardHeader>
-				<CardTitle className="text-lg text-snow">{cafe.name}</CardTitle>
+				<CardTitle className="text-lg text-foreground">{cafe.name}</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-2">
 				<div className="flex items-center gap-2">
 					{cafe.state && <Badge variant="secondary">{cafe.state}</Badge>}
 					{cafe.type === 'stockist' && <Badge variant="outline">Stockist</Badge>}
-					{cafe.suburb && <span className="text-sm text-grey-olive">{cafe.suburb}</span>}
+					{cafe.suburb && <span className="text-sm text-muted-foreground">{cafe.suburb}</span>}
 				</div>
-				{cafe.address && <p className="text-sm text-grey-olive">{cafe.address}</p>}
+				{cafe.address && <p className="text-sm text-muted-foreground">{cafe.address}</p>}
 				{cafe.roaster_name && (
 					<p className="text-sm">
-						<Link href={`/roasters/${cafe.roaster_slug}`} className="text-gold hover:underline">
+						<Link href={`/roasters/${cafe.roaster_slug}`} className="text-accent hover:text-foreground">
 							{cafe.roaster_name}
 						</Link>
 					</p>

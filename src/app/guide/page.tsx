@@ -331,8 +331,8 @@ export default function GuidePage() {
 	return (
 		<div className="space-y-12">
 			<div className="space-y-3">
-				<h1 className="text-3xl font-bold uppercase tracking-wider text-snow">Coffee Guide</h1>
-				<p className="text-grey-olive max-w-2xl">
+				<h1 className="text-3xl font-bold uppercase tracking-wider text-foreground">Coffee Guide</h1>
+				<p className="text-muted-foreground max-w-2xl">
 					Four factors shape what you taste in the cup: how the coffee was processed after harvest, how darkly it was
 					roasted, where it was grown, and which variety of plant it came from. Each one leaves a distinct mark on the
 					flavour.
@@ -341,8 +341,8 @@ export default function GuidePage() {
 
 			{/* Process */}
 			<section className="space-y-6">
-				<h2 className="text-2xl font-bold uppercase tracking-wider text-dusty-rose">Process</h2>
-				<p className="text-grey-olive max-w-2xl">
+				<h2 className="text-2xl font-bold uppercase tracking-wider text-accent">Process</h2>
+				<p className="text-muted-foreground max-w-2xl">
 					After coffee cherries are picked, they need to be dried and the seed extracted. How this is done has a major
 					effect on flavour. Processing determines the balance between clarity and fruitiness: methods that leave the
 					fruit on the bean longer produce sweeter, heavier cups, while methods that strip the fruit early let the
@@ -350,24 +350,24 @@ export default function GuidePage() {
 				</p>
 				<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 					{processes.map((p) => (
-						<div key={p.value} className="rounded border border-border/50 bg-card/80 p-6 space-y-3">
-							<p className="font-bold text-snow">{p.name}</p>
-							<p className="text-sm text-grey-olive">{p.description}</p>
+						<div key={p.value} className="rounded border-2 border-border bg-card p-6 space-y-3">
+							<p className="font-bold text-foreground">{p.name}</p>
+							<p className="text-sm text-muted-foreground">{p.description}</p>
 							<div className="text-sm space-y-1">
 								<p>
-									<span className="font-medium text-dusty-rose">Typical flavours:</span>{' '}
-									<span className="text-snow/70">{p.flavours.join(', ')}</span>
+									<span className="font-medium text-accent">Typical flavours:</span>{' '}
+									<span className="text-foreground/70">{p.flavours.join(', ')}</span>
 								</p>
 								<p>
-									<span className="font-medium text-dusty-rose">Body:</span>{' '}
-									<span className="text-snow/70">{p.body}</span>
+									<span className="font-medium text-accent">Body:</span>{' '}
+									<span className="text-foreground/70">{p.body}</span>
 								</p>
 								<p>
-									<span className="font-medium text-dusty-rose">Acidity:</span>{' '}
-									<span className="text-snow/70">{p.acidity}</span>
+									<span className="font-medium text-accent">Acidity:</span>{' '}
+									<span className="text-foreground/70">{p.acidity}</span>
 								</p>
 							</div>
-							<Link href={`/coffees?process=${p.value}`} className="text-sm text-gold hover:underline">
+							<Link href={`/coffees?process=${p.value}`} className="text-sm text-accent hover:text-foreground">
 								See {p.name} coffees
 							</Link>
 						</div>
@@ -377,8 +377,8 @@ export default function GuidePage() {
 
 			{/* Roast Level */}
 			<section className="space-y-6">
-				<h2 className="text-2xl font-bold uppercase tracking-wider text-dusty-rose">Roast Level</h2>
-				<p className="text-grey-olive max-w-2xl">
+				<h2 className="text-2xl font-bold uppercase tracking-wider text-accent">Roast Level</h2>
+				<p className="text-muted-foreground max-w-2xl">
 					Roasting transforms green coffee into the brown beans you brew. The longer and hotter the roast, the more the
 					bean's origin character gives way to roast character. Light roasts preserve what makes a coffee unique: its
 					acidity, florals, and fruit. Darker roasts trade that transparency for body, sweetness, and roast-derived
@@ -386,14 +386,14 @@ export default function GuidePage() {
 				</p>
 				<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 					{roastLevels.map((r) => (
-						<div key={r.value} className="rounded border border-border/50 bg-card/80 p-6 space-y-3">
-							<p className="font-bold text-snow">{r.name}</p>
-							<p className="text-sm text-grey-olive">{r.description}</p>
+						<div key={r.value} className="rounded border-2 border-border bg-card p-6 space-y-3">
+							<p className="font-bold text-foreground">{r.name}</p>
+							<p className="text-sm text-muted-foreground">{r.description}</p>
 							<p className="text-sm">
-								<span className="font-medium text-dusty-rose">Typical notes:</span>{' '}
-								<span className="text-snow/70">{r.notes.join(', ')}</span>
+								<span className="font-medium text-accent">Typical notes:</span>{' '}
+								<span className="text-foreground/70">{r.notes.join(', ')}</span>
 							</p>
-							<Link href={`/coffees?roast=${r.value}`} className="text-sm text-gold hover:underline">
+							<Link href={`/coffees?roast=${r.value}`} className="text-sm text-accent hover:text-foreground">
 								See {r.name} roast coffees
 							</Link>
 						</div>
@@ -403,8 +403,8 @@ export default function GuidePage() {
 
 			{/* Origin */}
 			<section className="space-y-8">
-				<h2 className="text-2xl font-bold uppercase tracking-wider text-dusty-rose">Origin</h2>
-				<p className="text-grey-olive max-w-2xl">
+				<h2 className="text-2xl font-bold uppercase tracking-wider text-accent">Origin</h2>
+				<p className="text-muted-foreground max-w-2xl">
 					Where coffee grows shapes its flavour more than any other factor. Altitude, soil, climate, and local farming
 					traditions all leave their mark. African coffees tend toward bright acidity and floral complexity. Central and
 					South American coffees are typically balanced and sweet. Asian coffees lean earthy and full-bodied. We group
@@ -412,13 +412,13 @@ export default function GuidePage() {
 				</p>
 				{originGroups.map((group) => (
 					<div key={group.label} className="space-y-4">
-						<h3 className="text-lg font-medium text-snow">{group.label}</h3>
+						<h3 className="text-lg font-medium text-foreground">{group.label}</h3>
 						<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 							{group.origins.map((origin) => (
-								<div key={origin.code} className="rounded border border-border/50 bg-card/80 p-6 space-y-3">
-									<p className="font-bold text-snow">{origin.name}</p>
-									<p className="text-sm text-grey-olive">{origin.summary}</p>
-									<Link href={`/coffees?origin=${origin.code}`} className="text-sm text-gold hover:underline">
+								<div key={origin.code} className="rounded border-2 border-border bg-card p-6 space-y-3">
+									<p className="font-bold text-foreground">{origin.name}</p>
+									<p className="text-sm text-muted-foreground">{origin.summary}</p>
+									<Link href={`/coffees?origin=${origin.code}`} className="text-sm text-accent hover:text-foreground">
 										See coffees from {origin.name}
 									</Link>
 								</div>
@@ -430,8 +430,8 @@ export default function GuidePage() {
 
 			{/* Variety */}
 			<section className="space-y-8">
-				<h2 className="text-2xl font-bold uppercase tracking-wider text-dusty-rose">Variety</h2>
-				<p className="text-grey-olive max-w-2xl">
+				<h2 className="text-2xl font-bold uppercase tracking-wider text-accent">Variety</h2>
+				<p className="text-muted-foreground max-w-2xl">
 					Just as grape varieties produce different wines, coffee plant varieties produce distinct flavour profiles.
 					Some varieties like Gesha are prized for extraordinary complexity. Others like Bourbon and Typica form the
 					backbone of specialty coffee. Variety sets the flavour potential; processing and roasting determine how much
@@ -439,23 +439,23 @@ export default function GuidePage() {
 				</p>
 				{varietyGroups.map((group) => (
 					<div key={group.label} className="space-y-4">
-						<h3 className="text-lg font-medium text-snow">{group.label}</h3>
+						<h3 className="text-lg font-medium text-foreground">{group.label}</h3>
 						<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 							{group.varieties.map((v) => (
-								<div key={v.value} className="rounded border border-border/50 bg-card/80 p-6 space-y-3">
-									<p className="font-bold text-snow">{v.name}</p>
-									<p className="text-sm text-grey-olive">{v.tendency}</p>
+								<div key={v.value} className="rounded border-2 border-border bg-card p-6 space-y-3">
+									<p className="font-bold text-foreground">{v.name}</p>
+									<p className="text-sm text-muted-foreground">{v.tendency}</p>
 									<div className="text-sm space-y-1">
 										<p>
-											<span className="font-medium text-dusty-rose">Body:</span>{' '}
-											<span className="text-snow/70">{v.body}</span>
+											<span className="font-medium text-accent">Body:</span>{' '}
+											<span className="text-foreground/70">{v.body}</span>
 										</p>
 										<p>
-											<span className="font-medium text-dusty-rose">Acidity:</span>{' '}
-											<span className="text-snow/70">{v.acidity}</span>
+											<span className="font-medium text-accent">Acidity:</span>{' '}
+											<span className="text-foreground/70">{v.acidity}</span>
 										</p>
 									</div>
-									<Link href={`/coffees?variety=${v.value}`} className="text-sm text-gold hover:underline">
+									<Link href={`/coffees?variety=${v.value}`} className="text-sm text-accent hover:text-foreground">
 										See {v.name} coffees
 									</Link>
 								</div>
