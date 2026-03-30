@@ -384,6 +384,7 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 			IsBlend:         raw.IsBlend,
 			Description:     textVal(raw.Description),
 			SourceHash:      textVal(raw.SourceHash),
+			IsDecaf:         normalise.IsDecaf(raw.Name),
 		})
 		if err != nil {
 			slog.Warn("upsert coffee failed", "name", raw.Name, "error", err)
