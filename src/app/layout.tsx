@@ -36,6 +36,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 										<Link href="/countries" className="hover:text-foreground">
 											Countries
 										</Link>
+										<Link href="/guide" className="hover:text-foreground">
+											Guide
+										</Link>
+										<Link href="/find" className="hover:text-foreground">
+											Find your coffee
+										</Link>
 										<Link href="/my-coffees" className="hover:text-foreground">
 											My coffees
 										</Link>

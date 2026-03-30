@@ -13,6 +13,8 @@ const navLinks = [
 	{ href: '/roasters', label: 'Roasters' },
 	{ href: '/cafes', label: 'Cafes' },
 	{ href: '/countries', label: 'Countries' },
+	{ href: '/guide', label: 'Guide' },
+	{ href: '/find', label: 'Find your coffee' },
 	{ href: '/my-coffees', label: 'My coffees' },
 ] as const;
 
