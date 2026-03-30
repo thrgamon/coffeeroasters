@@ -5,12 +5,14 @@
  * OpenAPI spec version: 1.0
  */
 import type { DomainBlendComponentResponse } from './domainBlendComponentResponse';
+import type { DomainCrowdsourcedTastingNote } from './domainCrowdsourcedTastingNote';
 import type { DomainSimilarCoffee } from './domainSimilarCoffee';
 
 export interface DomainCoffeeDetailResponse {
   blend_components?: DomainBlendComponentResponse[];
   country_code?: string;
   country_name?: string;
+  crowdsourced_notes?: DomainCrowdsourcedTastingNote[];
   description?: string;
   id?: number;
   image_url?: string;

@@ -7,16 +7,7 @@ package db
 
 import (
 	"context"
-	"time"
 )
-
-type UserTastingNote struct {
-	ID          int32     `json:"id"`
-	UserID      int32     `json:"user_id"`
-	CoffeeID    int64     `json:"coffee_id"`
-	TastingNote string    `json:"tasting_note"`
-	CreatedAt   time.Time `json:"created_at"`
-}
 
 const addUserTastingNote = `-- name: AddUserTastingNote :one
 INSERT INTO user_tasting_notes (user_id, coffee_id, tasting_note)
@@ -42,52 +33,6 @@ func (q *Queries) AddUserTastingNote(ctx context.Context, arg AddUserTastingNote
 		&i.CreatedAt,
 	)
 	return i, err
-}
-
-const removeUserTastingNote = `-- name: RemoveUserTastingNote :exec
-DELETE FROM user_tasting_notes
-WHERE user_id = $1 AND coffee_id = $2 AND tasting_note = $3
-`
-
-type RemoveUserTastingNoteParams struct {
-	UserID      int32  `json:"user_id"`
-	CoffeeID    int64  `json:"coffee_id"`
-	TastingNote string `json:"tasting_note"`
-}
-
-func (q *Queries) RemoveUserTastingNote(ctx context.Context, arg RemoveUserTastingNoteParams) error {
-	_, err := q.db.Exec(ctx, removeUserTastingNote, arg.UserID, arg.CoffeeID, arg.TastingNote)
-	return err
-}
-
-const listUserTastingNotesForCoffee = `-- name: ListUserTastingNotesForCoffee :many
-SELECT tasting_note FROM user_tasting_notes
-WHERE user_id = $1 AND coffee_id = $2
-`
-
-type ListUserTastingNotesForCoffeeParams struct {
-	UserID   int32 `json:"user_id"`
-	CoffeeID int64 `json:"coffee_id"`
-}
-
-func (q *Queries) ListUserTastingNotesForCoffee(ctx context.Context, arg ListUserTastingNotesForCoffeeParams) ([]string, error) {
-	rows, err := q.db.Query(ctx, listUserTastingNotesForCoffee, arg.UserID, arg.CoffeeID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []string{}
-	for rows.Next() {
-		var tasting_note string
-		if err := rows.Scan(&tasting_note); err != nil {
-			return nil, err
-		}
-		items = append(items, tasting_note)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const listCrowdsourcedTastingNotes = `-- name: ListCrowdsourcedTastingNotes :many
@@ -121,4 +66,50 @@ func (q *Queries) ListCrowdsourcedTastingNotes(ctx context.Context, coffeeID int
 		return nil, err
 	}
 	return items, nil
+}
+
+const listUserTastingNotesForCoffee = `-- name: ListUserTastingNotesForCoffee :many
+SELECT tasting_note FROM user_tasting_notes
+WHERE user_id = $1 AND coffee_id = $2
+`
+
+type ListUserTastingNotesForCoffeeParams struct {
+	UserID   int32 `json:"user_id"`
+	CoffeeID int64 `json:"coffee_id"`
+}
+
+func (q *Queries) ListUserTastingNotesForCoffee(ctx context.Context, arg ListUserTastingNotesForCoffeeParams) ([]string, error) {
+	rows, err := q.db.Query(ctx, listUserTastingNotesForCoffee, arg.UserID, arg.CoffeeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []string{}
+	for rows.Next() {
+		var tasting_note string
+		if err := rows.Scan(&tasting_note); err != nil {
+			return nil, err
+		}
+		items = append(items, tasting_note)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const removeUserTastingNote = `-- name: RemoveUserTastingNote :exec
+DELETE FROM user_tasting_notes
+WHERE user_id = $1 AND coffee_id = $2 AND tasting_note = $3
+`
+
+type RemoveUserTastingNoteParams struct {
+	UserID      int32  `json:"user_id"`
+	CoffeeID    int64  `json:"coffee_id"`
+	TastingNote string `json:"tasting_note"`
+}
+
+func (q *Queries) RemoveUserTastingNote(ctx context.Context, arg RemoveUserTastingNoteParams) error {
+	_, err := q.db.Exec(ctx, removeUserTastingNote, arg.UserID, arg.CoffeeID, arg.TastingNote)
+	return err
 }

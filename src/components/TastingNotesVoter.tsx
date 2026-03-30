@@ -72,11 +72,7 @@ export default function TastingNotesVoter({ coffeeId, roasterNotes }: TastingNot
 			const existing = prev.find((n) => n.note === note);
 			if (existing) {
 				return prev
-					.map((n) =>
-						n.note === note
-							? { ...n, vote_count: n.vote_count + (wasVoted ? -1 : 1) }
-							: n
-					)
+					.map((n) => (n.note === note ? { ...n, vote_count: n.vote_count + (wasVoted ? -1 : 1) } : n))
 					.filter((n) => n.vote_count > 0);
 			}
 			// New note being added
@@ -107,7 +103,7 @@ export default function TastingNotesVoter({ coffeeId, roasterNotes }: TastingNot
 
 	// Build the combined view: roaster notes + crowdsourced notes that meet the threshold
 	const crowdsourcedAboveThreshold = crowdsourcedNotes.filter(
-		(cn) => cn.vote_count >= CROWDSOURCE_THRESHOLD && !roasterNotes.includes(cn.note)
+		(cn) => cn.vote_count >= CROWDSOURCE_THRESHOLD && !roasterNotes.includes(cn.note),
 	);
 
 	// All crowdsourced notes (for the voting section), including ones that overlap with roaster notes
@@ -157,12 +153,8 @@ export default function TastingNotesVoter({ coffeeId, roasterNotes }: TastingNot
 			{/* Voting section (only for logged-in users) */}
 			{user && !loading && (
 				<div>
-					<h3 className="mb-2 text-sm font-medium">
-						What do you taste?
-					</h3>
-					<p className="mb-2 text-xs text-muted-foreground">
-						Select the notes you agree with, or add your own
-					</p>
+					<h3 className="mb-2 text-sm font-medium">What do you taste?</h3>
+					<p className="mb-2 text-xs text-muted-foreground">Select the notes you agree with, or add your own</p>
 					<div className="flex flex-wrap gap-1.5">
 						{Array.from(allVotableNotes)
 							.sort((a, b) => {
@@ -187,9 +179,7 @@ export default function TastingNotesVoter({ coffeeId, roasterNotes }: TastingNot
 										{voted && <Check className="size-3" />}
 										<Grape className="size-3" />
 										{note}
-										{count > 0 && (
-											<span className="text-xs opacity-60">{count}</span>
-										)}
+										{count > 0 && <span className="text-xs opacity-60">{count}</span>}
 									</button>
 								);
 							})}
@@ -216,7 +206,6 @@ export default function TastingNotesVoter({ coffeeId, roasterNotes }: TastingNot
 								onChange={(e) => setNewNote(e.target.value)}
 								placeholder="e.g. chocolate, berry, floral..."
 								maxLength={100}
-								autoFocus
 								className="flex-1 rounded border border-input bg-background px-3 py-1.5 text-sm"
 							/>
 							<button

@@ -124,12 +124,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 					</Link>
 				)}
 
-				{coffee.id && (
-					<TastingNotesVoter
-						coffeeId={coffee.id}
-						roasterNotes={coffee.tasting_notes ?? []}
-					/>
-				)}
+				{coffee.id && <TastingNotesVoter coffeeId={coffee.id} roasterNotes={coffee.tasting_notes ?? []} />}
 
 				{coffee.description && (
 					<div>
