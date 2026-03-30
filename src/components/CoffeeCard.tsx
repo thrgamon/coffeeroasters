@@ -5,18 +5,105 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DomainCoffeeResponse } from '@/lib/api/generated/models';
 
+const COUNTRIES = [
+	'ethiopia',
+	'colombia',
+	'kenya',
+	'brazil',
+	'guatemala',
+	'costa rica',
+	'el salvador',
+	'honduras',
+	'panama',
+	'nicaragua',
+	'mexico',
+	'peru',
+	'bolivia',
+	'ecuador',
+	'rwanda',
+	'burundi',
+	'tanzania',
+	'uganda',
+	'indonesia',
+	'india',
+	'papua new guinea',
+	'yemen',
+	'congo',
+	'malawi',
+];
+
+const PROCESSES = ['natural', 'washed', 'honey', 'anaerobic', 'semi-washed'];
+
+/** Strip redundant country, process, roast, and filler from coffee display names. */
+function cleanName(name: string, countryName?: string): string {
+	let cleaned = name;
+
+	// Remove FILTER / ESPRESSO roast suffixes
+	cleaned = cleaned.replace(/\s*(FILTER|ESPRESSO)\s*$/i, '');
+
+	// Remove process in parentheses: (Natural), (Washed), etc.
+	for (const p of PROCESSES) {
+		cleaned = cleaned.replace(new RegExp(`\\s*\\(${p}\\)\\s*`, 'i'), ' ');
+	}
+
+	// Remove country name in various positions
+	const countries = countryName ? [countryName, ...COUNTRIES] : COUNTRIES;
+	for (const country of countries) {
+		const escaped = country.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		// "- Ethiopia" or "| Ethiopia" or ", Ethiopia" at end
+		cleaned = cleaned.replace(new RegExp(`\\s*[-|,]\\s*${escaped}\\s*$`, 'i'), '');
+		// "Ethiopia -" or "Ethiopia |" or "Ethiopia," at start
+		cleaned = cleaned.replace(new RegExp(`^\\s*${escaped}\\s*[-|,]\\s*`, 'i'), '');
+		// ", Ethiopia," in the middle
+		cleaned = cleaned.replace(new RegExp(`,\\s*${escaped}\\b`, 'i'), '');
+		// "Colombia " at the very start (no separator, just a space before the rest)
+		cleaned = cleaned.replace(new RegExp(`^${escaped}\\s+`, 'i'), '');
+	}
+
+	// Remove "Espresso" or "Filter" prefix (roast is shown as a badge)
+	cleaned = cleaned.replace(/^(Espresso|Filter)\s+/i, '');
+
+	// Remove standalone process words at end: ", Washed" or ", Natural"
+	for (const p of PROCESSES) {
+		cleaned = cleaned.replace(new RegExp(`,\\s*${p}\\s*$`, 'i'), '');
+	}
+
+	// Remove "Single Origin" filler
+	cleaned = cleaned.replace(/\s*[-|]\s*Single Origin\b/i, '');
+	cleaned = cleaned.replace(/\bSingle Origin\s*[-|]\s*/i, '');
+
+	// Remove weight suffixes like "500g", "| 250g", "1kg"
+	cleaned = cleaned.replace(/\s*[|]\s*\d+g\b/i, '');
+	cleaned = cleaned.replace(/\s+\d+g\s*$/i, '');
+
+	// Remove trailing/leading separators and whitespace
+	cleaned = cleaned.replace(/\s*[|,-]\s*$/, '');
+	cleaned = cleaned.replace(/^\s*[|,-]\s*/, '');
+
+	return cleaned.trim();
+}
+
 export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse }) {
 	const origin = [coffee.country_name, coffee.region_name].filter(Boolean).join(', ');
+	const displayName = cleanName(coffee.name ?? '', coffee.country_name);
 
 	return (
 		<Link href={`/coffees/${coffee.id}`} className="block">
 			<Card className="h-full flex flex-col shadow-sm transition-all hover:shadow-md hover:bg-muted/50">
 				<CardHeader className="pb-1">
 					<div className="flex items-start justify-between gap-1">
-						<CardTitle className="text-base leading-snug">{coffee.name}</CardTitle>
+						<CardTitle className="text-base leading-snug">{displayName}</CardTitle>
 						{coffee.id && <CoffeeTrackButton coffeeId={coffee.id} variant="like" />}
 					</div>
-					{coffee.roaster_name && <p className="text-xs text-muted-foreground">{coffee.roaster_name}</p>}
+					{coffee.roaster_name && (
+						<Link
+							href={`/roasters/${coffee.roaster_slug}`}
+							onClick={(e) => e.stopPropagation()}
+							className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+						>
+							{coffee.roaster_name}
+						</Link>
+					)}
 				</CardHeader>
 				<CardContent className="flex-1 space-y-2 pt-0">
 					{origin && <p className="text-sm font-medium text-foreground/70">{origin}</p>}
