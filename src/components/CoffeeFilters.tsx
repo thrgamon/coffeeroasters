@@ -47,6 +47,7 @@ export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 	const roast = searchParams.get('roast') ?? '';
 	const variety = searchParams.get('variety') ?? '';
 	const roasterState = searchParams.get('roaster_state') ?? '';
+	const decaf = searchParams.get('decaf') ?? '';
 
 	const updateParams = useCallback(
 		(key: string, value: string) => {
@@ -74,6 +75,7 @@ export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 	if (roast) activeFilters.push({ key: 'roast', label: `Roast: ${roast}` });
 	if (variety) activeFilters.push({ key: 'variety', label: `Variety: ${variety}` });
 	if (roasterState) activeFilters.push({ key: 'roaster_state', label: `Roaster location: ${roasterState}` });
+	if (decaf) activeFilters.push({ key: 'decaf', label: `Decaf: ${decaf}` });
 
 	return (
 		<div className="space-y-2">
@@ -150,6 +152,16 @@ export default function CoffeeFilters({ countries }: CoffeeFiltersProps) {
 								{s}
 							</SelectItem>
 						))}
+					</SelectContent>
+				</Select>
+				<Select value={decaf || 'all'} onValueChange={(v) => updateParams('decaf', v === 'all' ? '' : v)}>
+					<SelectTrigger className="w-40">
+						<SelectValue placeholder="Decaf" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">All coffees</SelectItem>
+						<SelectItem value="exclude">Exclude decaf</SelectItem>
+						<SelectItem value="only">Decaf only</SelectItem>
 					</SelectContent>
 				</Select>
 				{isPending && <Loader2 className="size-5 animate-spin self-center text-muted-foreground" />}
