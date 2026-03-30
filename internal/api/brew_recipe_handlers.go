@@ -215,7 +215,7 @@ func brewRecipeByCoffeeRowToResponse(row db.ListBrewRecipesByCoffeeRow) domain.B
 		ID:         row.ID,
 		CoffeeID:   row.CoffeeID,
 		UserID:     row.UserID,
-		UserEmail:  row.UserEmail,
+		UserEmail:  "",
 		Title:      row.Title,
 		BrewMethod: row.BrewMethod,
 		IsPublic:   row.IsPublic,
