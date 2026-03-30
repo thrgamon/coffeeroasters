@@ -281,15 +281,20 @@ definitions:
       name:
         type: string
     type: object
-  domain.LoginRequest:
+  domain.MagicLinkRequest:
     properties:
       email:
         type: string
-      password:
-        type: string
     required:
     - email
-    - password
+    type: object
+  domain.MagicLinkResponse:
+    properties:
+      message:
+        type: string
+      token:
+        description: Only returned in development
+        type: string
     type: object
   domain.MeResponse:
     properties:
@@ -359,17 +364,6 @@ definitions:
         type: integer
       name:
         type: string
-    type: object
-  domain.RegisterRequest:
-    properties:
-      email:
-        type: string
-      password:
-        minLength: 8
-        type: string
-    required:
-    - email
-    - password
     type: object
   domain.RoasterDetailResponse:
     properties:
@@ -456,9 +450,18 @@ definitions:
         type: string
       id:
         type: integer
+      is_admin:
+        type: boolean
     required:
     - email
     - id
+    type: object
+  domain.VerifyMagicLinkRequest:
+    properties:
+      token:
+        type: string
+    required:
+    - token
     type: object
 host: localhost:8080
 info:
@@ -466,33 +469,26 @@ info:
   title: Coffeeroasters API
   version: "1.0"
 paths:
-  /api/auth/login:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Login credentials
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/domain.LoginRequest'
+  /api/admin:
+    get:
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.AuthResponse'
-        "401":
-          description: Unauthorized
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Login with email and password
+      summary: Admin dashboard (admin only)
       tags:
-      - auth
+      - admin
   /api/auth/logout:
     post:
       produces:
@@ -507,6 +503,33 @@ paths:
       summary: Logout current session
       tags:
       - auth
+  /api/auth/magic-link:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Email address
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.MagicLinkRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.MagicLinkResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Request a magic link for passwordless login
+      tags:
+      - auth
   /api/auth/me:
     get:
       produces:
@@ -519,31 +542,31 @@ paths:
       summary: Get current user (returns null user when unauthenticated)
       tags:
       - auth
-  /api/auth/register:
+  /api/auth/verify:
     post:
       consumes:
       - application/json
       parameters:
-      - description: Registration details
+      - description: Magic link token
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/domain.RegisterRequest'
+          $ref: '#/definitions/domain.VerifyMagicLinkRequest'
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/domain.AuthResponse'
-        "400":
-          description: Bad Request
+        "401":
+          description: Unauthorized
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Register a new user
+      summary: Verify a magic link token and create a session
       tags:
       - auth
   /api/cafes:

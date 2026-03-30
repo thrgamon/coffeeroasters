@@ -8,7 +8,7 @@ import { apiFetch } from '@/lib/api/server';
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
 	const { id } = await params;
 	const data = await apiFetch<DomainRegionDetailResponse>(`/api/regions/${id}`);
-	return { title: `${data.name} | Coffeeroasters` };
+	return { title: `${data.name} | COFFEEROASTERS` };
 }
 
 export default async function RegionDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -18,10 +18,13 @@ export default async function RegionDetailPage({ params }: { params: Promise<{ i
 	return (
 		<div className="space-y-8">
 			<div className="space-y-2">
-				<Link href={`/countries/${data.country_code}`} className="text-sm text-muted-foreground hover:text-foreground">
+				<Link
+					href={`/countries/${data.country_code}`}
+					className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+				>
 					&larr; {data.country_name}
 				</Link>
-				<h1 className="text-3xl font-bold">{data.name}</h1>
+				<h1 className="text-3xl font-bold text-foreground">{data.name}</h1>
 				<div className="flex gap-2">
 					<Link href={`/countries/${data.country_code}`}>
 						<Badge variant="secondary">{data.country_name}</Badge>
@@ -30,7 +33,7 @@ export default async function RegionDetailPage({ params }: { params: Promise<{ i
 			</div>
 
 			<section className="space-y-4">
-				<h2 className="text-xl font-semibold">
+				<h2 className="text-xl font-bold uppercase tracking-wider text-accent">
 					{data.coffees?.length ?? 0} coffee{(data.coffees?.length ?? 0) !== 1 ? 's' : ''}
 				</h2>
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -42,30 +45,33 @@ export default async function RegionDetailPage({ params }: { params: Promise<{ i
 
 			{data.nearby_regions && data.nearby_regions.length > 0 && (
 				<section className="space-y-4">
-					<h2 className="text-xl font-semibold">Nearby Regions</h2>
+					<h2 className="text-xl font-bold uppercase tracking-wider text-accent">Nearby Regions</h2>
 					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 						{data.nearby_regions.map((region) =>
 							region.coffee_count && region.coffee_count > 0 ? (
 								<Link
 									key={region.id}
 									href={`/regions/${region.id}`}
-									className="flex items-center justify-between rounded-lg border p-4 shadow-sm hover:shadow-md hover:bg-muted/50 transition-all"
+									className="flex items-center justify-between rounded border-2 border-border bg-card p-4 hover:border-accent transition-all"
 								>
 									<div>
-										<p className="font-medium">{region.name}</p>
+										<p className="font-medium text-foreground">{region.name}</p>
 										<p className="text-sm text-muted-foreground">{region.country_name}</p>
-										<p className="text-sm text-muted-foreground">
+										<p className="text-sm text-accent font-mono">
 											{region.coffee_count} coffee{region.coffee_count !== 1 ? 's' : ''}
 										</p>
 									</div>
 									<Badge variant="outline">{region.distance_km} km</Badge>
 								</Link>
 							) : (
-								<div key={region.id} className="flex items-center justify-between rounded-lg border p-4 shadow-sm">
+								<div
+									key={region.id}
+									className="flex items-center justify-between rounded border-2 border-border bg-card p-4"
+								>
 									<div>
 										<p className="font-medium text-muted-foreground">{region.name}</p>
 										<p className="text-sm text-muted-foreground">{region.country_name}</p>
-										<p className="text-sm text-muted-foreground">0 coffees</p>
+										<p className="text-sm text-muted-foreground font-mono">0 coffees</p>
 									</div>
 									<Badge variant="outline">{region.distance_km} km</Badge>
 								</div>

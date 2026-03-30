@@ -7,15 +7,19 @@ export default function Icon() {
 	return new ImageResponse(
 		<div
 			style={{
-				fontSize: 24,
+				fontSize: 18,
 				width: '100%',
 				height: '100%',
 				display: 'flex',
 				alignItems: 'center',
 				justifyContent: 'center',
+				background: '#280003',
+				color: '#ffd500',
+				fontWeight: 900,
+				borderRadius: 4,
 			}}
 		>
-			☕
+			CR
 		</div>,
 		{ ...size },
 	);

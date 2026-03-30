@@ -90,6 +90,15 @@ type Country struct {
 	Alpha3 pgtype.Text `json:"alpha3"`
 }
 
+type MagicLink struct {
+	ID        uuid.UUID          `json:"id"`
+	Email     string             `json:"email"`
+	Token     string             `json:"token"`
+	ExpiresAt time.Time          `json:"expires_at"`
+	UsedAt    pgtype.Timestamptz `json:"used_at"`
+	CreatedAt time.Time          `json:"created_at"`
+}
+
 type Producer struct {
 	ID          int32       `json:"id"`
 	Name        string      `json:"name"`
@@ -143,10 +152,23 @@ type Session struct {
 }
 
 type User struct {
-	ID           int32     `json:"id"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"password_hash"`
-	IsAdmin      bool      `json:"is_admin"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           int32       `json:"id"`
+	Email        string      `json:"email"`
+	PasswordHash pgtype.Text `json:"password_hash"`
+	CreatedAt    time.Time   `json:"created_at"`
+	UpdatedAt    time.Time   `json:"updated_at"`
+	IsAdmin      bool        `json:"is_admin"`
+}
+
+type UserCoffee struct {
+	ID        int32       `json:"id"`
+	UserID    int32       `json:"user_id"`
+	CoffeeID  int64       `json:"coffee_id"`
+	Status    string      `json:"status"`
+	Liked     pgtype.Bool `json:"liked"`
+	Rating    pgtype.Int2 `json:"rating"`
+	Review    pgtype.Text `json:"review"`
+	DrunkAt   pgtype.Date `json:"drunk_at"`
+	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
 }

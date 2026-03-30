@@ -18,33 +18,22 @@ import type {
 
 import type {
   DomainAuthResponse,
+  DomainMagicLinkResponse,
   DomainMeResponse,
   PostApiAuthLogout200
 } from '.././models';
 
 
-export const getPostApiAuthLoginResponseMock = (overrideResponse: Partial< DomainAuthResponse > = {}): DomainAuthResponse => ({user: {email: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.number.int({min: undefined, max: undefined})}, ...overrideResponse})
-
 export const getPostApiAuthLogoutResponseMock = (): PostApiAuthLogout200 => ({
         [faker.string.alphanumeric(5)]: faker.string.alpha({length: {min: 10, max: 20}})
       })
 
-export const getGetApiAuthMeResponseMock = (overrideResponse: Partial< DomainMeResponse > = {}): DomainMeResponse => ({user: faker.helpers.arrayElement([{email: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.number.int({min: undefined, max: undefined})}, undefined]), ...overrideResponse})
+export const getPostApiAuthMagicLinkResponseMock = (overrideResponse: Partial< DomainMagicLinkResponse > = {}): DomainMagicLinkResponse => ({message: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), token: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), ...overrideResponse})
 
-export const getPostApiAuthRegisterResponseMock = (overrideResponse: Partial< DomainAuthResponse > = {}): DomainAuthResponse => ({user: {email: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.number.int({min: undefined, max: undefined})}, ...overrideResponse})
+export const getGetApiAuthMeResponseMock = (overrideResponse: Partial< DomainMeResponse > = {}): DomainMeResponse => ({user: faker.helpers.arrayElement([{email: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.number.int({min: undefined, max: undefined}), is_admin: faker.helpers.arrayElement([faker.datatype.boolean(), undefined])}, undefined]), ...overrideResponse})
 
+export const getPostApiAuthVerifyResponseMock = (overrideResponse: Partial< DomainAuthResponse > = {}): DomainAuthResponse => ({user: {email: faker.string.alpha({length: {min: 10, max: 20}}), id: faker.number.int({min: undefined, max: undefined}), is_admin: faker.helpers.arrayElement([faker.datatype.boolean(), undefined])}, ...overrideResponse})
 
-export const getPostApiAuthLoginMockHandler = (overrideResponse?: DomainAuthResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<DomainAuthResponse> | DomainAuthResponse), options?: RequestHandlerOptions) => {
-  return http.post('*/api/auth/login', async (info) => {
-  
-    return new HttpResponse(JSON.stringify(overrideResponse !== undefined
-    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getPostApiAuthLoginResponseMock()),
-      { status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      })
-  }, options)
-}
 
 export const getPostApiAuthLogoutMockHandler = (overrideResponse?: PostApiAuthLogout200 | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<PostApiAuthLogout200> | PostApiAuthLogout200), options?: RequestHandlerOptions) => {
   return http.post('*/api/auth/logout', async (info) => {
@@ -52,6 +41,18 @@ export const getPostApiAuthLogoutMockHandler = (overrideResponse?: PostApiAuthLo
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getPostApiAuthLogoutResponseMock()),
+      { status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      })
+  }, options)
+}
+
+export const getPostApiAuthMagicLinkMockHandler = (overrideResponse?: DomainMagicLinkResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<DomainMagicLinkResponse> | DomainMagicLinkResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/auth/magic-link', async (info) => {
+  
+    return new HttpResponse(JSON.stringify(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPostApiAuthMagicLinkResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
@@ -70,20 +71,20 @@ export const getGetApiAuthMeMockHandler = (overrideResponse?: DomainMeResponse |
   }, options)
 }
 
-export const getPostApiAuthRegisterMockHandler = (overrideResponse?: DomainAuthResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<DomainAuthResponse> | DomainAuthResponse), options?: RequestHandlerOptions) => {
-  return http.post('*/api/auth/register', async (info) => {
+export const getPostApiAuthVerifyMockHandler = (overrideResponse?: DomainAuthResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<DomainAuthResponse> | DomainAuthResponse), options?: RequestHandlerOptions) => {
+  return http.post('*/api/auth/verify', async (info) => {
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getPostApiAuthRegisterResponseMock()),
-      { status: 201,
+    : getPostApiAuthVerifyResponseMock()),
+      { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 export const getAuthMock = () => [
-  getPostApiAuthLoginMockHandler(),
   getPostApiAuthLogoutMockHandler(),
+  getPostApiAuthMagicLinkMockHandler(),
   getGetApiAuthMeMockHandler(),
-  getPostApiAuthRegisterMockHandler()
+  getPostApiAuthVerifyMockHandler()
 ]

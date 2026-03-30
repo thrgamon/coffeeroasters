@@ -8,38 +8,27 @@
     "host": "localhost:8080",
     "basePath": "/api",
     "paths": {
-        "/api/auth/login": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
+        "/api/admin": {
+            "get": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "admin"
                 ],
-                "summary": "Login with email and password",
-                "parameters": [
-                    {
-                        "description": "Login credentials",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.LoginRequest"
-                        }
-                    }
-                ],
+                "summary": "Admin dashboard (admin only)",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.AuthResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -72,6 +61,48 @@
                 }
             }
         },
+        "/api/auth/magic-link": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Request a magic link for passwordless login",
+                "parameters": [
+                    {
+                        "description": "Email address",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.MagicLinkRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.MagicLinkResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/me": {
             "get": {
                 "produces": [
@@ -91,7 +122,7 @@
                 }
             }
         },
-        "/api/auth/register": {
+        "/api/auth/verify": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -102,27 +133,27 @@
                 "tags": [
                     "auth"
                 ],
-                "summary": "Register a new user",
+                "summary": "Verify a magic link token and create a session",
                 "parameters": [
                     {
-                        "description": "Registration details",
+                        "description": "Magic link token",
                         "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.RegisterRequest"
+                            "$ref": "#/definitions/domain.VerifyMagicLinkRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/domain.AuthResponse"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1067,17 +1098,25 @@
                 }
             }
         },
-        "domain.LoginRequest": {
+        "domain.MagicLinkRequest": {
             "type": "object",
             "required": [
-                "email",
-                "password"
+                "email"
             ],
             "properties": {
                 "email": {
                     "type": "string"
+                }
+            }
+        },
+        "domain.MagicLinkResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 },
-                "password": {
+                "token": {
+                    "description": "Only returned in development",
                     "type": "string"
                 }
             }
@@ -1185,22 +1224,6 @@
                 },
                 "name": {
                     "type": "string"
-                }
-            }
-        },
-        "domain.RegisterRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 8
                 }
             }
         },
@@ -1337,6 +1360,20 @@
                 },
                 "id": {
                     "type": "integer"
+                },
+                "is_admin": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "domain.VerifyMagicLinkRequest": {
+            "type": "object",
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
+                    "type": "string"
                 }
             }
         }
