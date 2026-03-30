@@ -590,6 +590,7 @@ WHERE r.opted_out = false
     AND ($7::text IS NULL
          OR ($7 = 'only' AND c.is_decaf = true)
          OR ($7 = 'exclude' AND c.is_decaf = false))
+    AND (c.country_code IS NOT NULL OR c.process IS NOT NULL OR array_length(c.tasting_notes, 1) IS NOT NULL)
 ORDER BY
     CASE WHEN $1::text IS NOT NULL
         THEN ts_rank(c.search_vector, plainto_tsquery('english', $1))
@@ -720,6 +721,7 @@ LEFT JOIN regions reg ON reg.id = c.region_id
 LEFT JOIN producers p ON p.id = c.producer_id
 WHERE r.opted_out = false
     AND c.in_stock = true
+    AND (c.country_code IS NOT NULL OR c.process IS NOT NULL OR array_length(c.tasting_notes, 1) IS NOT NULL)
 ORDER BY c.name
 `
 
