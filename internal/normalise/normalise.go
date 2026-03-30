@@ -119,6 +119,12 @@ var roastAliases = map[string]string{
 	"italian roast": RoastDark,
 }
 
+// IsDecaf returns true if the product name indicates decaffeinated coffee.
+func IsDecaf(name string) bool {
+	lower := strings.ToLower(name)
+	return strings.Contains(lower, "decaf")
+}
+
 // PricePer100g calculates the per-100g price in cents from a total price in
 // cents and a weight in grams. Returns 0 if weight is zero or negative.
 func PricePer100g(priceCents int64, weightGrams int) int64 {

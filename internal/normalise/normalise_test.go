@@ -160,3 +160,25 @@ func TestNormaliseRoastLevel(t *testing.T) {
 		})
 	}
 }
+
+func TestIsDecaf(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  string
+		expect bool
+	}{
+		{"explicit decaf", "Honduras Decaf", true},
+		{"decaffeinated", "Ethiopia Decaffeinated", true},
+		{"case insensitive", "DECAF Blend", true},
+		{"not decaf", "Ethiopia Yirgacheffe", false},
+		{"empty", "", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := IsDecaf(tt.input)
+			if got != tt.expect {
+				t.Errorf("IsDecaf(%q) = %v, want %v", tt.input, got, tt.expect)
+			}
+		})
+	}
+}
