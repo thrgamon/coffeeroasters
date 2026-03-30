@@ -11,6 +11,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type CoffeeAvailabilityLog struct {
+	ID         int64              `json:"id"`
+	CoffeeID   int64              `json:"coffee_id"`
+	InStock    bool               `json:"in_stock"`
+	PriceCents pgtype.Int4        `json:"price_cents"`
+	RecordedAt time.Time          `json:"recorded_at"`
+	CreatedAt  time.Time          `json:"created_at"`
+}
+
 type BlendComponent struct {
 	ID          int32       `json:"id"`
 	CoffeeID    int32       `json:"coffee_id"`

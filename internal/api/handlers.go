@@ -67,6 +67,27 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 	admin.Use(auth.RequireAuth(h.auth), auth.RequireAdmin())
 	{
 		admin.GET("", h.AdminDashboard)
+
+		// Roaster management
+		admin.GET("/roasters", h.AdminListRoasters)
+		admin.GET("/roasters/:id", h.AdminGetRoaster)
+		admin.POST("/roasters", h.AdminCreateRoaster)
+		admin.PUT("/roasters/:id", h.AdminUpdateRoaster)
+
+		// Coffee management
+		admin.GET("/coffees", h.AdminListCoffees)
+		admin.GET("/coffees/:id", h.AdminGetCoffee)
+		admin.POST("/coffees", h.AdminCreateCoffee)
+		admin.PUT("/coffees/:id", h.AdminUpdateCoffee)
+
+		// Cafe management
+		admin.GET("/cafes", h.AdminListCafes)
+		admin.GET("/cafes/:id", h.AdminGetCafe)
+		admin.POST("/cafes", h.AdminCreateCafe)
+		admin.PUT("/cafes/:id", h.AdminUpdateCafe)
+
+		// Scrape runs (read-only)
+		admin.GET("/scrape-runs", h.AdminListScrapeRuns)
 	}
 }
 

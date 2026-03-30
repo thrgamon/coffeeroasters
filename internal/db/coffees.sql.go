@@ -27,6 +27,22 @@ func (q *Queries) CountCoffees(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const getCoffeeByRoasterAndName = `-- name: GetCoffeeByRoasterAndName :one
+SELECT id FROM coffees WHERE roaster_id = $1 AND name = $2
+`
+
+type GetCoffeeByRoasterAndNameParams struct {
+	RoasterID int32  `json:"roaster_id"`
+	Name      string `json:"name"`
+}
+
+func (q *Queries) GetCoffeeByRoasterAndName(ctx context.Context, arg GetCoffeeByRoasterAndNameParams) (int64, error) {
+	row := q.db.QueryRow(ctx, getCoffeeByRoasterAndName, arg.RoasterID, arg.Name)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getCoffeeByID = `-- name: GetCoffeeByID :one
 SELECT
     c.id, c.roaster_id, c.name, c.product_url, c.image_url,

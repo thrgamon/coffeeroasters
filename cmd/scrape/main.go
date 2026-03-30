@@ -100,6 +100,16 @@ func main() {
 	fmt.Printf("\nScrape complete: %d total, %d success, %d failed, %s elapsed\n",
 		total, success, failed, time.Since(start).Round(time.Millisecond))
 
+	// Mark stale coffees as out of stock and record availability
+	if !*dryRun && pool != nil {
+		queries := db.New(pool)
+		if err := queries.MarkStaleCoffeesOutOfStock(ctx); err != nil {
+			slog.Warn("mark stale coffees failed", "error", err)
+		} else {
+			slog.Info("marked stale coffees out of stock")
+		}
+	}
+
 	// Geocode any new regions discovered during scraping
 	if !*dryRun && pool != nil {
 		queries := db.New(pool)

@@ -427,10 +427,39 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 			}
 		}
 
+		// Log availability snapshot
+		if err := r.queries.UpsertAvailabilityLog(ctx, db.UpsertAvailabilityLogParams{
+			CoffeeID:   coffeeID,
+			InStock:    raw.InStock,
+			PriceCents: int4Val(int32(priceCents)),
+		}); err != nil {
+			slog.Warn("upsert availability log failed", "coffee", raw.Name, "error", err)
+		}
+
 		if upsertResult.IsNew {
 			added++
 		} else {
 			updated++
+		}
+	}
+
+	// Log availability for unchanged products too
+	for _, raw := range unchanged {
+		priceCents, _ := normalise.NormalisePriceAUD(raw.PriceRaw)
+		// Look up the coffee ID by roaster+name to log availability
+		coffeeRow, err := r.queries.GetCoffeeByRoasterAndName(ctx, db.GetCoffeeByRoasterAndNameParams{
+			RoasterID: roasterID,
+			Name:      raw.Name,
+		})
+		if err != nil {
+			continue
+		}
+		if err := r.queries.UpsertAvailabilityLog(ctx, db.UpsertAvailabilityLogParams{
+			CoffeeID:   coffeeRow,
+			InStock:    raw.InStock,
+			PriceCents: int4Val(int32(priceCents)),
+		}); err != nil {
+			slog.Warn("upsert availability log failed", "coffee", raw.Name, "error", err)
 		}
 	}
 
