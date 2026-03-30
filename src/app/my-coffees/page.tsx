@@ -50,8 +50,8 @@ function ServerCoffeeList() {
 	if (coffees.length === 0) {
 		return (
 			<p className="text-muted-foreground">
-				You haven't saved any coffees yet. Use the bookmark icon to add coffees to your watchlist, or
-				the eye icon to log coffees you've tried.
+				You haven't saved any coffees yet. Use the bookmark icon to add coffees to your watchlist, or the eye icon to
+				log coffees you've tried.
 			</p>
 		);
 	}
@@ -68,8 +68,8 @@ function ServerCoffeeList() {
 function CoffeeSection({ title, coffees }: { title: string; coffees: DomainCoffeeResponse[] }) {
 	return (
 		<section className="space-y-3">
-			<h2 className="text-xl font-semibold">
-				{title} <span className="text-sm font-normal text-muted-foreground">({coffees.length})</span>
+			<h2 className="text-xl font-bold uppercase tracking-wider text-accent">
+				{title} <span className="text-sm font-normal text-muted-foreground font-mono">({coffees.length})</span>
 			</h2>
 			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{coffees.map((coffee) => (
@@ -83,8 +83,8 @@ function CoffeeSection({ title, coffees }: { title: string; coffees: DomainCoffe
 function LoggedCoffeeSection({ coffees }: { coffees: UserCoffeeDetail[] }) {
 	return (
 		<section className="space-y-3">
-			<h2 className="text-xl font-semibold">
-				Diary <span className="text-sm font-normal text-muted-foreground">({coffees.length})</span>
+			<h2 className="text-xl font-bold uppercase tracking-wider text-accent">
+				Diary <span className="text-sm font-normal text-muted-foreground font-mono">({coffees.length})</span>
 			</h2>
 			<div className="space-y-3">
 				{coffees.map((coffee) => (
@@ -99,19 +99,15 @@ function LoggedCoffeeEntry({ coffee }: { coffee: UserCoffeeDetail }) {
 	return (
 		<Link
 			href={`/coffees/${coffee.id}`}
-			className="flex items-center gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50"
+			className="flex items-center gap-4 rounded border-2 border-border bg-card p-4 transition-all hover:border-accent"
 		>
 			<div className="flex-1 min-w-0">
 				<div className="flex items-center gap-2">
-					<span className="font-medium truncate">{coffee.name}</span>
+					<span className="font-medium text-foreground truncate">{coffee.name}</span>
 					{coffee.liked && <Heart className="size-4 shrink-0 fill-red-500 text-red-500" />}
 				</div>
-				{coffee.roaster_name && (
-					<p className="text-sm text-muted-foreground">{coffee.roaster_name}</p>
-				)}
-				{coffee.review && (
-					<p className="mt-1 text-sm text-muted-foreground line-clamp-2">{coffee.review}</p>
-				)}
+				{coffee.roaster_name && <p className="text-sm text-accent">{coffee.roaster_name}</p>}
+				{coffee.review && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{coffee.review}</p>}
 			</div>
 			<div className="flex flex-col items-end gap-1 shrink-0">
 				{coffee.rating != null && coffee.rating > 0 && (
@@ -119,14 +115,12 @@ function LoggedCoffeeEntry({ coffee }: { coffee: UserCoffeeDetail }) {
 						{[1, 2, 3, 4, 5].map((n) => (
 							<Star
 								key={n}
-								className={`size-4 ${n <= coffee.rating! ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`}
+								className={`size-4 ${n <= (coffee.rating ?? 0) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`}
 							/>
 						))}
 					</div>
 				)}
-				{coffee.drunk_at && (
-					<span className="text-xs text-muted-foreground">{coffee.drunk_at}</span>
-				)}
+				{coffee.drunk_at && <span className="text-xs text-muted-foreground font-mono">{coffee.drunk_at}</span>}
 			</div>
 		</Link>
 	);
@@ -140,11 +134,11 @@ function LocalCoffeeList() {
 		return (
 			<div className="space-y-4">
 				<p className="text-muted-foreground">
-					You haven't saved any coffees yet. Use the bookmark icon to add coffees to your watchlist,
-					or the eye icon to log coffees you've tried.
+					You haven't saved any coffees yet. Use the bookmark icon to add coffees to your watchlist, or the eye icon to
+					log coffees you've tried.
 				</p>
 				<p className="text-sm text-muted-foreground">
-					<Link href="/login" className="text-primary underline">
+					<Link href="/login" className="text-accent hover:text-foreground underline">
 						Sign in
 					</Link>{' '}
 					to save your coffees across devices.
@@ -156,7 +150,7 @@ function LocalCoffeeList() {
 	return (
 		<>
 			<p className="text-sm text-muted-foreground">
-				<Link href="/login" className="text-primary underline">
+				<Link href="/login" className="text-accent hover:text-foreground underline">
 					Sign in
 				</Link>{' '}
 				to save your coffees across devices.
@@ -173,7 +167,7 @@ export default function MyCoffeesPage() {
 
 	return (
 		<div className="space-y-8">
-			<h1 className="text-3xl font-bold">My coffees</h1>
+			<h1 className="text-3xl font-bold uppercase tracking-wider text-foreground">My coffees</h1>
 			{user ? <ServerCoffeeList /> : <LocalCoffeeList />}
 		</div>
 	);

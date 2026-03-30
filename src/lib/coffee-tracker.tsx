@@ -78,8 +78,7 @@ export function CoffeeTrackerProvider({ children }: { children: React.ReactNode 
 			fetch('/api/user/coffee-ids', { credentials: 'include' })
 				.then(async (res) => {
 					if (res.ok) {
-						const items: { coffee_id: number; status: string; liked?: boolean; rating?: number }[] =
-							await res.json();
+						const items: { coffee_id: number; status: string; liked?: boolean; rating?: number }[] = await res.json();
 						const coffees: Record<number, CoffeeStatus> = {};
 						for (const item of items) {
 							coffees[item.coffee_id] = {
@@ -120,7 +119,11 @@ export function CoffeeTrackerProvider({ children }: { children: React.ReactNode 
 	const getCoffeeStatus = useCallback((id: number) => data.coffees[id], [data.coffees]);
 
 	const syncToServer = useCallback(
-		async (coffeeId: number, status: string, extra?: { liked?: boolean; rating?: number; review?: string; drunkAt?: string }) => {
+		async (
+			coffeeId: number,
+			status: string,
+			extra?: { liked?: boolean; rating?: number; review?: string; drunkAt?: string },
+		) => {
 			if (!user) return;
 			await fetch('/api/user/coffees', {
 				method: 'POST',

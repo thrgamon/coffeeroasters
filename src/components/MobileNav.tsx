@@ -12,10 +12,10 @@ const navLinks = [
 	{ href: '/coffees', label: 'Coffees' },
 	{ href: '/roasters', label: 'Roasters' },
 	{ href: '/cafes', label: 'Cafes' },
-	{ href: '/countries', label: 'Countries' },
+	{ href: '/countries', label: 'Origins' },
 	{ href: '/guide', label: 'Guide' },
-	{ href: '/find', label: 'Find your coffee' },
-	{ href: '/my-coffees', label: 'My coffees' },
+	{ href: '/find', label: 'Find' },
+	{ href: '/my-coffees', label: 'My Coffees' },
 ] as const;
 
 export function MobileNav() {
@@ -25,23 +25,21 @@ export function MobileNav() {
 	return (
 		<Sheet open={open} onOpenChange={setOpen}>
 			<SheetTrigger aria-label="Open menu">
-				<Menu className="size-6 text-muted-foreground" />
+				<Menu className="size-6 text-gold" />
 			</SheetTrigger>
-			<SheetContent side="right">
+			<SheetContent side="right" className="bg-rich-mahogany border-2 border-gold">
 				<SheetHeader>
-					<SheetTitle>Navigation</SheetTitle>
+					<SheetTitle className="text-gold tracking-[0.2em] uppercase text-sm font-bold">Navigation</SheetTitle>
 				</SheetHeader>
-				<nav className="flex flex-col gap-2 px-4">
+				<nav className="flex flex-col gap-1 px-4">
 					{navLinks.map((link) => (
 						<Link
 							key={link.href}
 							href={link.href}
 							onClick={() => setOpen(false)}
 							className={cn(
-								'rounded-md px-3 py-2 text-sm transition-colors',
-								pathname === link.href
-									? 'bg-accent font-medium text-foreground'
-									: 'text-muted-foreground hover:text-foreground',
+								'px-3 py-2.5 text-sm font-bold uppercase tracking-[0.15em] transition-colors',
+								pathname === link.href ? 'bg-gold text-rich-mahogany' : 'text-snow/70 hover:text-gold',
 							)}
 						>
 							{link.label}

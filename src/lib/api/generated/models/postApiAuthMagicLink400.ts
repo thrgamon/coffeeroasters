@@ -5,8 +5,4 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface DomainUserResponse {
-  email: string;
-  id: number;
-  is_admin?: boolean;
-}
+export type PostApiAuthMagicLink400 = {[key: string]: string};

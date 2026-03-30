@@ -10,7 +10,7 @@ import type {
 } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
-export const metadata: Metadata = { title: 'Coffees | Coffeeroasters' };
+export const metadata: Metadata = { title: 'Coffees | COFFEEROASTERS' };
 
 interface CoffeesPageProps {
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -69,18 +69,20 @@ export default async function CoffeesPage({ searchParams }: CoffeesPageProps) {
 		<div className="space-y-6">
 			{similarTo && sourceCoffee ? (
 				<div className="space-y-2">
-					<h1 className="text-3xl font-bold">Coffees similar to {sourceCoffee.name}</h1>
+					<h1 className="text-3xl font-bold uppercase tracking-wider text-foreground">
+						Similar to {sourceCoffee.name}
+					</h1>
 					<p className="text-sm text-muted-foreground">
 						{sourceCoffee.roaster_name}
 						{sourceCoffee.country_name ? ` \u00b7 ${sourceCoffee.country_name}` : ''}
 						{sourceCoffee.process ? ` \u00b7 ${sourceCoffee.process}` : ''}
 					</p>
-					<Link href="/coffees" className="inline-block text-sm text-primary hover:underline">
+					<Link href="/coffees" className="inline-block text-sm text-accent hover:text-foreground">
 						Back to all coffees
 					</Link>
 				</div>
 			) : (
-				<h1 className="text-3xl font-bold">Coffees</h1>
+				<h1 className="text-3xl font-bold uppercase tracking-wider text-foreground">Coffees</h1>
 			)}
 
 			{!similarTo && (
@@ -89,7 +91,7 @@ export default async function CoffeesPage({ searchParams }: CoffeesPageProps) {
 				</Suspense>
 			)}
 
-			<p className="text-sm text-muted-foreground">
+			<p className="text-sm text-muted-foreground font-mono">
 				{data.total_count ?? 0} coffee{(data.total_count ?? 0) !== 1 ? 's' : ''} found
 			</p>
 
@@ -102,21 +104,27 @@ export default async function CoffeesPage({ searchParams }: CoffeesPageProps) {
 			{totalPages > 1 && (
 				<div className="flex justify-center gap-2">
 					{page > 1 ? (
-						<Link href={pageUrl(page - 1)} className="rounded border border-border px-3 py-1 text-sm hover:bg-accent">
+						<Link
+							href={pageUrl(page - 1)}
+							className="rounded border border-border px-3 py-1 text-sm text-foreground hover:border-accent hover:text-accent transition-colors"
+						>
 							Previous
 						</Link>
 					) : (
-						<span className="rounded border border-border px-3 py-1 text-sm opacity-50">Previous</span>
+						<span className="rounded border border-border px-3 py-1 text-sm opacity-30 text-foreground">Previous</span>
 					)}
-					<span className="px-3 py-1 text-sm text-muted-foreground">
-						Page {page} of {totalPages}
+					<span className="px-3 py-1 text-sm text-muted-foreground font-mono">
+						{page} / {totalPages}
 					</span>
 					{page < totalPages ? (
-						<Link href={pageUrl(page + 1)} className="rounded border border-border px-3 py-1 text-sm hover:bg-accent">
+						<Link
+							href={pageUrl(page + 1)}
+							className="rounded border border-border px-3 py-1 text-sm text-foreground hover:border-accent hover:text-accent transition-colors"
+						>
 							Next
 						</Link>
 					) : (
-						<span className="rounded border border-border px-3 py-1 text-sm opacity-50">Next</span>
+						<span className="rounded border border-border px-3 py-1 text-sm opacity-30 text-foreground">Next</span>
 					)}
 				</div>
 			)}
