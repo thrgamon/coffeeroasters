@@ -26,6 +26,7 @@ export interface DomainCoffeeResponse {
   region_name?: string;
   roast_level?: string;
   roaster_id?: number;
+  roaster_logo_url?: string;
   roaster_name?: string;
   roaster_slug?: string;
   similarity_score?: number;

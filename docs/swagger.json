@@ -872,6 +872,9 @@
                 "roaster_id": {
                     "type": "integer"
                 },
+                "roaster_logo_url": {
+                    "type": "string"
+                },
                 "roaster_name": {
                     "type": "string"
                 },
@@ -986,6 +989,9 @@
                 },
                 "roaster_id": {
                     "type": "integer"
+                },
+                "roaster_logo_url": {
+                    "type": "string"
                 },
                 "roaster_name": {
                     "type": "string"
@@ -1237,6 +1243,9 @@
                 },
                 "id": {
                     "type": "integer"
+                },
+                "logo_url": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"

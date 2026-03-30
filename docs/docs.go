@@ -879,6 +879,9 @@ const docTemplate = `{
                 "roaster_id": {
                     "type": "integer"
                 },
+                "roaster_logo_url": {
+                    "type": "string"
+                },
                 "roaster_name": {
                     "type": "string"
                 },
@@ -993,6 +996,9 @@ const docTemplate = `{
                 },
                 "roaster_id": {
                     "type": "integer"
+                },
+                "roaster_logo_url": {
+                    "type": "string"
                 },
                 "roaster_name": {
                     "type": "string"
@@ -1244,6 +1250,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "logo_url": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"

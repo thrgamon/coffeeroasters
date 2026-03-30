@@ -153,6 +153,8 @@ definitions:
         type: string
       roaster_id:
         type: integer
+      roaster_logo_url:
+        type: string
       roaster_name:
         type: string
       roaster_slug:
@@ -229,6 +231,8 @@ definitions:
         type: string
       roaster_id:
         type: integer
+      roaster_logo_url:
+        type: string
       roaster_name:
         type: string
       roaster_slug:
@@ -393,6 +397,8 @@ definitions:
         type: integer
       id:
         type: integer
+      logo_url:
+        type: string
       name:
         type: string
       slug:

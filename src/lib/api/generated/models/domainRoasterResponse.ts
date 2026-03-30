@@ -8,6 +8,7 @@
 export interface DomainRoasterResponse {
   coffee_count?: number;
   id?: number;
+  logo_url?: string;
   name?: string;
   slug?: string;
   state?: string;
