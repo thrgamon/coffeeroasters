@@ -102,6 +102,7 @@ type CoffeeResponse struct {
 	PricePer100gMin int32    `json:"price_per_100g_min,omitempty"`
 	PricePer100gMax int32    `json:"price_per_100g_max,omitempty"`
 	IsBlend         bool     `json:"is_blend"`
+	IsDecaf         bool     `json:"is_decaf"`
 	InStock         bool     `json:"in_stock"`
 	Description     string   `json:"description,omitempty"`
 	SimilarityScore float64  `json:"similarity_score,omitempty"`
