@@ -181,3 +181,11 @@ type UserCoffee struct {
 	CreatedAt time.Time   `json:"created_at"`
 	UpdatedAt time.Time   `json:"updated_at"`
 }
+
+type UserTastingNote struct {
+	ID          int32     `json:"id"`
+	UserID      int32     `json:"user_id"`
+	CoffeeID    int64     `json:"coffee_id"`
+	TastingNote string    `json:"tasting_note"`
+	CreatedAt   time.Time `json:"created_at"`
+}

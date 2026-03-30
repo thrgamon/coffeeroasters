@@ -161,8 +161,27 @@ type BlendComponentResponse struct {
 // blend components for blend coffees.
 type CoffeeDetailResponse struct {
 	CoffeeResponse
-	BlendComponents []BlendComponentResponse `json:"blend_components,omitempty"`
-	SimilarCoffees  []SimilarCoffee          `json:"similar_coffees,omitempty"`
+	BlendComponents      []BlendComponentResponse      `json:"blend_components,omitempty"`
+	SimilarCoffees       []SimilarCoffee               `json:"similar_coffees,omitempty"`
+	CrowdsourcedNotes    []CrowdsourcedTastingNote      `json:"crowdsourced_notes,omitempty"`
+}
+
+// CrowdsourcedTastingNote represents a tasting note with its vote count from users.
+type CrowdsourcedTastingNote struct {
+	Note      string `json:"note"`
+	VoteCount int64  `json:"vote_count"`
+}
+
+// TastingNoteVoteRequest is the request body for voting on a tasting note.
+type TastingNoteVoteRequest struct {
+	CoffeeID    int64  `json:"coffee_id" binding:"required"`
+	TastingNote string `json:"tasting_note" binding:"required"`
+}
+
+// TastingNoteVotesResponse returns crowdsourced notes and which ones the current user has voted for.
+type TastingNoteVotesResponse struct {
+	CrowdsourcedNotes []CrowdsourcedTastingNote `json:"crowdsourced_notes"`
+	UserVotes         []string                  `json:"user_votes"`
 }
 
 // SimilarCoffee is a lightweight coffee representation for the similar coffees section.

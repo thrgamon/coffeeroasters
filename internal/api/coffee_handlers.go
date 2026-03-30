@@ -458,6 +458,21 @@ func (h *Handler) GetCoffee(c *gin.Context) {
 		}
 	}
 
+	// Fetch crowdsourced tasting notes
+	crowdsourcedRows, err := h.queries.ListCrowdsourcedTastingNotes(ctx, id)
+	if err != nil {
+		slog.Warn("list crowdsourced tasting notes", "error", err)
+	} else if len(crowdsourcedRows) > 0 {
+		notes := make([]domain.CrowdsourcedTastingNote, 0, len(crowdsourcedRows))
+		for _, cn := range crowdsourcedRows {
+			notes = append(notes, domain.CrowdsourcedTastingNote{
+				Note:      cn.TastingNote,
+				VoteCount: cn.VoteCount,
+			})
+		}
+		resp.CrowdsourcedNotes = notes
+	}
+
 	// Build similar coffees
 	simRows, err := h.queries.ListCoffeesForSimilarity(ctx)
 	if err != nil {

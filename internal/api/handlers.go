@@ -53,6 +53,9 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 	rg.GET("/regions/:id", h.GetRegion)
 	rg.GET("/producers/:id", h.GetProducer)
 
+	// Tasting note votes: public read (with optional auth enrichment), protected write
+	rg.GET("/coffees/:coffee_id/tasting-notes", h.OptionalAuth, h.GetTastingNoteVotes)
+
 	protected := rg.Group("")
 	protected.Use(auth.RequireAuth(h.auth))
 	{
@@ -61,6 +64,8 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 		protected.DELETE("/user/coffees/:coffee_id", h.DeleteUserCoffee)
 		protected.GET("/user/coffees", h.ListUserCoffees)
 		protected.GET("/user/coffee-ids", h.ListUserCoffeeIDs)
+		protected.POST("/user/tasting-notes", h.AddTastingNoteVote)
+		protected.DELETE("/user/tasting-notes", h.RemoveTastingNoteVote)
 	}
 
 	admin := rg.Group("/admin")
@@ -241,4 +246,24 @@ func (h *Handler) setSessionCookie(c *gin.Context, token string) {
 func (h *Handler) clearSessionCookie(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("session_token", "", -1, "/", h.cfg.CookieDomain, h.cfg.CookieSecure, true)
+}
+
+// OptionalAuth sets user context if a valid session exists, but does not block unauthenticated requests.
+func (h *Handler) OptionalAuth(c *gin.Context) {
+	token, err := c.Cookie("session_token")
+	if err != nil || token == "" {
+		c.Next()
+		return
+	}
+
+	session, err := h.auth.ValidateSession(c.Request.Context(), token)
+	if err != nil {
+		c.Next()
+		return
+	}
+
+	c.Set("user_id", session.UserID)
+	c.Set("user_email", session.UserEmail)
+	c.Set("user_is_admin", session.UserIsAdmin)
+	c.Next()
 }
