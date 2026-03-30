@@ -23,17 +23,17 @@ RETURNING id, coffee_id, user_id, title, brew_method, dose_grams, water_ml, wate
 `
 
 type CreateBrewRecipeParams struct {
-	CoffeeID        int64         `json:"coffee_id"`
-	UserID          int32         `json:"user_id"`
-	Title           string        `json:"title"`
-	BrewMethod      string        `json:"brew_method"`
+	CoffeeID        int64          `json:"coffee_id"`
+	UserID          int32          `json:"user_id"`
+	Title           string         `json:"title"`
+	BrewMethod      string         `json:"brew_method"`
 	DoseGrams       pgtype.Numeric `json:"dose_grams"`
-	WaterMl         pgtype.Int4   `json:"water_ml"`
-	WaterTempC      pgtype.Int4   `json:"water_temp_c"`
-	GrindSize       pgtype.Text   `json:"grind_size"`
-	BrewTimeSeconds pgtype.Int4   `json:"brew_time_seconds"`
-	Notes           pgtype.Text   `json:"notes"`
-	IsPublic        bool          `json:"is_public"`
+	WaterMl         pgtype.Int4    `json:"water_ml"`
+	WaterTempC      pgtype.Int4    `json:"water_temp_c"`
+	GrindSize       pgtype.Text    `json:"grind_size"`
+	BrewTimeSeconds pgtype.Int4    `json:"brew_time_seconds"`
+	Notes           pgtype.Text    `json:"notes"`
+	IsPublic        bool           `json:"is_public"`
 }
 
 func (q *Queries) CreateBrewRecipe(ctx context.Context, arg CreateBrewRecipeParams) (BrewRecipe, error) {
@@ -52,62 +52,20 @@ func (q *Queries) CreateBrewRecipe(ctx context.Context, arg CreateBrewRecipePara
 	)
 	var i BrewRecipe
 	err := row.Scan(
-		&i.ID, &i.CoffeeID, &i.UserID, &i.Title, &i.BrewMethod,
-		&i.DoseGrams, &i.WaterMl, &i.WaterTempC, &i.GrindSize,
-		&i.BrewTimeSeconds, &i.Notes, &i.IsPublic, &i.CreatedAt, &i.UpdatedAt,
-	)
-	return i, err
-}
-
-const updateBrewRecipe = `-- name: UpdateBrewRecipe :one
-UPDATE brew_recipes SET
-    title = $3,
-    brew_method = $4,
-    dose_grams = $5,
-    water_ml = $6,
-    water_temp_c = $7,
-    grind_size = $8,
-    brew_time_seconds = $9,
-    notes = $10,
-    is_public = $11,
-    updated_at = now()
-WHERE id = $1 AND user_id = $2
-RETURNING id, coffee_id, user_id, title, brew_method, dose_grams, water_ml, water_temp_c, grind_size, brew_time_seconds, notes, is_public, created_at, updated_at
-`
-
-type UpdateBrewRecipeParams struct {
-	ID              int32         `json:"id"`
-	UserID          int32         `json:"user_id"`
-	Title           string        `json:"title"`
-	BrewMethod      string        `json:"brew_method"`
-	DoseGrams       pgtype.Numeric `json:"dose_grams"`
-	WaterMl         pgtype.Int4   `json:"water_ml"`
-	WaterTempC      pgtype.Int4   `json:"water_temp_c"`
-	GrindSize       pgtype.Text   `json:"grind_size"`
-	BrewTimeSeconds pgtype.Int4   `json:"brew_time_seconds"`
-	Notes           pgtype.Text   `json:"notes"`
-	IsPublic        bool          `json:"is_public"`
-}
-
-func (q *Queries) UpdateBrewRecipe(ctx context.Context, arg UpdateBrewRecipeParams) (BrewRecipe, error) {
-	row := q.db.QueryRow(ctx, updateBrewRecipe,
-		arg.ID,
-		arg.UserID,
-		arg.Title,
-		arg.BrewMethod,
-		arg.DoseGrams,
-		arg.WaterMl,
-		arg.WaterTempC,
-		arg.GrindSize,
-		arg.BrewTimeSeconds,
-		arg.Notes,
-		arg.IsPublic,
-	)
-	var i BrewRecipe
-	err := row.Scan(
-		&i.ID, &i.CoffeeID, &i.UserID, &i.Title, &i.BrewMethod,
-		&i.DoseGrams, &i.WaterMl, &i.WaterTempC, &i.GrindSize,
-		&i.BrewTimeSeconds, &i.Notes, &i.IsPublic, &i.CreatedAt, &i.UpdatedAt,
+		&i.ID,
+		&i.CoffeeID,
+		&i.UserID,
+		&i.Title,
+		&i.BrewMethod,
+		&i.DoseGrams,
+		&i.WaterMl,
+		&i.WaterTempC,
+		&i.GrindSize,
+		&i.BrewTimeSeconds,
+		&i.Notes,
+		&i.IsPublic,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -136,30 +94,41 @@ WHERE br.id = $1
 `
 
 type GetBrewRecipeRow struct {
-	ID              int32         `json:"id"`
-	CoffeeID        int64         `json:"coffee_id"`
-	UserID          int32         `json:"user_id"`
-	Title           string        `json:"title"`
-	BrewMethod      string        `json:"brew_method"`
+	ID              int32          `json:"id"`
+	CoffeeID        int64          `json:"coffee_id"`
+	UserID          int32          `json:"user_id"`
+	Title           string         `json:"title"`
+	BrewMethod      string         `json:"brew_method"`
 	DoseGrams       pgtype.Numeric `json:"dose_grams"`
-	WaterMl         pgtype.Int4   `json:"water_ml"`
-	WaterTempC      pgtype.Int4   `json:"water_temp_c"`
-	GrindSize       pgtype.Text   `json:"grind_size"`
-	BrewTimeSeconds pgtype.Int4   `json:"brew_time_seconds"`
-	Notes           pgtype.Text   `json:"notes"`
-	IsPublic        bool          `json:"is_public"`
-	CreatedAt       time.Time     `json:"created_at"`
-	UpdatedAt       time.Time     `json:"updated_at"`
-	UserEmail       string        `json:"user_email"`
+	WaterMl         pgtype.Int4    `json:"water_ml"`
+	WaterTempC      pgtype.Int4    `json:"water_temp_c"`
+	GrindSize       pgtype.Text    `json:"grind_size"`
+	BrewTimeSeconds pgtype.Int4    `json:"brew_time_seconds"`
+	Notes           pgtype.Text    `json:"notes"`
+	IsPublic        bool           `json:"is_public"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	UserEmail       string         `json:"user_email"`
 }
 
 func (q *Queries) GetBrewRecipe(ctx context.Context, id int32) (GetBrewRecipeRow, error) {
 	row := q.db.QueryRow(ctx, getBrewRecipe, id)
 	var i GetBrewRecipeRow
 	err := row.Scan(
-		&i.ID, &i.CoffeeID, &i.UserID, &i.Title, &i.BrewMethod,
-		&i.DoseGrams, &i.WaterMl, &i.WaterTempC, &i.GrindSize,
-		&i.BrewTimeSeconds, &i.Notes, &i.IsPublic, &i.CreatedAt, &i.UpdatedAt,
+		&i.ID,
+		&i.CoffeeID,
+		&i.UserID,
+		&i.Title,
+		&i.BrewMethod,
+		&i.DoseGrams,
+		&i.WaterMl,
+		&i.WaterTempC,
+		&i.GrindSize,
+		&i.BrewTimeSeconds,
+		&i.Notes,
+		&i.IsPublic,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.UserEmail,
 	)
 	return i, err
@@ -171,7 +140,7 @@ SELECT br.id, br.coffee_id, br.user_id, br.title, br.brew_method, br.dose_grams,
 FROM brew_recipes br
 JOIN users u ON u.id = br.user_id
 WHERE br.coffee_id = $1
-    AND (br.is_public = true OR br.user_id = $2)
+    AND (br.is_public = true OR br.user_id = $2::int)
 ORDER BY br.created_at DESC
 `
 
@@ -181,21 +150,21 @@ type ListBrewRecipesByCoffeeParams struct {
 }
 
 type ListBrewRecipesByCoffeeRow struct {
-	ID              int32         `json:"id"`
-	CoffeeID        int64         `json:"coffee_id"`
-	UserID          int32         `json:"user_id"`
-	Title           string        `json:"title"`
-	BrewMethod      string        `json:"brew_method"`
+	ID              int32          `json:"id"`
+	CoffeeID        int64          `json:"coffee_id"`
+	UserID          int32          `json:"user_id"`
+	Title           string         `json:"title"`
+	BrewMethod      string         `json:"brew_method"`
 	DoseGrams       pgtype.Numeric `json:"dose_grams"`
-	WaterMl         pgtype.Int4   `json:"water_ml"`
-	WaterTempC      pgtype.Int4   `json:"water_temp_c"`
-	GrindSize       pgtype.Text   `json:"grind_size"`
-	BrewTimeSeconds pgtype.Int4   `json:"brew_time_seconds"`
-	Notes           pgtype.Text   `json:"notes"`
-	IsPublic        bool          `json:"is_public"`
-	CreatedAt       time.Time     `json:"created_at"`
-	UpdatedAt       time.Time     `json:"updated_at"`
-	UserEmail       string        `json:"user_email"`
+	WaterMl         pgtype.Int4    `json:"water_ml"`
+	WaterTempC      pgtype.Int4    `json:"water_temp_c"`
+	GrindSize       pgtype.Text    `json:"grind_size"`
+	BrewTimeSeconds pgtype.Int4    `json:"brew_time_seconds"`
+	Notes           pgtype.Text    `json:"notes"`
+	IsPublic        bool           `json:"is_public"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	UserEmail       string         `json:"user_email"`
 }
 
 func (q *Queries) ListBrewRecipesByCoffee(ctx context.Context, arg ListBrewRecipesByCoffeeParams) ([]ListBrewRecipesByCoffeeRow, error) {
@@ -208,9 +177,20 @@ func (q *Queries) ListBrewRecipesByCoffee(ctx context.Context, arg ListBrewRecip
 	for rows.Next() {
 		var i ListBrewRecipesByCoffeeRow
 		if err := rows.Scan(
-			&i.ID, &i.CoffeeID, &i.UserID, &i.Title, &i.BrewMethod,
-			&i.DoseGrams, &i.WaterMl, &i.WaterTempC, &i.GrindSize,
-			&i.BrewTimeSeconds, &i.Notes, &i.IsPublic, &i.CreatedAt, &i.UpdatedAt,
+			&i.ID,
+			&i.CoffeeID,
+			&i.UserID,
+			&i.Title,
+			&i.BrewMethod,
+			&i.DoseGrams,
+			&i.WaterMl,
+			&i.WaterTempC,
+			&i.GrindSize,
+			&i.BrewTimeSeconds,
+			&i.Notes,
+			&i.IsPublic,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.UserEmail,
 		); err != nil {
 			return nil, err
@@ -235,23 +215,23 @@ ORDER BY br.updated_at DESC
 `
 
 type ListBrewRecipesByUserRow struct {
-	ID              int32         `json:"id"`
-	CoffeeID        int64         `json:"coffee_id"`
-	UserID          int32         `json:"user_id"`
-	Title           string        `json:"title"`
-	BrewMethod      string        `json:"brew_method"`
+	ID              int32          `json:"id"`
+	CoffeeID        int64          `json:"coffee_id"`
+	UserID          int32          `json:"user_id"`
+	Title           string         `json:"title"`
+	BrewMethod      string         `json:"brew_method"`
 	DoseGrams       pgtype.Numeric `json:"dose_grams"`
-	WaterMl         pgtype.Int4   `json:"water_ml"`
-	WaterTempC      pgtype.Int4   `json:"water_temp_c"`
-	GrindSize       pgtype.Text   `json:"grind_size"`
-	BrewTimeSeconds pgtype.Int4   `json:"brew_time_seconds"`
-	Notes           pgtype.Text   `json:"notes"`
-	IsPublic        bool          `json:"is_public"`
-	CreatedAt       time.Time     `json:"created_at"`
-	UpdatedAt       time.Time     `json:"updated_at"`
-	CoffeeName      string        `json:"coffee_name"`
-	RoasterName     string        `json:"roaster_name"`
-	RoasterSlug     string        `json:"roaster_slug"`
+	WaterMl         pgtype.Int4    `json:"water_ml"`
+	WaterTempC      pgtype.Int4    `json:"water_temp_c"`
+	GrindSize       pgtype.Text    `json:"grind_size"`
+	BrewTimeSeconds pgtype.Int4    `json:"brew_time_seconds"`
+	Notes           pgtype.Text    `json:"notes"`
+	IsPublic        bool           `json:"is_public"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	CoffeeName      string         `json:"coffee_name"`
+	RoasterName     string         `json:"roaster_name"`
+	RoasterSlug     string         `json:"roaster_slug"`
 }
 
 func (q *Queries) ListBrewRecipesByUser(ctx context.Context, userID int32) ([]ListBrewRecipesByUserRow, error) {
@@ -264,10 +244,23 @@ func (q *Queries) ListBrewRecipesByUser(ctx context.Context, userID int32) ([]Li
 	for rows.Next() {
 		var i ListBrewRecipesByUserRow
 		if err := rows.Scan(
-			&i.ID, &i.CoffeeID, &i.UserID, &i.Title, &i.BrewMethod,
-			&i.DoseGrams, &i.WaterMl, &i.WaterTempC, &i.GrindSize,
-			&i.BrewTimeSeconds, &i.Notes, &i.IsPublic, &i.CreatedAt, &i.UpdatedAt,
-			&i.CoffeeName, &i.RoasterName, &i.RoasterSlug,
+			&i.ID,
+			&i.CoffeeID,
+			&i.UserID,
+			&i.Title,
+			&i.BrewMethod,
+			&i.DoseGrams,
+			&i.WaterMl,
+			&i.WaterTempC,
+			&i.GrindSize,
+			&i.BrewTimeSeconds,
+			&i.Notes,
+			&i.IsPublic,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.CoffeeName,
+			&i.RoasterName,
+			&i.RoasterSlug,
 		); err != nil {
 			return nil, err
 		}
@@ -277,4 +270,68 @@ func (q *Queries) ListBrewRecipesByUser(ctx context.Context, userID int32) ([]Li
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateBrewRecipe = `-- name: UpdateBrewRecipe :one
+UPDATE brew_recipes SET
+    title = $3,
+    brew_method = $4,
+    dose_grams = $5,
+    water_ml = $6,
+    water_temp_c = $7,
+    grind_size = $8,
+    brew_time_seconds = $9,
+    notes = $10,
+    is_public = $11,
+    updated_at = now()
+WHERE id = $1 AND user_id = $2
+RETURNING id, coffee_id, user_id, title, brew_method, dose_grams, water_ml, water_temp_c, grind_size, brew_time_seconds, notes, is_public, created_at, updated_at
+`
+
+type UpdateBrewRecipeParams struct {
+	ID              int32          `json:"id"`
+	UserID          int32          `json:"user_id"`
+	Title           string         `json:"title"`
+	BrewMethod      string         `json:"brew_method"`
+	DoseGrams       pgtype.Numeric `json:"dose_grams"`
+	WaterMl         pgtype.Int4    `json:"water_ml"`
+	WaterTempC      pgtype.Int4    `json:"water_temp_c"`
+	GrindSize       pgtype.Text    `json:"grind_size"`
+	BrewTimeSeconds pgtype.Int4    `json:"brew_time_seconds"`
+	Notes           pgtype.Text    `json:"notes"`
+	IsPublic        bool           `json:"is_public"`
+}
+
+func (q *Queries) UpdateBrewRecipe(ctx context.Context, arg UpdateBrewRecipeParams) (BrewRecipe, error) {
+	row := q.db.QueryRow(ctx, updateBrewRecipe,
+		arg.ID,
+		arg.UserID,
+		arg.Title,
+		arg.BrewMethod,
+		arg.DoseGrams,
+		arg.WaterMl,
+		arg.WaterTempC,
+		arg.GrindSize,
+		arg.BrewTimeSeconds,
+		arg.Notes,
+		arg.IsPublic,
+	)
+	var i BrewRecipe
+	err := row.Scan(
+		&i.ID,
+		&i.CoffeeID,
+		&i.UserID,
+		&i.Title,
+		&i.BrewMethod,
+		&i.DoseGrams,
+		&i.WaterMl,
+		&i.WaterTempC,
+		&i.GrindSize,
+		&i.BrewTimeSeconds,
+		&i.Notes,
+		&i.IsPublic,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
