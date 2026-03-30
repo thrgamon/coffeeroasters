@@ -69,7 +69,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id,
@@ -116,7 +116,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id
@@ -139,7 +139,7 @@ SELECT
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
     c.description,
     c.first_seen_at, c.last_seen_at,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name,
     p.name AS producer_name
@@ -164,7 +164,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id
@@ -187,7 +187,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id
@@ -206,7 +206,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id
@@ -283,7 +283,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id

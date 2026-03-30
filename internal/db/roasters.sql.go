@@ -24,7 +24,7 @@ func (q *Queries) CountRoasters(ctx context.Context) (int64, error) {
 }
 
 const getRoasterBySlug = `-- name: GetRoasterBySlug :one
-SELECT id, slug, name, website, state, description, active, created_at, updated_at
+SELECT id, slug, name, website, state, logo_url, description, active, created_at, updated_at
 FROM roasters
 WHERE slug = $1 AND opted_out = false
 `
@@ -35,6 +35,7 @@ type GetRoasterBySlugRow struct {
 	Name        string      `json:"name"`
 	Website     string      `json:"website"`
 	State       pgtype.Text `json:"state"`
+	LogoUrl     pgtype.Text `json:"logo_url"`
 	Description pgtype.Text `json:"description"`
 	Active      bool        `json:"active"`
 	CreatedAt   time.Time   `json:"created_at"`
@@ -50,6 +51,7 @@ func (q *Queries) GetRoasterBySlug(ctx context.Context, slug string) (GetRoaster
 		&i.Name,
 		&i.Website,
 		&i.State,
+		&i.LogoUrl,
 		&i.Description,
 		&i.Active,
 		&i.CreatedAt,
@@ -59,12 +61,12 @@ func (q *Queries) GetRoasterBySlug(ctx context.Context, slug string) (GetRoaster
 }
 
 const listRoasters = `-- name: ListRoasters :many
-SELECT r.id, r.slug, r.name, r.website, r.state,
+SELECT r.id, r.slug, r.name, r.website, r.state, r.logo_url,
     count(c.id)::int AS coffee_count
 FROM roasters r
 LEFT JOIN coffees c ON c.roaster_id = r.id AND c.in_stock = true
 WHERE r.active = true AND r.opted_out = false
-GROUP BY r.id, r.slug, r.name, r.website, r.state
+GROUP BY r.id, r.slug, r.name, r.website, r.state, r.logo_url
 ORDER BY r.name
 `
 
@@ -74,6 +76,7 @@ type ListRoastersRow struct {
 	Name        string      `json:"name"`
 	Website     string      `json:"website"`
 	State       pgtype.Text `json:"state"`
+	LogoUrl     pgtype.Text `json:"logo_url"`
 	CoffeeCount int32       `json:"coffee_count"`
 }
 
@@ -92,6 +95,7 @@ func (q *Queries) ListRoasters(ctx context.Context) ([]ListRoastersRow, error) {
 			&i.Name,
 			&i.Website,
 			&i.State,
+			&i.LogoUrl,
 			&i.CoffeeCount,
 		); err != nil {
 			return nil, err
@@ -105,12 +109,12 @@ func (q *Queries) ListRoasters(ctx context.Context) ([]ListRoastersRow, error) {
 }
 
 const listRoastersByState = `-- name: ListRoastersByState :many
-SELECT r.id, r.slug, r.name, r.website, r.state,
+SELECT r.id, r.slug, r.name, r.website, r.state, r.logo_url,
     count(c.id)::int AS coffee_count
 FROM roasters r
 LEFT JOIN coffees c ON c.roaster_id = r.id AND c.in_stock = true
 WHERE r.state = $1 AND r.active = true AND r.opted_out = false
-GROUP BY r.id, r.slug, r.name, r.website, r.state
+GROUP BY r.id, r.slug, r.name, r.website, r.state, r.logo_url
 ORDER BY r.name
 `
 
@@ -120,6 +124,7 @@ type ListRoastersByStateRow struct {
 	Name        string      `json:"name"`
 	Website     string      `json:"website"`
 	State       pgtype.Text `json:"state"`
+	LogoUrl     pgtype.Text `json:"logo_url"`
 	CoffeeCount int32       `json:"coffee_count"`
 }
 
@@ -138,6 +143,7 @@ func (q *Queries) ListRoastersByState(ctx context.Context, state pgtype.Text) ([
 			&i.Name,
 			&i.Website,
 			&i.State,
+			&i.LogoUrl,
 			&i.CoffeeCount,
 		); err != nil {
 			return nil, err

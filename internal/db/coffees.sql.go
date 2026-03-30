@@ -38,7 +38,7 @@ SELECT
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
     c.description,
     c.first_seen_at, c.last_seen_at,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name,
     p.name AS producer_name
@@ -83,6 +83,7 @@ type GetCoffeeByIDRow struct {
 	LastSeenAt      time.Time   `json:"last_seen_at"`
 	RoasterName     string      `json:"roaster_name"`
 	RoasterSlug     string      `json:"roaster_slug"`
+	RoasterLogoUrl  pgtype.Text `json:"roaster_logo_url"`
 	CountryName     pgtype.Text `json:"country_name"`
 	RegionName      pgtype.Text `json:"region_name"`
 	ProducerName    pgtype.Text `json:"producer_name"`
@@ -124,6 +125,7 @@ func (q *Queries) GetCoffeeByID(ctx context.Context, id int64) (GetCoffeeByIDRow
 		&i.LastSeenAt,
 		&i.RoasterName,
 		&i.RoasterSlug,
+		&i.RoasterLogoUrl,
 		&i.CountryName,
 		&i.RegionName,
 		&i.ProducerName,
@@ -170,7 +172,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id
@@ -208,6 +210,7 @@ type ListCoffeesByCountryRow struct {
 	IsDecaf          bool        `json:"is_decaf"`
 	RoasterName      string      `json:"roaster_name"`
 	RoasterSlug      string      `json:"roaster_slug"`
+	RoasterLogoUrl   pgtype.Text `json:"roaster_logo_url"`
 	CountryName      pgtype.Text `json:"country_name"`
 	RegionName       pgtype.Text `json:"region_name"`
 	CoffeeRegionID   pgtype.Int4 `json:"coffee_region_id"`
@@ -245,6 +248,7 @@ func (q *Queries) ListCoffeesByCountry(ctx context.Context, countryCode pgtype.T
 			&i.IsDecaf,
 			&i.RoasterName,
 			&i.RoasterSlug,
+			&i.RoasterLogoUrl,
 			&i.CountryName,
 			&i.RegionName,
 			&i.CoffeeRegionID,
@@ -268,7 +272,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id
@@ -302,6 +306,7 @@ type ListCoffeesByProducerRow struct {
 	IsDecaf          bool        `json:"is_decaf"`
 	RoasterName      string      `json:"roaster_name"`
 	RoasterSlug      string      `json:"roaster_slug"`
+	RoasterLogoUrl   pgtype.Text `json:"roaster_logo_url"`
 	CountryName      pgtype.Text `json:"country_name"`
 	RegionName       pgtype.Text `json:"region_name"`
 	CoffeeRegionID   pgtype.Int4 `json:"coffee_region_id"`
@@ -339,6 +344,7 @@ func (q *Queries) ListCoffeesByProducer(ctx context.Context, producerID pgtype.I
 			&i.IsDecaf,
 			&i.RoasterName,
 			&i.RoasterSlug,
+			&i.RoasterLogoUrl,
 			&i.CountryName,
 			&i.RegionName,
 			&i.CoffeeRegionID,
@@ -362,7 +368,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id
@@ -396,6 +402,7 @@ type ListCoffeesByRegionRow struct {
 	IsDecaf          bool        `json:"is_decaf"`
 	RoasterName      string      `json:"roaster_name"`
 	RoasterSlug      string      `json:"roaster_slug"`
+	RoasterLogoUrl   pgtype.Text `json:"roaster_logo_url"`
 	CountryName      pgtype.Text `json:"country_name"`
 	RegionName       pgtype.Text `json:"region_name"`
 	CoffeeRegionID   pgtype.Int4 `json:"coffee_region_id"`
@@ -433,6 +440,7 @@ func (q *Queries) ListCoffeesByRegion(ctx context.Context, regionID pgtype.Int4)
 			&i.IsDecaf,
 			&i.RoasterName,
 			&i.RoasterSlug,
+			&i.RoasterLogoUrl,
 			&i.CountryName,
 			&i.RegionName,
 			&i.CoffeeRegionID,
@@ -456,7 +464,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id
@@ -492,6 +500,7 @@ type ListCoffeesByRoasterRow struct {
 	IsDecaf          bool        `json:"is_decaf"`
 	RoasterName      string      `json:"roaster_name"`
 	RoasterSlug      string      `json:"roaster_slug"`
+	RoasterLogoUrl   pgtype.Text `json:"roaster_logo_url"`
 	CountryName      pgtype.Text `json:"country_name"`
 	RegionName       pgtype.Text `json:"region_name"`
 	CoffeeRegionID   pgtype.Int4 `json:"coffee_region_id"`
@@ -531,6 +540,7 @@ func (q *Queries) ListCoffeesByRoaster(ctx context.Context, slug string) ([]List
 			&i.IsDecaf,
 			&i.RoasterName,
 			&i.RoasterSlug,
+			&i.RoasterLogoUrl,
 			&i.CountryName,
 			&i.RegionName,
 			&i.CoffeeRegionID,
@@ -554,7 +564,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id,
@@ -623,6 +633,7 @@ type ListCoffeesFilteredRow struct {
 	IsDecaf          bool        `json:"is_decaf"`
 	RoasterName      string      `json:"roaster_name"`
 	RoasterSlug      string      `json:"roaster_slug"`
+	RoasterLogoUrl   pgtype.Text `json:"roaster_logo_url"`
 	CountryName      pgtype.Text `json:"country_name"`
 	RegionName       pgtype.Text `json:"region_name"`
 	CoffeeRegionID   pgtype.Int4 `json:"coffee_region_id"`
@@ -673,6 +684,7 @@ func (q *Queries) ListCoffeesFiltered(ctx context.Context, arg ListCoffeesFilter
 			&i.IsDecaf,
 			&i.RoasterName,
 			&i.RoasterSlug,
+			&i.RoasterLogoUrl,
 			&i.CountryName,
 			&i.RegionName,
 			&i.CoffeeRegionID,
@@ -697,7 +709,7 @@ SELECT
     c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    r.name AS roaster_name, r.slug AS roaster_slug,
+    r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,
     reg.name AS region_name, reg.id AS coffee_region_id,
     p.name AS producer_name, p.id AS coffee_producer_id
@@ -732,6 +744,7 @@ type ListCoffeesForFinderRow struct {
 	IsDecaf          bool        `json:"is_decaf"`
 	RoasterName      string      `json:"roaster_name"`
 	RoasterSlug      string      `json:"roaster_slug"`
+	RoasterLogoUrl   pgtype.Text `json:"roaster_logo_url"`
 	CountryName      pgtype.Text `json:"country_name"`
 	RegionName       pgtype.Text `json:"region_name"`
 	CoffeeRegionID   pgtype.Int4 `json:"coffee_region_id"`
@@ -769,6 +782,7 @@ func (q *Queries) ListCoffeesForFinder(ctx context.Context) ([]ListCoffeesForFin
 			&i.IsDecaf,
 			&i.RoasterName,
 			&i.RoasterSlug,
+			&i.RoasterLogoUrl,
 			&i.CountryName,
 			&i.RegionName,
 			&i.CoffeeRegionID,

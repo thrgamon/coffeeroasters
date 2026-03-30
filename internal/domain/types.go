@@ -75,6 +75,7 @@ type RoasterResponse struct {
 	Name        string `json:"name"`
 	Website     string `json:"website"`
 	State       string `json:"state,omitempty"`
+	LogoURL     string `json:"logo_url,omitempty"`
 	CoffeeCount int32  `json:"coffee_count,omitempty"`
 }
 
@@ -83,6 +84,7 @@ type CoffeeResponse struct {
 	RoasterID       int32    `json:"roaster_id"`
 	RoasterName     string   `json:"roaster_name,omitempty"`
 	RoasterSlug     string   `json:"roaster_slug,omitempty"`
+	RoasterLogoURL  string   `json:"roaster_logo_url,omitempty"`
 	Name            string   `json:"name"`
 	ProductURL      string   `json:"product_url,omitempty"`
 	ImageURL        string   `json:"image_url,omitempty"`

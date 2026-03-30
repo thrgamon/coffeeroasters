@@ -9,26 +9,26 @@ ON CONFLICT (slug) DO UPDATE SET
 RETURNING id;
 
 -- name: GetRoasterBySlug :one
-SELECT id, slug, name, website, state, description, active, created_at, updated_at
+SELECT id, slug, name, website, state, logo_url, description, active, created_at, updated_at
 FROM roasters
 WHERE slug = $1 AND opted_out = false;
 
 -- name: ListRoasters :many
-SELECT r.id, r.slug, r.name, r.website, r.state,
+SELECT r.id, r.slug, r.name, r.website, r.state, r.logo_url,
     count(c.id)::int AS coffee_count
 FROM roasters r
 LEFT JOIN coffees c ON c.roaster_id = r.id AND c.in_stock = true
 WHERE r.active = true AND r.opted_out = false
-GROUP BY r.id, r.slug, r.name, r.website, r.state
+GROUP BY r.id, r.slug, r.name, r.website, r.state, r.logo_url
 ORDER BY r.name;
 
 -- name: ListRoastersByState :many
-SELECT r.id, r.slug, r.name, r.website, r.state,
+SELECT r.id, r.slug, r.name, r.website, r.state, r.logo_url,
     count(c.id)::int AS coffee_count
 FROM roasters r
 LEFT JOIN coffees c ON c.roaster_id = r.id AND c.in_stock = true
 WHERE r.state = $1 AND r.active = true AND r.opted_out = false
-GROUP BY r.id, r.slug, r.name, r.website, r.state
+GROUP BY r.id, r.slug, r.name, r.website, r.state, r.logo_url
 ORDER BY r.name;
 
 -- name: CountRoasters :one
