@@ -9,12 +9,12 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
 
 	return (
 		<div className="flex flex-col items-center justify-center gap-4 py-20">
-			<h2 className="text-xl font-semibold">Something went wrong</h2>
-			<p className="text-muted-foreground">An unexpected error occurred. Please try again.</p>
+			<h2 className="text-xl font-bold uppercase tracking-wider text-snow">Something went wrong</h2>
+			<p className="text-grey-olive">An unexpected error occurred. Please try again.</p>
 			<button
 				type="button"
 				onClick={() => reset()}
-				className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+				className="rounded bg-gold px-4 py-2 text-sm font-bold uppercase tracking-wider text-rich-mahogany hover:bg-gold/90 transition-colors"
 			>
 				Try again
 			</button>

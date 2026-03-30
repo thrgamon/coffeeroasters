@@ -13,36 +13,54 @@ export default async function Home() {
 	]);
 
 	return (
-		<div className="space-y-12">
-			<section className="space-y-4 text-center rounded-xl bg-gradient-to-b from-muted/50 to-background px-6 py-12">
-				<h1 className="text-4xl font-bold">Coffeeroasters</h1>
-				<p className="text-lg text-muted-foreground">Discover specialty coffee from Australian indie roasters</p>
-				<div className="flex justify-center gap-8 text-sm text-muted-foreground">
-					<span>{stats.roaster_count} roasters</span>
-					<span>{stats.coffee_count} coffees</span>
-					<span>{stats.origins?.length ?? 0} origins</span>
-				</div>
-				<div className="flex justify-center gap-4">
-					<Link
-						href="/coffees"
-						className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-					>
-						Browse Coffees
-					</Link>
-					<Link
-						href="/roasters"
-						className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-accent"
-					>
-						View Roasters
-					</Link>
+		<div className="space-y-16">
+			<section className="relative overflow-hidden rounded-lg border border-border/50 bg-gradient-to-br from-rich-mahogany via-background to-rich-mahogany px-6 py-20 text-center retro-blur scanlines">
+				<div className="relative z-10 space-y-6">
+					<p className="text-xs font-medium tracking-[0.3em] uppercase text-dusty-rose">
+						Australian Specialty Coffee
+					</p>
+					<h1 className="text-5xl font-bold tracking-tight text-gold glow-gold sm:text-6xl">
+						COFFEEROASTERS
+					</h1>
+					<p className="mx-auto max-w-md text-lg text-snow/70">
+						Discover the best indie roasters across Australia
+					</p>
+					<div className="flex justify-center gap-10 text-sm font-mono tracking-wider text-dusty-rose">
+						<span className="flex flex-col items-center">
+							<span className="text-2xl font-bold text-gold">{stats.roaster_count}</span>
+							roasters
+						</span>
+						<span className="flex flex-col items-center">
+							<span className="text-2xl font-bold text-gold">{stats.coffee_count}</span>
+							coffees
+						</span>
+						<span className="flex flex-col items-center">
+							<span className="text-2xl font-bold text-gold">{stats.origins?.length ?? 0}</span>
+							origins
+						</span>
+					</div>
+					<div className="flex justify-center gap-4 pt-2">
+						<Link
+							href="/coffees"
+							className="rounded bg-gold px-6 py-2.5 text-sm font-bold uppercase tracking-wider text-rich-mahogany hover:bg-gold/90 transition-colors"
+						>
+							Browse Coffees
+						</Link>
+						<Link
+							href="/roasters"
+							className="rounded border border-dusty-rose/50 px-6 py-2.5 text-sm font-bold uppercase tracking-wider text-dusty-rose hover:bg-dusty-rose/10 transition-colors"
+						>
+							View Roasters
+						</Link>
+					</div>
 				</div>
 			</section>
 
 			<Recommendations />
 
 			{coffees.coffees && coffees.coffees.length > 0 && (
-				<section className="space-y-4">
-					<h2 className="text-2xl font-semibold">Latest Coffees</h2>
+				<section className="space-y-6">
+					<h2 className="text-2xl font-bold uppercase tracking-wider text-snow">Latest Coffees</h2>
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{coffees.coffees.map((coffee) => (
 							<CoffeeCard key={coffee.id} coffee={coffee} />

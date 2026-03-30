@@ -18,15 +18,15 @@ export default function DashboardPage() {
 
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-center gap-4">
-			<h1 className="text-2xl font-bold">Dashboard</h1>
-			<p className="text-muted-foreground">Welcome, {user.email}</p>
+			<h1 className="text-2xl font-bold uppercase tracking-wider text-snow">Dashboard</h1>
+			<p className="text-grey-olive">Welcome, {user.email}</p>
 			<button
 				type="button"
 				onClick={async () => {
 					await logout();
 					router.push('/');
 				}}
-				className="rounded bg-secondary px-4 py-2 text-secondary-foreground"
+				className="rounded border border-border px-4 py-2 text-sm font-medium uppercase tracking-wider text-snow hover:border-gold hover:text-gold transition-colors"
 			>
 				Logout
 			</button>

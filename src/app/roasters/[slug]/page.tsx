@@ -8,7 +8,7 @@ import { apiFetch } from '@/lib/api/server';
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
 	const { slug } = await params;
 	const data = await apiFetch<DomainRoasterDetailResponse>(`/api/roasters/${slug}`);
-	return { title: `${data.roaster?.name ?? 'Roaster'} | Coffeeroasters` };
+	return { title: `${data.roaster?.name ?? 'Roaster'} | COFFEEROASTERS` };
 }
 
 export default async function RoasterDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -22,10 +22,10 @@ export default async function RoasterDetailPage({ params }: { params: Promise<{ 
 	return (
 		<div className="space-y-8">
 			<div className="space-y-2">
-				<Link href="/roasters" className="text-sm text-muted-foreground hover:text-foreground">
+				<Link href="/roasters" className="text-sm text-grey-olive hover:text-gold transition-colors">
 					&larr; All roasters
 				</Link>
-				<h1 className="text-3xl font-bold">{roaster?.name}</h1>
+				<h1 className="text-3xl font-bold text-snow">{roaster?.name}</h1>
 				<div className="flex items-center gap-3">
 					{roaster?.state && <Badge variant="secondary">{roaster.state}</Badge>}
 					{roaster?.website && (
@@ -33,7 +33,7 @@ export default async function RoasterDetailPage({ params }: { params: Promise<{ 
 							href={roaster.website}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="text-sm text-primary hover:underline"
+							className="text-sm text-gold hover:underline"
 						>
 							{roaster.website}
 						</a>
@@ -43,15 +43,15 @@ export default async function RoasterDetailPage({ params }: { params: Promise<{ 
 
 			{cafes.length > 0 && (
 				<section className="space-y-4">
-					<h2 className="text-xl font-semibold">
+					<h2 className="text-xl font-bold uppercase tracking-wider text-dusty-rose">
 						{cafes.length} cafe{cafes.length !== 1 ? 's' : ''}
 					</h2>
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{cafes.map((cafe) => (
-							<div key={cafe.id} className="rounded-lg border border-border p-4 space-y-1">
-								<p className="font-medium">{cafe.name}</p>
-								{cafe.address && <p className="text-sm text-muted-foreground">{cafe.address}</p>}
-								{cafe.phone && <p className="text-sm text-muted-foreground">{cafe.phone}</p>}
+							<div key={cafe.id} className="rounded-lg border border-border/50 bg-card/80 p-4 space-y-1">
+								<p className="font-medium text-snow">{cafe.name}</p>
+								{cafe.address && <p className="text-sm text-grey-olive">{cafe.address}</p>}
+								{cafe.phone && <p className="text-sm text-grey-olive">{cafe.phone}</p>}
 							</div>
 						))}
 					</div>
@@ -59,7 +59,7 @@ export default async function RoasterDetailPage({ params }: { params: Promise<{ 
 			)}
 
 			<section className="space-y-4">
-				<h2 className="text-xl font-semibold">
+				<h2 className="text-xl font-bold uppercase tracking-wider text-dusty-rose">
 					{coffees.length} coffee{coffees.length !== 1 ? 's' : ''}
 				</h2>
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

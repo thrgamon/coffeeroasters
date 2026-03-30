@@ -61,9 +61,9 @@ function LoginForm() {
 		return (
 			<main className="flex min-h-screen items-center justify-center">
 				<form onSubmit={handleVerify} className="w-full max-w-sm space-y-4">
-					<h1 className="text-2xl font-bold">Check your email</h1>
-					<p className="text-sm text-muted-foreground">
-						We sent a login link to <strong>{email}</strong>. Click the link in your email, or paste the
+					<h1 className="text-2xl font-bold uppercase tracking-wider text-snow">Check your email</h1>
+					<p className="text-sm text-grey-olive">
+						We sent a login link to <strong className="text-snow">{email}</strong>. Click the link in your email, or paste the
 						code below.
 					</p>
 					{error && <ErrorBanner message={error} />}
@@ -73,9 +73,9 @@ function LoginForm() {
 						value={token}
 						onChange={(e) => setToken(e.target.value)}
 						required
-						className="w-full rounded border border-input bg-background px-3 py-2 font-mono text-sm"
+						className="w-full rounded border border-input bg-card/80 px-3 py-2 font-mono text-sm text-snow placeholder:text-grey-olive focus:border-gold focus:outline-none"
 					/>
-					<button type="submit" className="w-full rounded bg-primary px-4 py-2 text-primary-foreground">
+					<button type="submit" className="w-full rounded bg-gold px-4 py-2 font-bold uppercase tracking-wider text-rich-mahogany hover:bg-gold/90 transition-colors">
 						Verify
 					</button>
 					<button
@@ -84,7 +84,7 @@ function LoginForm() {
 							setSent(false);
 							setToken('');
 						}}
-						className="w-full text-sm text-muted-foreground underline"
+						className="w-full text-sm text-grey-olive underline hover:text-gold transition-colors"
 					>
 						Use a different email
 					</button>
@@ -96,8 +96,8 @@ function LoginForm() {
 	return (
 		<main className="flex min-h-screen items-center justify-center">
 			<form onSubmit={handleSendLink} className="w-full max-w-sm space-y-4">
-				<h1 className="text-2xl font-bold">Sign in</h1>
-				<p className="text-sm text-muted-foreground">
+				<h1 className="text-2xl font-bold uppercase tracking-wider text-snow">Sign in</h1>
+				<p className="text-sm text-grey-olive">
 					Enter your email and we'll send you a login link. No password needed.
 				</p>
 				{error && <ErrorBanner message={error} />}
@@ -107,9 +107,9 @@ function LoginForm() {
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					required
-					className="w-full rounded border border-input bg-background px-3 py-2"
+					className="w-full rounded border border-input bg-card/80 px-3 py-2 text-snow placeholder:text-grey-olive focus:border-gold focus:outline-none"
 				/>
-				<button type="submit" className="w-full rounded bg-primary px-4 py-2 text-primary-foreground">
+				<button type="submit" className="w-full rounded bg-gold px-4 py-2 font-bold uppercase tracking-wider text-rich-mahogany hover:bg-gold/90 transition-colors">
 					Send login link
 				</button>
 			</form>

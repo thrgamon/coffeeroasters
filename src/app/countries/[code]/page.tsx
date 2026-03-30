@@ -8,7 +8,7 @@ import { apiFetch } from '@/lib/api/server';
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }): Promise<Metadata> {
 	const { code } = await params;
 	const data = await apiFetch<DomainCountryDetailResponse>(`/api/countries/${code}`);
-	return { title: `${data.name} | Coffeeroasters` };
+	return { title: `${data.name} | COFFEEROASTERS` };
 }
 
 export default async function CountryDetailPage({ params }: { params: Promise<{ code: string }> }) {
@@ -18,26 +18,26 @@ export default async function CountryDetailPage({ params }: { params: Promise<{ 
 	return (
 		<div className="space-y-8">
 			<div className="space-y-2">
-				<Link href="/countries" className="text-sm text-muted-foreground hover:text-foreground">
+				<Link href="/countries" className="text-sm text-grey-olive hover:text-gold transition-colors">
 					&larr; All countries
 				</Link>
-				<h1 className="text-3xl font-bold">{data.name}</h1>
+				<h1 className="text-3xl font-bold text-snow">{data.name}</h1>
 				<Badge variant="secondary">{data.code}</Badge>
 			</div>
 
 			{data.regions && data.regions.length > 0 && (
 				<section className="space-y-4">
-					<h2 className="text-xl font-semibold">Regions</h2>
+					<h2 className="text-xl font-bold uppercase tracking-wider text-dusty-rose">Regions</h2>
 					<div className="flex flex-wrap gap-2">
 						{data.regions.map((region) =>
 							region.coffee_count && region.coffee_count > 0 ? (
 								<Link key={region.id} href={`/regions/${region.id}`}>
-									<Badge variant="outline" className="cursor-pointer hover:bg-accent">
+									<Badge variant="outline" className="cursor-pointer hover:border-gold/50 hover:text-gold">
 										{region.name} ({region.coffee_count})
 									</Badge>
 								</Link>
 							) : (
-								<Badge key={region.id} variant="outline" className="text-muted-foreground">
+								<Badge key={region.id} variant="outline" className="text-grey-olive">
 									{region.name} (0)
 								</Badge>
 							),
@@ -47,7 +47,7 @@ export default async function CountryDetailPage({ params }: { params: Promise<{ 
 			)}
 
 			<section className="space-y-4">
-				<h2 className="text-xl font-semibold">
+				<h2 className="text-xl font-bold uppercase tracking-wider text-dusty-rose">
 					{data.coffees?.length ?? 0} coffee{(data.coffees?.length ?? 0) !== 1 ? 's' : ''}
 				</h2>
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

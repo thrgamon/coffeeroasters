@@ -8,7 +8,7 @@ import { CoffeeTrackerProvider } from '@/lib/coffee-tracker';
 import { QueryProvider } from '@/lib/query-provider';
 
 export const metadata: Metadata = {
-	title: 'Coffeeroasters',
+	title: 'COFFEEROASTERS',
 	description: 'Discover Australian specialty coffee roasters',
 };
 
@@ -19,32 +19,32 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				<QueryProvider>
 					<AuthProvider>
 						<CoffeeTrackerProvider>
-							<nav className="border-b border-border shadow-sm">
+							<nav className="border-b border-border/60 bg-rich-mahogany/80 backdrop-blur-md sticky top-0 z-50">
 								<div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-									<Link href="/" className="text-lg font-semibold text-primary">
+									<Link href="/" className="text-lg font-bold tracking-widest uppercase text-gold glow-gold">
 										Coffeeroasters
 									</Link>
-									<div className="hidden gap-6 text-sm text-muted-foreground sm:flex">
-										<Link href="/coffees" className="hover:text-foreground">
+									<div className="hidden gap-8 text-sm font-medium tracking-wide uppercase sm:flex">
+										<Link href="/coffees" className="text-snow/60 hover:text-gold transition-colors">
 											Coffees
 										</Link>
-										<Link href="/roasters" className="hover:text-foreground">
+										<Link href="/roasters" className="text-snow/60 hover:text-gold transition-colors">
 											Roasters
 										</Link>
-										<Link href="/cafes" className="hover:text-foreground">
+										<Link href="/cafes" className="text-snow/60 hover:text-gold transition-colors">
 											Cafes
 										</Link>
-										<Link href="/countries" className="hover:text-foreground">
-											Countries
+										<Link href="/countries" className="text-snow/60 hover:text-gold transition-colors">
+											Origins
 										</Link>
-										<Link href="/guide" className="hover:text-foreground">
+										<Link href="/guide" className="text-snow/60 hover:text-gold transition-colors">
 											Guide
 										</Link>
-										<Link href="/find" className="hover:text-foreground">
-											Find your coffee
+										<Link href="/find" className="text-snow/60 hover:text-gold transition-colors">
+											Find
 										</Link>
-										<Link href="/my-coffees" className="hover:text-foreground">
-											My coffees
+										<Link href="/my-coffees" className="text-snow/60 hover:text-gold transition-colors">
+											My Coffees
 										</Link>
 										<UserNav />
 									</div>
@@ -54,8 +54,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 								</div>
 							</nav>
 							<main className="mx-auto flex-1 max-w-6xl px-4 py-8">{children}</main>
-							<footer className="border-t border-border">
-								<div className="mx-auto max-w-6xl px-4 py-4 text-center text-sm text-muted-foreground">
+							<footer className="border-t border-border/40">
+								<div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs tracking-widest uppercase text-grey-olive">
 									&copy; {new Date().getFullYear()} Coffeeroasters
 								</div>
 							</footer>
