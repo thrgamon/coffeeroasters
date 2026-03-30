@@ -99,7 +99,7 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 						{coffee.id && (
 								<div className="flex items-center gap-0.5">
 									<CoffeeTrackButton coffeeId={coffee.id} variant="wishlist" />
-									<CoffeeTrackButton coffeeId={coffee.id} variant="tried" />
+									<CoffeeTrackButton coffeeId={coffee.id} variant="log" />
 								</div>
 							)}
 					</div>

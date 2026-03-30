@@ -1,8 +1,9 @@
 -- name: UpsertUserCoffee :one
-INSERT INTO user_coffees (user_id, coffee_id, status, enjoyed)
-VALUES ($1, $2, $3, $4)
+INSERT INTO user_coffees (user_id, coffee_id, status, liked, rating, review, drunk_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 ON CONFLICT (user_id, coffee_id)
-DO UPDATE SET status = EXCLUDED.status, enjoyed = EXCLUDED.enjoyed, updated_at = now()
+DO UPDATE SET status = EXCLUDED.status, liked = EXCLUDED.liked, rating = EXCLUDED.rating,
+             review = EXCLUDED.review, drunk_at = EXCLUDED.drunk_at, updated_at = now()
 RETURNING *;
 
 -- name: DeleteUserCoffee :exec
@@ -31,7 +32,7 @@ SELECT * FROM user_coffees
 WHERE user_id = $1 AND coffee_id = $2;
 
 -- name: ListUserCoffeeIDs :many
-SELECT coffee_id, status, enjoyed FROM user_coffees
+SELECT coffee_id, status, liked, rating FROM user_coffees
 WHERE user_id = $1;
 
 -- name: CreateUserPasswordless :one

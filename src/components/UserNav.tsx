@@ -13,6 +13,11 @@ export function UserNav() {
 	if (user) {
 		return (
 			<div className="flex items-center gap-3">
+				{user.is_admin && (
+					<Link href="/admin" className="text-sm text-muted-foreground hover:text-foreground">
+						Admin
+					</Link>
+				)}
 				<span className="text-sm text-muted-foreground hidden lg:inline">{user.email}</span>
 				<button
 					type="button"

@@ -62,6 +62,12 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 		protected.GET("/user/coffees", h.ListUserCoffees)
 		protected.GET("/user/coffee-ids", h.ListUserCoffeeIDs)
 	}
+
+	admin := rg.Group("/admin")
+	admin.Use(auth.RequireAuth(h.auth), auth.RequireAdmin())
+	{
+		admin.GET("", h.AdminDashboard)
+	}
 }
 
 // Health godoc
@@ -168,8 +174,9 @@ func (h *Handler) Me(c *gin.Context) {
 	}
 
 	user := &domain.UserResponse{
-		ID:    session.UserID,
-		Email: session.UserEmail,
+		ID:      session.UserID,
+		Email:   session.UserEmail,
+		IsAdmin: session.UserIsAdmin,
 	}
 	c.JSON(http.StatusOK, domain.MeResponse{User: user})
 }
@@ -185,6 +192,21 @@ func (h *Handler) Dashboard(c *gin.Context) {
 	email, _ := c.Get("user_email")
 	c.JSON(http.StatusOK, gin.H{
 		"message": "welcome to the dashboard",
+		"email":   email,
+	})
+}
+
+// AdminDashboard godoc
+// @Summary Admin dashboard (admin only)
+// @Tags admin
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Router /api/admin [get]
+func (h *Handler) AdminDashboard(c *gin.Context) {
+	email, _ := c.Get("user_email")
+	c.JSON(http.StatusOK, gin.H{
+		"message": "admin dashboard",
 		"email":   email,
 	})
 }

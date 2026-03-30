@@ -68,19 +68,20 @@ func (q *Queries) DeleteSessionsByUserID(ctx context.Context, userID int32) erro
 }
 
 const getSessionByToken = `-- name: GetSessionByToken :one
-SELECT s.id, s.user_id, s.token, s.expires_at, s.created_at, u.email AS user_email
+SELECT s.id, s.user_id, s.token, s.expires_at, s.created_at, u.email AS user_email, u.is_admin AS user_is_admin
 FROM sessions s
 JOIN users u ON u.id = s.user_id
 WHERE s.token = $1 AND s.expires_at > now()
 `
 
 type GetSessionByTokenRow struct {
-	ID        uuid.UUID `json:"id"`
-	UserID    int32     `json:"user_id"`
-	Token     string    `json:"token"`
-	ExpiresAt time.Time `json:"expires_at"`
-	CreatedAt time.Time `json:"created_at"`
-	UserEmail string    `json:"user_email"`
+	ID          uuid.UUID `json:"id"`
+	UserID      int32     `json:"user_id"`
+	Token       string    `json:"token"`
+	ExpiresAt   time.Time `json:"expires_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	UserEmail   string    `json:"user_email"`
+	UserIsAdmin bool      `json:"user_is_admin"`
 }
 
 func (q *Queries) GetSessionByToken(ctx context.Context, token string) (GetSessionByTokenRow, error) {
@@ -93,6 +94,7 @@ func (q *Queries) GetSessionByToken(ctx context.Context, token string) (GetSessi
 		&i.ExpiresAt,
 		&i.CreatedAt,
 		&i.UserEmail,
+		&i.UserIsAdmin,
 	)
 	return i, err
 }

@@ -13,39 +13,49 @@ import (
 )
 
 type UserCoffee struct {
-	ID        int32              `json:"id"`
-	UserID    int32              `json:"user_id"`
-	CoffeeID  int64              `json:"coffee_id"`
-	Status    string             `json:"status"`
-	Enjoyed   pgtype.Bool        `json:"enjoyed"`
-	CreatedAt time.Time          `json:"created_at"`
-	UpdatedAt time.Time          `json:"updated_at"`
+	ID        int32       `json:"id"`
+	UserID    int32       `json:"user_id"`
+	CoffeeID  int64       `json:"coffee_id"`
+	Status    string      `json:"status"`
+	Liked     pgtype.Bool `json:"liked"`
+	Rating    pgtype.Int2 `json:"rating"`
+	Review    pgtype.Text `json:"review"`
+	DrunkAt   pgtype.Date `json:"drunk_at"`
+	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
 }
 
 const upsertUserCoffee = `-- name: UpsertUserCoffee :one
-INSERT INTO user_coffees (user_id, coffee_id, status, enjoyed)
-VALUES ($1, $2, $3, $4)
+INSERT INTO user_coffees (user_id, coffee_id, status, liked, rating, review, drunk_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 ON CONFLICT (user_id, coffee_id)
-DO UPDATE SET status = EXCLUDED.status, enjoyed = EXCLUDED.enjoyed, updated_at = now()
-RETURNING id, user_id, coffee_id, status, enjoyed, created_at, updated_at
+DO UPDATE SET status = EXCLUDED.status, liked = EXCLUDED.liked, rating = EXCLUDED.rating,
+             review = EXCLUDED.review, drunk_at = EXCLUDED.drunk_at, updated_at = now()
+RETURNING id, user_id, coffee_id, status, liked, rating, review, drunk_at, created_at, updated_at
 `
 
 type UpsertUserCoffeeParams struct {
 	UserID   int32       `json:"user_id"`
 	CoffeeID int64       `json:"coffee_id"`
 	Status   string      `json:"status"`
-	Enjoyed  pgtype.Bool `json:"enjoyed"`
+	Liked    pgtype.Bool `json:"liked"`
+	Rating   pgtype.Int2 `json:"rating"`
+	Review   pgtype.Text `json:"review"`
+	DrunkAt  pgtype.Date `json:"drunk_at"`
 }
 
 func (q *Queries) UpsertUserCoffee(ctx context.Context, arg UpsertUserCoffeeParams) (UserCoffee, error) {
-	row := q.db.QueryRow(ctx, upsertUserCoffee, arg.UserID, arg.CoffeeID, arg.Status, arg.Enjoyed)
+	row := q.db.QueryRow(ctx, upsertUserCoffee, arg.UserID, arg.CoffeeID, arg.Status, arg.Liked, arg.Rating, arg.Review, arg.DrunkAt)
 	var i UserCoffee
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
 		&i.CoffeeID,
 		&i.Status,
-		&i.Enjoyed,
+		&i.Liked,
+		&i.Rating,
+		&i.Review,
+		&i.DrunkAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -68,7 +78,7 @@ func (q *Queries) DeleteUserCoffee(ctx context.Context, arg DeleteUserCoffeePara
 }
 
 const listUserCoffees = `-- name: ListUserCoffees :many
-SELECT uc.id, uc.user_id, uc.coffee_id, uc.status, uc.enjoyed, uc.created_at, uc.updated_at,
+SELECT uc.id, uc.user_id, uc.coffee_id, uc.status, uc.liked, uc.rating, uc.review, uc.drunk_at, uc.created_at, uc.updated_at,
        c.name AS coffee_name, c.image_url AS coffee_image_url,
        r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
        c.process, c.roast_level, c.tasting_notes, c.variety,
@@ -91,7 +101,10 @@ type ListUserCoffeesRow struct {
 	UserID          int32       `json:"user_id"`
 	CoffeeID        int64       `json:"coffee_id"`
 	Status          string      `json:"status"`
-	Enjoyed         pgtype.Bool `json:"enjoyed"`
+	Liked           pgtype.Bool `json:"liked"`
+	Rating          pgtype.Int2 `json:"rating"`
+	Review          pgtype.Text `json:"review"`
+	DrunkAt         pgtype.Date `json:"drunk_at"`
 	CreatedAt       time.Time   `json:"created_at"`
 	UpdatedAt       time.Time   `json:"updated_at"`
 	CoffeeName      string      `json:"coffee_name"`
@@ -133,7 +146,10 @@ func (q *Queries) ListUserCoffees(ctx context.Context, userID int32) ([]ListUser
 			&i.UserID,
 			&i.CoffeeID,
 			&i.Status,
-			&i.Enjoyed,
+			&i.Liked,
+			&i.Rating,
+			&i.Review,
+			&i.DrunkAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.CoffeeName,
@@ -168,7 +184,7 @@ func (q *Queries) ListUserCoffees(ctx context.Context, userID int32) ([]ListUser
 }
 
 const getUserCoffee = `-- name: GetUserCoffee :one
-SELECT id, user_id, coffee_id, status, enjoyed, created_at, updated_at FROM user_coffees
+SELECT id, user_id, coffee_id, status, liked, rating, review, drunk_at, created_at, updated_at FROM user_coffees
 WHERE user_id = $1 AND coffee_id = $2
 `
 
@@ -185,7 +201,10 @@ func (q *Queries) GetUserCoffee(ctx context.Context, arg GetUserCoffeeParams) (U
 		&i.UserID,
 		&i.CoffeeID,
 		&i.Status,
-		&i.Enjoyed,
+		&i.Liked,
+		&i.Rating,
+		&i.Review,
+		&i.DrunkAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -193,14 +212,15 @@ func (q *Queries) GetUserCoffee(ctx context.Context, arg GetUserCoffeeParams) (U
 }
 
 const listUserCoffeeIDs = `-- name: ListUserCoffeeIDs :many
-SELECT coffee_id, status, enjoyed FROM user_coffees
+SELECT coffee_id, status, liked, rating FROM user_coffees
 WHERE user_id = $1
 `
 
 type ListUserCoffeeIDsRow struct {
 	CoffeeID int64       `json:"coffee_id"`
 	Status   string      `json:"status"`
-	Enjoyed  pgtype.Bool `json:"enjoyed"`
+	Liked    pgtype.Bool `json:"liked"`
+	Rating   pgtype.Int2 `json:"rating"`
 }
 
 func (q *Queries) ListUserCoffeeIDs(ctx context.Context, userID int32) ([]ListUserCoffeeIDsRow, error) {
@@ -212,7 +232,7 @@ func (q *Queries) ListUserCoffeeIDs(ctx context.Context, userID int32) ([]ListUs
 	items := []ListUserCoffeeIDsRow{}
 	for rows.Next() {
 		var i ListUserCoffeeIDsRow
-		if err := rows.Scan(&i.CoffeeID, &i.Status, &i.Enjoyed); err != nil {
+		if err := rows.Scan(&i.CoffeeID, &i.Status, &i.Liked, &i.Rating); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -223,7 +243,7 @@ func (q *Queries) ListUserCoffeeIDs(ctx context.Context, userID int32) ([]ListUs
 const createUserPasswordless = `-- name: CreateUserPasswordless :one
 INSERT INTO users (email, password_hash)
 VALUES ($1, '')
-RETURNING id, email, password_hash, created_at, updated_at
+RETURNING id, email, password_hash, is_admin, created_at, updated_at
 `
 
 func (q *Queries) CreateUserPasswordless(ctx context.Context, email string) (User, error) {
@@ -233,6 +253,7 @@ func (q *Queries) CreateUserPasswordless(ctx context.Context, email string) (Use
 		&i.ID,
 		&i.Email,
 		&i.PasswordHash,
+		&i.IsAdmin,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

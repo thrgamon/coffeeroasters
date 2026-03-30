@@ -3,9 +3,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
-interface CoffeeStatus {
-	status: 'wishlist' | 'tried';
-	enjoyed?: boolean;
+export interface CoffeeStatus {
+	status: 'wishlist' | 'logged';
+	liked?: boolean;
+	rating?: number;
+	review?: string;
+	drunkAt?: string;
 }
 
 interface TrackerData {
@@ -15,14 +18,14 @@ interface TrackerData {
 interface CoffeeTrackerContextType {
 	hydrated: boolean;
 	isWishlisted: (id: number) => boolean;
-	isTried: (id: number) => boolean;
-	getEnjoyed: (id: number) => boolean | undefined;
-	toggleWishlist: (id: number) => void;
-	markTried: (id: number, enjoyed: boolean) => void;
+	isLogged: (id: number) => boolean;
+	getCoffeeStatus: (id: number) => CoffeeStatus | undefined;
+	addToWishlist: (id: number) => void;
+	removeFromWishlist: (id: number) => void;
+	logCoffee: (id: number, data: { liked?: boolean; rating?: number; review?: string; drunkAt?: string }) => void;
 	removeCoffee: (id: number) => void;
 	wishlistIds: number[];
-	triedIds: number[];
-	getCoffeeStatus: (id: number) => CoffeeStatus | undefined;
+	loggedIds: number[];
 }
 
 const STORAGE_KEY = 'coffee-tracker';
@@ -34,7 +37,7 @@ function readStorage(): TrackerData {
 		const raw = localStorage.getItem(STORAGE_KEY);
 		if (!raw) return EMPTY;
 		const parsed = JSON.parse(raw);
-		// Migrate old format (liked/tried arrays) to new format
+		// Migrate old format
 		if (Array.isArray(parsed.liked) || Array.isArray(parsed.tried)) {
 			const coffees: Record<number, CoffeeStatus> = {};
 			if (Array.isArray(parsed.liked)) {
@@ -44,7 +47,7 @@ function readStorage(): TrackerData {
 			}
 			if (Array.isArray(parsed.tried)) {
 				for (const id of parsed.tried) {
-					if (typeof id === 'number') coffees[id] = { status: 'tried' };
+					if (typeof id === 'number') coffees[id] = { status: 'logged' };
 				}
 			}
 			return { coffees };
@@ -70,18 +73,19 @@ export function CoffeeTrackerProvider({ children }: { children: React.ReactNode 
 	const [data, setData] = useState<TrackerData>(EMPTY);
 	const [hydrated, setHydrated] = useState(false);
 
-	// Load data from server when authenticated, otherwise from localStorage
 	useEffect(() => {
 		if (user) {
 			fetch('/api/user/coffee-ids', { credentials: 'include' })
 				.then(async (res) => {
 					if (res.ok) {
-						const items: { coffee_id: number; status: string; enjoyed?: boolean }[] = await res.json();
+						const items: { coffee_id: number; status: string; liked?: boolean; rating?: number }[] =
+							await res.json();
 						const coffees: Record<number, CoffeeStatus> = {};
 						for (const item of items) {
 							coffees[item.coffee_id] = {
-								status: item.status as 'wishlist' | 'tried',
-								enjoyed: item.enjoyed,
+								status: item.status as 'wishlist' | 'logged',
+								liked: item.liked,
+								rating: item.rating,
 							};
 						}
 						setData({ coffees });
@@ -103,27 +107,33 @@ export function CoffeeTrackerProvider({ children }: { children: React.ReactNode 
 		[data.coffees],
 	);
 
-	const triedIds = useMemo(
+	const loggedIds = useMemo(
 		() =>
 			Object.entries(data.coffees)
-				.filter(([, v]) => v.status === 'tried')
+				.filter(([, v]) => v.status === 'logged')
 				.map(([k]) => Number(k)),
 		[data.coffees],
 	);
 
 	const isWishlisted = useCallback((id: number) => data.coffees[id]?.status === 'wishlist', [data.coffees]);
-	const isTried = useCallback((id: number) => data.coffees[id]?.status === 'tried', [data.coffees]);
-	const getEnjoyed = useCallback((id: number) => data.coffees[id]?.enjoyed, [data.coffees]);
+	const isLogged = useCallback((id: number) => data.coffees[id]?.status === 'logged', [data.coffees]);
 	const getCoffeeStatus = useCallback((id: number) => data.coffees[id], [data.coffees]);
 
 	const syncToServer = useCallback(
-		async (coffeeId: number, status: string, enjoyed?: boolean) => {
+		async (coffeeId: number, status: string, extra?: { liked?: boolean; rating?: number; review?: string; drunkAt?: string }) => {
 			if (!user) return;
 			await fetch('/api/user/coffees', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				credentials: 'include',
-				body: JSON.stringify({ coffee_id: coffeeId, status, enjoyed }),
+				body: JSON.stringify({
+					coffee_id: coffeeId,
+					status,
+					liked: extra?.liked,
+					rating: extra?.rating,
+					review: extra?.review,
+					drunk_at: extra?.drunkAt,
+				}),
 			}).catch(() => {});
 		},
 		[user],
@@ -140,31 +150,43 @@ export function CoffeeTrackerProvider({ children }: { children: React.ReactNode 
 		[user],
 	);
 
-	const toggleWishlist = useCallback(
+	const addToWishlist = useCallback(
 		(id: number) => {
 			setData((prev) => {
-				const next = { ...prev, coffees: { ...prev.coffees } };
-				if (prev.coffees[id]?.status === 'wishlist') {
-					delete next.coffees[id];
-					deleteFromServer(id);
-				} else {
-					next.coffees[id] = { status: 'wishlist' };
-					syncToServer(id, 'wishlist');
-				}
+				const next = { ...prev, coffees: { ...prev.coffees, [id]: { status: 'wishlist' as const } } };
 				if (!user) writeStorage(next);
+				syncToServer(id, 'wishlist');
 				return next;
 			});
 		},
-		[user, syncToServer, deleteFromServer],
+		[user, syncToServer],
 	);
 
-	const markTried = useCallback(
-		(id: number, enjoyed: boolean) => {
+	const removeFromWishlist = useCallback(
+		(id: number) => {
 			setData((prev) => {
 				const next = { ...prev, coffees: { ...prev.coffees } };
-				next.coffees[id] = { status: 'tried', enjoyed };
+				delete next.coffees[id];
 				if (!user) writeStorage(next);
-				syncToServer(id, 'tried', enjoyed);
+				deleteFromServer(id);
+				return next;
+			});
+		},
+		[user, deleteFromServer],
+	);
+
+	const logCoffee = useCallback(
+		(id: number, logData: { liked?: boolean; rating?: number; review?: string; drunkAt?: string }) => {
+			setData((prev) => {
+				const next = {
+					...prev,
+					coffees: {
+						...prev.coffees,
+						[id]: { status: 'logged' as const, ...logData },
+					},
+				};
+				if (!user) writeStorage(next);
+				syncToServer(id, 'logged', logData);
 				return next;
 			});
 		},
@@ -189,14 +211,14 @@ export function CoffeeTrackerProvider({ children }: { children: React.ReactNode 
 			value={{
 				hydrated,
 				isWishlisted,
-				isTried,
-				getEnjoyed,
-				toggleWishlist,
-				markTried,
+				isLogged,
+				getCoffeeStatus,
+				addToWishlist,
+				removeFromWishlist,
+				logCoffee,
 				removeCoffee,
 				wishlistIds,
-				triedIds,
-				getCoffeeStatus,
+				loggedIds,
 			}}
 		>
 			{children}

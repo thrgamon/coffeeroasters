@@ -79,7 +79,7 @@ func (s *Service) VerifyMagicLink(ctx context.Context, token string) (*domain.Au
 	}
 
 	return &domain.AuthResponse{
-		User: domain.UserResponse{ID: user.ID, Email: user.Email},
+		User: domain.UserResponse{ID: user.ID, Email: user.Email, IsAdmin: user.IsAdmin},
 	}, sessionToken, nil
 }
 
