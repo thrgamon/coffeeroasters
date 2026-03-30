@@ -22,6 +22,7 @@ import type {
 import type {
   DomainCoffeeDetailResponse,
   DomainCoffeeListResponse,
+  GetApiCoffeesFindParams,
   GetApiCoffeesId404,
   GetApiCoffeesParams
 } from '.././models';
@@ -113,6 +114,99 @@ export function useGetApiCoffees<TData = Awaited<ReturnType<typeof getApiCoffees
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
 
   const queryOptions = getGetApiCoffeesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * @summary Find coffees matching flavour preferences
+ */
+export const getApiCoffeesFind = (
+    params?: GetApiCoffeesFindParams,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customFetch<DomainCoffeeListResponse>(
+      {url: `/api/coffees/find`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
+
+
+
+export const getGetApiCoffeesFindQueryKey = (params?: GetApiCoffeesFindParams,) => {
+    return [
+    `/api/coffees/find`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiCoffeesFindQueryOptions = <TData = Awaited<ReturnType<typeof getApiCoffeesFind>>, TError = unknown>(params?: GetApiCoffeesFindParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCoffeesFind>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiCoffeesFindQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiCoffeesFind>>> = ({ signal }) => getApiCoffeesFind(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiCoffeesFind>>, TError, TData> & { queryKey: DataTag<QueryKey, TData> }
+}
+
+export type GetApiCoffeesFindQueryResult = NonNullable<Awaited<ReturnType<typeof getApiCoffeesFind>>>
+export type GetApiCoffeesFindQueryError = unknown
+
+
+export function useGetApiCoffeesFind<TData = Awaited<ReturnType<typeof getApiCoffeesFind>>, TError = unknown>(
+ params: undefined |  GetApiCoffeesFindParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCoffeesFind>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiCoffeesFind>>,
+          TError,
+          Awaited<ReturnType<typeof getApiCoffeesFind>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useGetApiCoffeesFind<TData = Awaited<ReturnType<typeof getApiCoffeesFind>>, TError = unknown>(
+ params?: GetApiCoffeesFindParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCoffeesFind>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiCoffeesFind>>,
+          TError,
+          Awaited<ReturnType<typeof getApiCoffeesFind>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+export function useGetApiCoffeesFind<TData = Awaited<ReturnType<typeof getApiCoffeesFind>>, TError = unknown>(
+ params?: GetApiCoffeesFindParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCoffeesFind>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> }
+/**
+ * @summary Find coffees matching flavour preferences
+ */
+
+export function useGetApiCoffeesFind<TData = Awaited<ReturnType<typeof getApiCoffeesFind>>, TError = unknown>(
+ params?: GetApiCoffeesFindParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCoffeesFind>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+
+  const queryOptions = getGetApiCoffeesFindQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
 

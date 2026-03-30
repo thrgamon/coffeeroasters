@@ -16,6 +16,7 @@ export interface DomainCoffeeDetailResponse {
   image_url?: string;
   in_stock?: boolean;
   is_blend?: boolean;
+  is_decaf?: boolean;
   name?: string;
   price_cents?: number;
   price_per_100g_max?: number;

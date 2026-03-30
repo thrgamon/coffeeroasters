@@ -127,6 +127,8 @@ definitions:
         type: boolean
       is_blend:
         type: boolean
+      is_decaf:
+        type: boolean
       name:
         type: string
       price_cents:
@@ -200,6 +202,8 @@ definitions:
       in_stock:
         type: boolean
       is_blend:
+        type: boolean
+      is_decaf:
         type: boolean
       name:
         type: string
@@ -604,6 +608,10 @@ paths:
         in: query
         name: roaster_state
         type: string
+      - description: 'Decaf filter: ''only'', ''exclude'', or omit for all'
+        in: query
+        name: decaf
+        type: string
       - description: Coffee ID to find similar coffees for
         in: query
         name: similar_to
@@ -652,6 +660,39 @@ paths:
               type: string
             type: object
       summary: Get a single coffee by ID with similar coffees
+      tags:
+      - coffees
+  /api/coffees/find:
+    get:
+      parameters:
+      - description: 'Sweetness preference: fruity, caramel, both'
+        in: query
+        name: sweetness
+        type: string
+      - description: 'Brightness preference: bright, smooth, neutral'
+        in: query
+        name: brightness
+        type: string
+      - description: 'Body preference: light, full, neutral'
+        in: query
+        name: body
+        type: string
+      - description: 'Flavour appeal: floral, chocolate, berry, earthy'
+        in: query
+        name: appeal
+        type: string
+      - description: 'Adventurousness: classic, surprise'
+        in: query
+        name: adventurous
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.CoffeeListResponse'
+      summary: Find coffees matching flavour preferences
       tags:
       - coffees
   /api/countries:

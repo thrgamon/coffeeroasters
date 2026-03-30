@@ -251,6 +251,12 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "description": "Decaf filter: 'only', 'exclude', or omit for all",
+                        "name": "decaf",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "description": "Coffee ID to find similar coffees for",
                         "name": "similar_to",
@@ -272,6 +278,57 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Page size (default 20, max 100)",
                         "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.CoffeeListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/coffees/find": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "coffees"
+                ],
+                "summary": "Find coffees matching flavour preferences",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sweetness preference: fruity, caramel, both",
+                        "name": "sweetness",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Brightness preference: bright, smooth, neutral",
+                        "name": "brightness",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Body preference: light, full, neutral",
+                        "name": "body",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Flavour appeal: floral, chocolate, berry, earthy",
+                        "name": "appeal",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Adventurousness: classic, surprise",
+                        "name": "adventurous",
                         "in": "query"
                     }
                 ],
@@ -783,6 +840,9 @@ const docTemplate = `{
                 "is_blend": {
                     "type": "boolean"
                 },
+                "is_decaf": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -893,6 +953,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "is_blend": {
+                    "type": "boolean"
+                },
+                "is_decaf": {
                     "type": "boolean"
                 },
                 "name": {

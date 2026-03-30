@@ -32,6 +32,7 @@ export * from './domainUserResponse';
 export * from './getApiAuthMe401';
 export * from './getApiCafesParams';
 export * from './getApiCafesSlug404';
+export * from './getApiCoffeesFindParams';
 export * from './getApiCoffeesId404';
 export * from './getApiCoffeesParams';
 export * from './getApiCountriesCode404';

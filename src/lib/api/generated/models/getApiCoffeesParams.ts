@@ -31,6 +31,10 @@ variety?: string;
  */
 roaster_state?: string;
 /**
+ * Decaf filter: 'only', 'exclude', or omit for all
+ */
+decaf?: string;
+/**
  * Coffee ID to find similar coffees for
  */
 similar_to?: number;
