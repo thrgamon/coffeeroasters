@@ -3,6 +3,7 @@ package api
 import (
 	"log/slog"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -11,6 +12,7 @@ import (
 
 	"github.com/thrgamon/coffeeroasters/internal/db"
 	"github.com/thrgamon/coffeeroasters/internal/domain"
+	"github.com/thrgamon/coffeeroasters/internal/flavour"
 	"github.com/thrgamon/coffeeroasters/internal/similarity"
 )
 
@@ -475,6 +477,100 @@ func (h *Handler) GetCoffee(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
+}
+
+// FindCoffees godoc
+// @Summary Find coffees matching flavour preferences
+// @Tags coffees
+// @Produce json
+// @Param sweetness query string false "Sweetness preference: fruity, caramel, both"
+// @Param brightness query string false "Brightness preference: bright, smooth, neutral"
+// @Param body query string false "Body preference: light, full, neutral"
+// @Param appeal query string false "Flavour appeal: floral, chocolate, berry, earthy"
+// @Param adventurous query string false "Adventurousness: classic, surprise"
+// @Success 200 {object} domain.CoffeeListResponse
+// @Router /api/coffees/find [get]
+func (h *Handler) FindCoffees(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	sweetness := c.DefaultQuery("sweetness", "both")
+	brightness := c.DefaultQuery("brightness", "neutral")
+	bodyPref := c.DefaultQuery("body", "neutral")
+	appeal := c.DefaultQuery("appeal", "chocolate")
+	adventurous := c.DefaultQuery("adventurous", "classic")
+
+	target := flavour.TargetFromAnswers(sweetness, brightness, bodyPref, appeal, adventurous)
+
+	rows, err := h.queries.ListCoffeesForFinder(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list coffees"})
+		return
+	}
+
+	type scored struct {
+		row   db.ListCoffeesForFinderRow
+		score float64
+	}
+	var results []scored
+	for _, row := range rows {
+		composite := flavour.Composite(row.Process.String, row.RoastLevel.String, row.CountryCode.String, row.Variety.String)
+		if composite == (flavour.Vector{}) {
+			continue
+		}
+		if adventurous == "classic" && flavour.IsExperimental(row.Process.String) {
+			continue
+		}
+		score := flavour.MatchScore(target, composite)
+		results = append(results, scored{row: row, score: score})
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].score > results[j].score
+	})
+
+	limit := 20
+	if len(results) > limit {
+		results = results[:limit]
+	}
+
+	coffees := make([]domain.CoffeeResponse, 0, len(results))
+	for _, r := range results {
+		coffees = append(coffees, domain.CoffeeResponse{
+			ID:              r.row.ID,
+			RoasterID:       r.row.RoasterID,
+			RoasterName:     r.row.RoasterName,
+			RoasterSlug:     r.row.RoasterSlug,
+			Name:            r.row.Name,
+			ProductURL:      r.row.ProductUrl.String,
+			ImageURL:        r.row.ImageUrl.String,
+			CountryCode:     r.row.CountryCode.String,
+			CountryName:     r.row.CountryName.String,
+			RegionID:        r.row.CoffeeRegionID.Int32,
+			RegionName:      r.row.RegionName.String,
+			ProducerID:      r.row.CoffeeProducerID.Int32,
+			ProducerName:    r.row.ProducerName.String,
+			Process:         r.row.Process.String,
+			RoastLevel:      r.row.RoastLevel.String,
+			TastingNotes:    r.row.TastingNotes,
+			Variety:         r.row.Variety.String,
+			Species:         r.row.Species.String,
+			PriceCents:      r.row.PriceCents.Int32,
+			WeightGrams:     r.row.WeightGrams.Int32,
+			PricePer100gMin: r.row.PricePer100gMin.Int32,
+			PricePer100gMax: r.row.PricePer100gMax.Int32,
+			IsBlend:         r.row.IsBlend,
+			IsDecaf:         r.row.IsDecaf,
+			InStock:         r.row.InStock,
+			SimilarityScore: r.score,
+		})
+	}
+
+	c.JSON(http.StatusOK, domain.CoffeeListResponse{
+		Coffees:    coffees,
+		TotalCount: int64(len(coffees)),
+		Page:       1,
+		PageSize:   int32(limit),
+	})
 }
 
 // GetStats godoc

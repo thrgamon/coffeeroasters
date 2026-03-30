@@ -43,6 +43,7 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 	rg.GET("/roasters", h.ListRoasters)
 	rg.GET("/roasters/:slug", h.GetRoaster)
 	rg.GET("/coffees", h.ListCoffees)
+	rg.GET("/coffees/find", h.FindCoffees)
 	rg.GET("/coffees/:id", h.GetCoffee)
 	rg.GET("/cafes", h.ListCafes)
 	rg.GET("/cafes/:slug", h.GetCafe)
