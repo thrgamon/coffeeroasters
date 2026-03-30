@@ -16,14 +16,14 @@ export default async function Home() {
 		<div className="space-y-16">
 			<section className="text-center py-12">
 				<p className="text-xs font-bold tracking-[0.4em] uppercase text-accent mb-6">Australian Specialty Coffee</p>
-				<h1 className="text-7xl font-bold tracking-[0.08em] text-foreground sm:text-8xl leading-none">
+				<h1 className="text-5xl font-bold tracking-[0.08em] text-foreground sm:text-8xl leading-none">
 					COFFEE
 					<br />
 					ROASTERS
 				</h1>
-				<div className="mx-auto mt-8 flex justify-center">
-					<div className="bg-primary px-10 py-4">
-						<div className="flex gap-12 text-sm font-mono font-bold tracking-wider text-foreground">
+				<div className="mx-auto mt-8 flex justify-center px-4">
+					<div className="bg-primary px-6 py-4 sm:px-10">
+						<div className="flex gap-6 sm:gap-12 text-sm font-mono font-bold tracking-wider text-foreground">
 							<span className="flex flex-col items-center">
 								<span className="text-3xl">{stats.roaster_count}</span>
 								<span className="text-xs tracking-[0.2em]">ROASTERS</span>
@@ -39,7 +39,7 @@ export default async function Home() {
 						</div>
 					</div>
 				</div>
-				<div className="flex justify-center gap-4 mt-10">
+				<div className="flex flex-col sm:flex-row justify-center gap-4 mt-10 px-4">
 					<Link
 						href="/coffees"
 						className="bg-foreground px-8 py-3 text-sm font-bold uppercase tracking-[0.2em] text-primary hover:bg-foreground/80 transition-colors"
