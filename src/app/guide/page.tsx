@@ -342,6 +342,12 @@ export default function GuidePage() {
 			{/* Process */}
 			<section className="space-y-6">
 				<h2 className="text-2xl font-semibold">Process</h2>
+				<p className="text-muted-foreground max-w-2xl">
+					After coffee cherries are picked, they need to be dried and the seed extracted. How this is done has a major
+					effect on flavour. Processing determines the balance between clarity and fruitiness: methods that leave the
+					fruit on the bean longer produce sweeter, heavier cups, while methods that strip the fruit early let the
+					bean's terroir speak for itself.
+				</p>
 				<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 					{processes.map((p) => (
 						<div key={p.value} className="rounded-lg border bg-card p-6 space-y-3">
@@ -371,6 +377,12 @@ export default function GuidePage() {
 			{/* Roast Level */}
 			<section className="space-y-6">
 				<h2 className="text-2xl font-semibold">Roast Level</h2>
+				<p className="text-muted-foreground max-w-2xl">
+					Roasting transforms green coffee into the brown beans you brew. The longer and hotter the roast, the more the
+					bean's origin character gives way to roast character. Light roasts preserve what makes a coffee unique: its
+					acidity, florals, and fruit. Darker roasts trade that transparency for body, sweetness, and roast-derived
+					flavours like chocolate and caramel.
+				</p>
 				<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 					{roastLevels.map((r) => (
 						<div key={r.value} className="rounded-lg border bg-card p-6 space-y-3">
@@ -391,6 +403,12 @@ export default function GuidePage() {
 			{/* Origin */}
 			<section className="space-y-8">
 				<h2 className="text-2xl font-semibold">Origin</h2>
+				<p className="text-muted-foreground max-w-2xl">
+					Where coffee grows shapes its flavour more than any other factor. Altitude, soil, climate, and local farming
+					traditions all leave their mark. African coffees tend toward bright acidity and floral complexity. Central and
+					South American coffees are typically balanced and sweet. Asian coffees lean earthy and full-bodied. We group
+					origins here by flavour family rather than geography.
+				</p>
 				{originGroups.map((group) => (
 					<div key={group.label} className="space-y-4">
 						<h3 className="text-lg font-medium">{group.label}</h3>
@@ -412,6 +430,12 @@ export default function GuidePage() {
 			{/* Variety */}
 			<section className="space-y-8">
 				<h2 className="text-2xl font-semibold">Variety</h2>
+				<p className="text-muted-foreground max-w-2xl">
+					Just as grape varieties produce different wines, coffee plant varieties produce distinct flavour profiles.
+					Some varieties like Gesha are prized for extraordinary complexity. Others like Bourbon and Typica form the
+					backbone of specialty coffee. Variety sets the flavour potential; processing and roasting determine how much
+					of it is expressed.
+				</p>
 				{varietyGroups.map((group) => (
 					<div key={group.label} className="space-y-4">
 						<h3 className="text-lg font-medium">{group.label}</h3>
