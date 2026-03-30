@@ -92,7 +92,7 @@ func FetchShopify(ctx context.Context, cfg domain.RoasterConfig, client *http.Cl
 		}
 
 		body, err := io.ReadAll(io.LimitReader(resp.Body, 10*1024*1024))
-		resp.Body.Close()
+		_ = resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
 			return nil, fmt.Errorf("GET %s: status %d", url, resp.StatusCode)

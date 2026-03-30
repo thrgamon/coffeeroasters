@@ -88,7 +88,7 @@ func (rc *RobotsCache) fetchEntry(ctx context.Context, domain, robotsURL string)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	entry = &robotsEntry{fetchedAt: time.Now()}
 
@@ -180,7 +180,7 @@ func FetchHTML(ctx context.Context, client *http.Client, rawURL string) (*html.N
 	if err != nil {
 		return nil, fmt.Errorf("GET %s: %w", rawURL, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("GET %s: status %d", rawURL, resp.StatusCode)
