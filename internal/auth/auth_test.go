@@ -2,26 +2,7 @@ package auth
 
 import (
 	"testing"
-
-	"golang.org/x/crypto/bcrypt"
 )
-
-func TestPasswordHashRoundTrip(t *testing.T) {
-	password := "test-password-123"
-
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-	if err != nil {
-		t.Fatalf("hashing password: %v", err)
-	}
-
-	if err := bcrypt.CompareHashAndPassword(hash, []byte(password)); err != nil {
-		t.Errorf("password should match hash: %v", err)
-	}
-
-	if err := bcrypt.CompareHashAndPassword(hash, []byte("wrong-password")); err == nil {
-		t.Error("wrong password should not match hash")
-	}
-}
 
 func TestGenerateTokenUniqueness(t *testing.T) {
 	tokens := make(map[string]bool)

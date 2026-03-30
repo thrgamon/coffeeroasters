@@ -4,6 +4,7 @@ import { z } from 'zod';
 export const UserSchema = z.object({
 	id: z.number(),
 	email: z.string(),
+	is_admin: z.boolean().optional().default(false),
 });
 
 export const AuthResponseSchema = z.object({

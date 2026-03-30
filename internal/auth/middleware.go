@@ -24,6 +24,19 @@ func RequireAuth(svc *Service) gin.HandlerFunc {
 
 		c.Set("user_id", session.UserID)
 		c.Set("user_email", session.UserEmail)
+		c.Set("user_is_admin", session.UserIsAdmin)
+		c.Next()
+	}
+}
+
+func RequireAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		isAdmin, exists := c.Get("user_is_admin")
+		if !exists || !isAdmin.(bool) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "admin access required"})
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }

@@ -96,7 +96,12 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 				<CardHeader className="pb-1">
 					<div className="flex items-start justify-between gap-1">
 						<CardTitle className="text-base leading-snug">{displayName}</CardTitle>
-						{coffee.id && <CoffeeTrackButton coffeeId={coffee.id} variant="like" />}
+						{coffee.id && (
+								<div className="flex items-center gap-0.5">
+									<CoffeeTrackButton coffeeId={coffee.id} variant="wishlist" />
+									<CoffeeTrackButton coffeeId={coffee.id} variant="log" />
+								</div>
+							)}
 					</div>
 					{coffee.roaster_name && (
 						<Link

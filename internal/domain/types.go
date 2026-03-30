@@ -2,19 +2,23 @@ package domain
 
 // --- Auth ---
 
-type RegisterRequest struct {
-	Email    string `json:"email" binding:"required,email" validate:"required"`
-	Password string `json:"password" binding:"required,min=8" validate:"required"`
+type MagicLinkRequest struct {
+	Email string `json:"email" binding:"required,email" validate:"required"`
 }
 
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email" validate:"required"`
-	Password string `json:"password" binding:"required" validate:"required"`
+type MagicLinkResponse struct {
+	Message string `json:"message"`
+	Token   string `json:"token,omitempty"` // Only returned in development
+}
+
+type VerifyMagicLinkRequest struct {
+	Token string `json:"token" binding:"required" validate:"required"`
 }
 
 type UserResponse struct {
-	ID    int32  `json:"id" validate:"required"`
-	Email string `json:"email" validate:"required"`
+	ID      int32  `json:"id" validate:"required"`
+	Email   string `json:"email" validate:"required"`
+	IsAdmin bool   `json:"is_admin"`
 }
 
 type AuthResponse struct {
@@ -23,6 +27,39 @@ type AuthResponse struct {
 
 type MeResponse struct {
 	User *UserResponse `json:"user"`
+}
+
+// --- User Coffees (Letterboxd-style) ---
+
+type UserCoffeeRequest struct {
+	CoffeeID int64   `json:"coffee_id" binding:"required" validate:"required"`
+	Status   string  `json:"status" binding:"required,oneof=wishlist logged" validate:"required"`
+	Liked    *bool   `json:"liked,omitempty"`
+	Rating   *int16  `json:"rating,omitempty"` // 1-5
+	Review   *string `json:"review,omitempty"`
+	DrunkAt  *string `json:"drunk_at,omitempty"` // YYYY-MM-DD
+}
+
+type UserCoffeeResponse struct {
+	CoffeeID int64   `json:"coffee_id"`
+	Status   string  `json:"status"`
+	Liked    *bool   `json:"liked,omitempty"`
+	Rating   *int16  `json:"rating,omitempty"`
+	Review   *string `json:"review,omitempty"`
+	DrunkAt  *string `json:"drunk_at,omitempty"`
+}
+
+type UserCoffeeDetailResponse struct {
+	CoffeeResponse
+	Status  string  `json:"status"`
+	Liked   *bool   `json:"liked,omitempty"`
+	Rating  *int16  `json:"rating,omitempty"`
+	Review  *string `json:"review,omitempty"`
+	DrunkAt *string `json:"drunk_at,omitempty"`
+}
+
+type UserCoffeeListResponse struct {
+	Coffees []UserCoffeeDetailResponse `json:"coffees"`
 }
 
 // --- Scraper ---
