@@ -8,19 +8,7 @@ package db
 import (
 	"context"
 	"time"
-
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
-
-type MagicLink struct {
-	ID        uuid.UUID          `json:"id"`
-	Email     string             `json:"email"`
-	Token     string             `json:"token"`
-	ExpiresAt time.Time          `json:"expires_at"`
-	UsedAt    pgtype.Timestamptz `json:"used_at"`
-	CreatedAt time.Time          `json:"created_at"`
-}
 
 const createMagicLink = `-- name: CreateMagicLink :one
 INSERT INTO magic_links (email, token, expires_at)
@@ -46,6 +34,16 @@ func (q *Queries) CreateMagicLink(ctx context.Context, arg CreateMagicLinkParams
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const deleteExpiredMagicLinks = `-- name: DeleteExpiredMagicLinks :exec
+DELETE FROM magic_links
+WHERE expires_at <= now() OR used_at IS NOT NULL
+`
+
+func (q *Queries) DeleteExpiredMagicLinks(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, deleteExpiredMagicLinks)
+	return err
 }
 
 const getMagicLinkByToken = `-- name: GetMagicLinkByToken :one
@@ -74,15 +72,5 @@ WHERE token = $1
 
 func (q *Queries) MarkMagicLinkUsed(ctx context.Context, token string) error {
 	_, err := q.db.Exec(ctx, markMagicLinkUsed, token)
-	return err
-}
-
-const deleteExpiredMagicLinks = `-- name: DeleteExpiredMagicLinks :exec
-DELETE FROM magic_links
-WHERE expires_at <= now() OR used_at IS NOT NULL
-`
-
-func (q *Queries) DeleteExpiredMagicLinks(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, deleteExpiredMagicLinks)
 	return err
 }

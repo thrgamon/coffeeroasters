@@ -12,52 +12,22 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type UserCoffee struct {
-	ID        int32       `json:"id"`
-	UserID    int32       `json:"user_id"`
-	CoffeeID  int64       `json:"coffee_id"`
-	Status    string      `json:"status"`
-	Liked     pgtype.Bool `json:"liked"`
-	Rating    pgtype.Int2 `json:"rating"`
-	Review    pgtype.Text `json:"review"`
-	DrunkAt   pgtype.Date `json:"drunk_at"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
-}
-
-const upsertUserCoffee = `-- name: UpsertUserCoffee :one
-INSERT INTO user_coffees (user_id, coffee_id, status, liked, rating, review, drunk_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-ON CONFLICT (user_id, coffee_id)
-DO UPDATE SET status = EXCLUDED.status, liked = EXCLUDED.liked, rating = EXCLUDED.rating,
-             review = EXCLUDED.review, drunk_at = EXCLUDED.drunk_at, updated_at = now()
-RETURNING id, user_id, coffee_id, status, liked, rating, review, drunk_at, created_at, updated_at
+const createUserPasswordless = `-- name: CreateUserPasswordless :one
+INSERT INTO users (email, password_hash)
+VALUES ($1, '')
+RETURNING id, email, password_hash, created_at, updated_at, is_admin
 `
 
-type UpsertUserCoffeeParams struct {
-	UserID   int32       `json:"user_id"`
-	CoffeeID int64       `json:"coffee_id"`
-	Status   string      `json:"status"`
-	Liked    pgtype.Bool `json:"liked"`
-	Rating   pgtype.Int2 `json:"rating"`
-	Review   pgtype.Text `json:"review"`
-	DrunkAt  pgtype.Date `json:"drunk_at"`
-}
-
-func (q *Queries) UpsertUserCoffee(ctx context.Context, arg UpsertUserCoffeeParams) (UserCoffee, error) {
-	row := q.db.QueryRow(ctx, upsertUserCoffee, arg.UserID, arg.CoffeeID, arg.Status, arg.Liked, arg.Rating, arg.Review, arg.DrunkAt)
-	var i UserCoffee
+func (q *Queries) CreateUserPasswordless(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, createUserPasswordless, email)
+	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
-		&i.CoffeeID,
-		&i.Status,
-		&i.Liked,
-		&i.Rating,
-		&i.Review,
-		&i.DrunkAt,
+		&i.Email,
+		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsAdmin,
 	)
 	return i, err
 }
@@ -77,9 +47,73 @@ func (q *Queries) DeleteUserCoffee(ctx context.Context, arg DeleteUserCoffeePara
 	return err
 }
 
+const getUserCoffee = `-- name: GetUserCoffee :one
+SELECT id, user_id, coffee_id, status, liked, rating, review, drunk_at, created_at, updated_at FROM user_coffees
+WHERE user_id = $1 AND coffee_id = $2
+`
+
+type GetUserCoffeeParams struct {
+	UserID   int32 `json:"user_id"`
+	CoffeeID int64 `json:"coffee_id"`
+}
+
+func (q *Queries) GetUserCoffee(ctx context.Context, arg GetUserCoffeeParams) (UserCoffee, error) {
+	row := q.db.QueryRow(ctx, getUserCoffee, arg.UserID, arg.CoffeeID)
+	var i UserCoffee
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.CoffeeID,
+		&i.Status,
+		&i.Liked,
+		&i.Rating,
+		&i.Review,
+		&i.DrunkAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const listUserCoffeeIDs = `-- name: ListUserCoffeeIDs :many
+SELECT coffee_id, status, liked, rating FROM user_coffees
+WHERE user_id = $1
+`
+
+type ListUserCoffeeIDsRow struct {
+	CoffeeID int64       `json:"coffee_id"`
+	Status   string      `json:"status"`
+	Liked    pgtype.Bool `json:"liked"`
+	Rating   pgtype.Int2 `json:"rating"`
+}
+
+func (q *Queries) ListUserCoffeeIDs(ctx context.Context, userID int32) ([]ListUserCoffeeIDsRow, error) {
+	rows, err := q.db.Query(ctx, listUserCoffeeIDs, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListUserCoffeeIDsRow{}
+	for rows.Next() {
+		var i ListUserCoffeeIDsRow
+		if err := rows.Scan(
+			&i.CoffeeID,
+			&i.Status,
+			&i.Liked,
+			&i.Rating,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listUserCoffees = `-- name: ListUserCoffees :many
-SELECT uc.id, uc.user_id, uc.coffee_id, uc.status, uc.liked, uc.rating, uc.review, uc.drunk_at, uc.created_at, uc.updated_at,
-       c.name AS coffee_name, c.image_url AS coffee_image_url,
+SELECT uc.id, uc.user_id, uc.coffee_id, uc.status, uc.liked, uc.rating, uc.review, uc.drunk_at, uc.created_at, uc.updated_at, c.name AS coffee_name, c.image_url AS coffee_image_url,
        r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
        c.process, c.roast_level, c.tasting_notes, c.variety,
        c.price_cents, c.weight_grams, c.price_per_100g_min, c.price_per_100g_max,
@@ -180,21 +214,41 @@ func (q *Queries) ListUserCoffees(ctx context.Context, userID int32) ([]ListUser
 		}
 		items = append(items, i)
 	}
-	return items, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
-const getUserCoffee = `-- name: GetUserCoffee :one
-SELECT id, user_id, coffee_id, status, liked, rating, review, drunk_at, created_at, updated_at FROM user_coffees
-WHERE user_id = $1 AND coffee_id = $2
+const upsertUserCoffee = `-- name: UpsertUserCoffee :one
+INSERT INTO user_coffees (user_id, coffee_id, status, liked, rating, review, drunk_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+ON CONFLICT (user_id, coffee_id)
+DO UPDATE SET status = EXCLUDED.status, liked = EXCLUDED.liked, rating = EXCLUDED.rating,
+             review = EXCLUDED.review, drunk_at = EXCLUDED.drunk_at, updated_at = now()
+RETURNING id, user_id, coffee_id, status, liked, rating, review, drunk_at, created_at, updated_at
 `
 
-type GetUserCoffeeParams struct {
-	UserID   int32 `json:"user_id"`
-	CoffeeID int64 `json:"coffee_id"`
+type UpsertUserCoffeeParams struct {
+	UserID   int32       `json:"user_id"`
+	CoffeeID int64       `json:"coffee_id"`
+	Status   string      `json:"status"`
+	Liked    pgtype.Bool `json:"liked"`
+	Rating   pgtype.Int2 `json:"rating"`
+	Review   pgtype.Text `json:"review"`
+	DrunkAt  pgtype.Date `json:"drunk_at"`
 }
 
-func (q *Queries) GetUserCoffee(ctx context.Context, arg GetUserCoffeeParams) (UserCoffee, error) {
-	row := q.db.QueryRow(ctx, getUserCoffee, arg.UserID, arg.CoffeeID)
+func (q *Queries) UpsertUserCoffee(ctx context.Context, arg UpsertUserCoffeeParams) (UserCoffee, error) {
+	row := q.db.QueryRow(ctx, upsertUserCoffee,
+		arg.UserID,
+		arg.CoffeeID,
+		arg.Status,
+		arg.Liked,
+		arg.Rating,
+		arg.Review,
+		arg.DrunkAt,
+	)
 	var i UserCoffee
 	err := row.Scan(
 		&i.ID,
@@ -205,55 +259,6 @@ func (q *Queries) GetUserCoffee(ctx context.Context, arg GetUserCoffeeParams) (U
 		&i.Rating,
 		&i.Review,
 		&i.DrunkAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const listUserCoffeeIDs = `-- name: ListUserCoffeeIDs :many
-SELECT coffee_id, status, liked, rating FROM user_coffees
-WHERE user_id = $1
-`
-
-type ListUserCoffeeIDsRow struct {
-	CoffeeID int64       `json:"coffee_id"`
-	Status   string      `json:"status"`
-	Liked    pgtype.Bool `json:"liked"`
-	Rating   pgtype.Int2 `json:"rating"`
-}
-
-func (q *Queries) ListUserCoffeeIDs(ctx context.Context, userID int32) ([]ListUserCoffeeIDsRow, error) {
-	rows, err := q.db.Query(ctx, listUserCoffeeIDs, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []ListUserCoffeeIDsRow{}
-	for rows.Next() {
-		var i ListUserCoffeeIDsRow
-		if err := rows.Scan(&i.CoffeeID, &i.Status, &i.Liked, &i.Rating); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	return items, rows.Err()
-}
-
-const createUserPasswordless = `-- name: CreateUserPasswordless :one
-INSERT INTO users (email, password_hash)
-VALUES ($1, '')
-RETURNING id, email, password_hash, is_admin, created_at, updated_at
-`
-
-func (q *Queries) CreateUserPasswordless(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRow(ctx, createUserPasswordless, email)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Email,
-		&i.PasswordHash,
-		&i.IsAdmin,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

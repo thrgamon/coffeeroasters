@@ -74,9 +74,7 @@ export default function LogCoffeeModal({ coffeeId, coffeeName, open, onOpenChang
 									/>
 								</button>
 							))}
-							{rating > 0 && (
-								<span className="ml-2 self-center text-sm text-muted-foreground">{rating}/5</span>
-							)}
+							{rating > 0 && <span className="ml-2 self-center text-sm text-muted-foreground">{rating}/5</span>}
 						</div>
 					</div>
 
@@ -87,9 +85,7 @@ export default function LogCoffeeModal({ coffeeId, coffeeName, open, onOpenChang
 							type="button"
 							onClick={() => setLiked(liked === true ? undefined : true)}
 							className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors ${
-								liked === true
-									? 'bg-red-50 text-red-500 dark:bg-red-950'
-									: 'text-muted-foreground hover:bg-accent'
+								liked === true ? 'bg-red-50 text-red-500 dark:bg-red-950' : 'text-muted-foreground hover:bg-accent'
 							}`}
 						>
 							<Heart className={`size-4 ${liked === true ? 'fill-current' : ''}`} />

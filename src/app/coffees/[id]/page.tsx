@@ -11,7 +11,7 @@ import { apiFetch } from '@/lib/api/server';
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
 	const { id } = await params;
 	const coffee = await apiFetch<DomainCoffeeDetailResponse>(`/api/coffees/${id}`);
-	return { title: `${coffee.name} | Coffeeroasters` };
+	return { title: `${coffee.name} | COFFEEROASTERS` };
 }
 
 export default async function CoffeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,12 +29,12 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 							width={192}
 							height={192}
 							unoptimized
-							className="h-48 w-48 rounded-lg object-cover"
+							className="h-48 w-48 rounded-lg object-cover border-2 border-border"
 						/>
 					)}
 					<div className="space-y-2">
 						<div className="flex items-center gap-2">
-							<h1 className="text-3xl font-bold">{coffee.name}</h1>
+							<h1 className="text-3xl font-bold text-foreground">{coffee.name}</h1>
 							{coffee.id && (
 								<div className="flex items-center gap-1">
 									<CoffeeTrackButton coffeeId={coffee.id} coffeeName={coffee.name} variant="wishlist" size="md" />
@@ -46,7 +46,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 							<div className="flex items-center gap-3">
 								<Link
 									href={`/roasters/${coffee.roaster_slug}`}
-									className="text-lg text-muted-foreground hover:text-foreground"
+									className="text-lg text-accent hover:text-accent transition-colors"
 								>
 									{coffee.roaster_name}
 								</Link>
@@ -55,7 +55,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 										href={coffee.product_url}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="inline-block rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90"
+										className="inline-block rounded bg-foreground px-4 py-2 text-sm font-bold uppercase tracking-wider text-primary hover:bg-foreground/90 transition-colors"
 									>
 										View on roaster site
 									</a>
@@ -65,7 +65,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 						<div className="flex flex-wrap gap-2">
 							{coffee.country_name && (
 								<Link href={`/countries/${coffee.country_code}`}>
-									<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent">
+									<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent hover:text-card">
 										<Globe className="size-3" />
 										{coffee.country_name}
 									</Badge>
@@ -73,7 +73,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 							)}
 							{coffee.region_name && coffee.region_id && (
 								<Link href={`/regions/${coffee.region_id}`}>
-									<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent">
+									<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent hover:text-card">
 										<Globe className="size-3" />
 										{coffee.region_name}
 									</Badge>
@@ -117,7 +117,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 				{coffee.producer_name && coffee.producer_id && (
 					<Link
 						href={`/producers/${coffee.producer_id}`}
-						className="block text-sm text-muted-foreground hover:text-foreground"
+						className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
 					>
 						Producer: {coffee.producer_name}
 					</Link>
@@ -125,7 +125,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 
 				{coffee.tasting_notes && coffee.tasting_notes.length > 0 && (
 					<div>
-						<h3 className="mb-1 text-sm font-medium">Tasting notes</h3>
+						<h3 className="mb-1 text-sm font-bold uppercase tracking-wider text-accent">Tasting notes</h3>
 						<div className="flex flex-wrap gap-1">
 							{coffee.tasting_notes.map((note) => (
 								<Badge key={note} variant="secondary" className="gap-1">
@@ -139,14 +139,14 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 
 				{coffee.description && (
 					<div>
-						<h3 className="mb-1 text-sm font-medium">About this coffee</h3>
-						<p className="text-sm text-muted-foreground whitespace-pre-line">{coffee.description}</p>
+						<h3 className="mb-1 text-sm font-bold uppercase tracking-wider text-accent">About this coffee</h3>
+						<p className="text-sm text-foreground/70 whitespace-pre-line">{coffee.description}</p>
 					</div>
 				)}
 
 				{coffee.blend_components && coffee.blend_components.length > 0 && (
 					<div>
-						<h3 className="mb-1 text-sm font-medium">Blend components</h3>
+						<h3 className="mb-1 text-sm font-bold uppercase tracking-wider text-accent">Blend components</h3>
 						<div className="space-y-1">
 							{coffee.blend_components.map((comp) => (
 								<div
@@ -155,7 +155,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 								>
 									{comp.country_name && (
 										<Link href={`/countries/${comp.country_code}`}>
-											<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent">
+											<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent hover:text-card">
 												<Globe className="size-3" />
 												{comp.country_name}
 											</Badge>
@@ -163,7 +163,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 									)}
 									{comp.region_name && comp.region_id && (
 										<Link href={`/regions/${comp.region_id}`}>
-											<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent">
+											<Badge variant="secondary" className="cursor-pointer gap-1 hover:bg-accent hover:text-card">
 												<Globe className="size-3" />
 												{comp.region_name}
 											</Badge>
@@ -175,7 +175,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 											{comp.variety}
 										</Badge>
 									)}
-									{comp.percentage ? <span className="text-muted-foreground">{comp.percentage}%</span> : null}
+									{comp.percentage ? <span className="text-muted-foreground font-mono">{comp.percentage}%</span> : null}
 								</div>
 							))}
 						</div>
@@ -184,16 +184,18 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 
 				<div className="flex items-center gap-4 text-sm">
 					{coffee.price_per_100g_min ? (
-						<span className="text-lg font-medium">
+						<span className="text-lg font-bold text-foreground font-mono">
 							{coffee.price_per_100g_min === coffee.price_per_100g_max
 								? `$${(coffee.price_per_100g_min / 100).toFixed(2)} / 100g`
 								: `$${(coffee.price_per_100g_min / 100).toFixed(2)} - $${((coffee.price_per_100g_max ?? coffee.price_per_100g_min) / 100).toFixed(2)} / 100g`}
 						</span>
 					) : coffee.price_cents ? (
-						<span className="text-lg font-medium">${(coffee.price_cents / 100).toFixed(2)}</span>
+						<span className="text-lg font-bold text-foreground font-mono">
+							${(coffee.price_cents / 100).toFixed(2)}
+						</span>
 					) : null}
 					{coffee.price_cents ? (
-						<span className="text-muted-foreground">
+						<span className="text-muted-foreground font-mono">
 							${(coffee.price_cents / 100).toFixed(2)} / {coffee.weight_grams}g
 						</span>
 					) : null}
@@ -202,16 +204,16 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 
 			{coffee.similar_coffees && coffee.similar_coffees.length > 0 && (
 				<div className="space-y-3">
-					<h3 className="text-lg font-medium text-muted-foreground">You might also like</h3>
+					<h3 className="text-lg font-bold uppercase tracking-wider text-accent">You might also like</h3>
 					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 						{coffee.similar_coffees.map((similar) => (
 							<Link key={similar.id} href={`/coffees/${similar.id}`}>
-								<Card className="h-full shadow-sm transition-all hover:shadow-md hover:bg-accent/50">
+								<Card className="h-full border-2 border-border bg-card transition-all hover:border-accent">
 									<CardContent className="p-4 space-y-1.5">
-										<p className="font-medium text-sm leading-snug">{similar.name}</p>
-										{similar.roaster_name && <p className="text-xs text-muted-foreground">{similar.roaster_name}</p>}
+										<p className="font-medium text-sm leading-snug text-foreground">{similar.name}</p>
+										{similar.roaster_name && <p className="text-xs text-accent">{similar.roaster_name}</p>}
 										{similar.reasons && similar.reasons.length > 0 && (
-											<p className="text-xs text-muted-foreground">{similar.reasons.join(' · ')}</p>
+											<p className="text-xs text-muted-foreground">{similar.reasons.join(' \u00b7 ')}</p>
 										)}
 									</CardContent>
 								</Card>
