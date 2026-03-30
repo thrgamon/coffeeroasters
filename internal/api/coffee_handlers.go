@@ -647,6 +647,7 @@ func coffeeDetailRowToResponse(row db.GetCoffeeByIDRow) domain.CoffeeResponse {
 		IsDecaf:         row.IsDecaf,
 		InStock:         row.InStock,
 		Description:     row.Description.String,
+		BrewRecipeRaw:   row.BrewRecipeRaw.String,
 	}
 }
 

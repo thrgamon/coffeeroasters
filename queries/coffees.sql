@@ -8,7 +8,7 @@ INSERT INTO coffees (
     country_code, region_id, producer_id, producer_raw,
     variety, species,
     price_per_100g_min, price_per_100g_max, is_blend,
-    description, source_hash, is_decaf,
+    description, brew_recipe_raw, source_hash, is_decaf,
     last_seen_at
 )
 VALUES (
@@ -19,7 +19,7 @@ VALUES (
     $20, $21, $22, $23,
     $24, $25,
     $26, $27, $28,
-    $29, $30, $31,
+    $29, $30, $31, $32,
     now()
 )
 ON CONFLICT (roaster_id, name) DO UPDATE SET
@@ -50,6 +50,7 @@ ON CONFLICT (roaster_id, name) DO UPDATE SET
     price_per_100g_max = EXCLUDED.price_per_100g_max,
     is_blend = EXCLUDED.is_blend,
     description = EXCLUDED.description,
+    brew_recipe_raw = EXCLUDED.brew_recipe_raw,
     source_hash = EXCLUDED.source_hash,
     is_decaf = EXCLUDED.is_decaf,
     last_seen_at = now(),
@@ -138,7 +139,7 @@ SELECT
     c.producer_raw, c.region_id, c.producer_id,
     c.variety, c.species,
     c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    c.description,
+    c.description, c.brew_recipe_raw,
     c.first_seen_at, c.last_seen_at,
     r.name AS roaster_name, r.slug AS roaster_slug, r.logo_url AS roaster_logo_url,
     co.name AS country_name,

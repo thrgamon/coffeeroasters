@@ -115,6 +115,9 @@ func FetchHTMLPage(ctx context.Context, cfg domain.RoasterConfig, client *http.C
 		if p.Description != nil {
 			raw.Description = *p.Description
 		}
+		if p.BrewRecipe != nil {
+			raw.BrewRecipeRaw = *p.BrewRecipe
+		}
 
 		raw.IsBlend = p.IsBlend
 		if p.IsBlend && len(p.BlendComponents) > 0 {

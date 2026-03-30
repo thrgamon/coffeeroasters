@@ -45,6 +45,7 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 	rg.GET("/coffees", h.ListCoffees)
 	rg.GET("/coffees/find", h.FindCoffees)
 	rg.GET("/coffees/:id", h.GetCoffee)
+	rg.GET("/coffees/:id/recipes", h.ListBrewRecipesByCoffee)
 	rg.GET("/cafes", h.ListCafes)
 	rg.GET("/cafes/:slug", h.GetCafe)
 	rg.GET("/stats", h.GetStats)
@@ -61,6 +62,10 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 		protected.DELETE("/user/coffees/:coffee_id", h.DeleteUserCoffee)
 		protected.GET("/user/coffees", h.ListUserCoffees)
 		protected.GET("/user/coffee-ids", h.ListUserCoffeeIDs)
+		protected.POST("/recipes", h.CreateBrewRecipe)
+		protected.PUT("/recipes/:id", h.UpdateBrewRecipe)
+		protected.DELETE("/recipes/:id", h.DeleteBrewRecipe)
+		protected.GET("/user/recipes", h.ListBrewRecipesByUser)
 	}
 
 	admin := rg.Group("/admin")

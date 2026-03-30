@@ -144,7 +144,48 @@ type CoffeeResponse struct {
 	IsDecaf         bool     `json:"is_decaf"`
 	InStock         bool     `json:"in_stock"`
 	Description     string   `json:"description,omitempty"`
+	BrewRecipeRaw   string   `json:"brew_recipe_raw,omitempty"`
 	SimilarityScore float64  `json:"similarity_score,omitempty"`
+}
+
+// --- Brew Recipes ---
+
+type BrewRecipeRequest struct {
+	CoffeeID        int64    `json:"coffee_id" binding:"required" validate:"required"`
+	Title           string   `json:"title" binding:"required" validate:"required"`
+	BrewMethod      string   `json:"brew_method" binding:"required,oneof=espresso pourover aeropress french_press cold_brew filter moka_pot other" validate:"required"`
+	DoseGrams       *float64 `json:"dose_grams,omitempty"`
+	WaterMl         *int32   `json:"water_ml,omitempty"`
+	WaterTempC      *int32   `json:"water_temp_c,omitempty"`
+	GrindSize       *string  `json:"grind_size,omitempty"`
+	BrewTimeSeconds *int32   `json:"brew_time_seconds,omitempty"`
+	Notes           *string  `json:"notes,omitempty"`
+	IsPublic        *bool    `json:"is_public,omitempty"`
+}
+
+type BrewRecipeResponse struct {
+	ID              int32    `json:"id"`
+	CoffeeID        int64    `json:"coffee_id"`
+	UserID          int32    `json:"user_id"`
+	UserEmail       string   `json:"user_email,omitempty"`
+	Title           string   `json:"title"`
+	BrewMethod      string   `json:"brew_method"`
+	DoseGrams       *float64 `json:"dose_grams,omitempty"`
+	WaterMl         *int32   `json:"water_ml,omitempty"`
+	WaterTempC      *int32   `json:"water_temp_c,omitempty"`
+	GrindSize       *string  `json:"grind_size,omitempty"`
+	BrewTimeSeconds *int32   `json:"brew_time_seconds,omitempty"`
+	Notes           *string  `json:"notes,omitempty"`
+	IsPublic        bool     `json:"is_public"`
+	CoffeeName      string   `json:"coffee_name,omitempty"`
+	RoasterName     string   `json:"roaster_name,omitempty"`
+	RoasterSlug     string   `json:"roaster_slug,omitempty"`
+	CreatedAt       string   `json:"created_at"`
+	UpdatedAt       string   `json:"updated_at"`
+}
+
+type BrewRecipeListResponse struct {
+	Recipes []BrewRecipeResponse `json:"recipes"`
 }
 
 // BlendComponentResponse represents a single origin component of a blend.

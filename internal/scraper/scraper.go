@@ -28,8 +28,9 @@ type RawCoffee struct {
 	// Process and roast (raw strings, normalised later)
 	ProcessRaw   string // e.g. "Natural", "Washed", "Honey"
 	RoastRaw     string // e.g. "Light", "Filter Roast", "Medium-Light"
-	TastingNotes string // e.g. "Blueberry, dark chocolate, jasmine"
-	Description  string // roaster's flavour writeup / descriptive prose
+	TastingNotes   string // e.g. "Blueberry, dark chocolate, jasmine"
+	Description    string // roaster's flavour writeup / descriptive prose
+	BrewRecipeRaw  string // brewing recommendations / recipe from the roaster
 
 	// Pricing
 	PriceRaw        string // e.g. "$32.00", "32", "32.00"
