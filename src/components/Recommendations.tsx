@@ -6,14 +6,14 @@ import { useGetApiCoffees } from '@/lib/api/generated/coffees/coffees';
 import { useCoffeeTracker } from '@/lib/coffee-tracker';
 
 export default function Recommendations() {
-	const { hydrated, likedIds } = useCoffeeTracker();
+	const { hydrated, wishlistIds } = useCoffeeTracker();
 
 	const { data, isLoading } = useGetApiCoffees(
-		{ liked: likedIds.join(','), page_size: 6 },
-		{ query: { enabled: hydrated && likedIds.length > 0 } },
+		{ liked: wishlistIds.join(','), page_size: 6 },
+		{ query: { enabled: hydrated && wishlistIds.length > 0 } },
 	);
 
-	if (!hydrated || likedIds.length === 0) {
+	if (!hydrated || wishlistIds.length === 0) {
 		return null;
 	}
 

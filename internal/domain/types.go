@@ -2,14 +2,17 @@ package domain
 
 // --- Auth ---
 
-type RegisterRequest struct {
-	Email    string `json:"email" binding:"required,email" validate:"required"`
-	Password string `json:"password" binding:"required,min=8" validate:"required"`
+type MagicLinkRequest struct {
+	Email string `json:"email" binding:"required,email" validate:"required"`
 }
 
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email" validate:"required"`
-	Password string `json:"password" binding:"required" validate:"required"`
+type MagicLinkResponse struct {
+	Message string `json:"message"`
+	Token   string `json:"token,omitempty"` // Only returned in development
+}
+
+type VerifyMagicLinkRequest struct {
+	Token string `json:"token" binding:"required" validate:"required"`
 }
 
 type UserResponse struct {
@@ -23,6 +26,30 @@ type AuthResponse struct {
 
 type MeResponse struct {
 	User *UserResponse `json:"user"`
+}
+
+// --- User Coffees ---
+
+type UserCoffeeRequest struct {
+	CoffeeID int64  `json:"coffee_id" binding:"required" validate:"required"`
+	Status   string `json:"status" binding:"required,oneof=wishlist tried" validate:"required"`
+	Enjoyed  *bool  `json:"enjoyed,omitempty"`
+}
+
+type UserCoffeeResponse struct {
+	CoffeeID int64  `json:"coffee_id"`
+	Status   string `json:"status"`
+	Enjoyed  *bool  `json:"enjoyed,omitempty"`
+}
+
+type UserCoffeeDetailResponse struct {
+	CoffeeResponse
+	Status  string `json:"status"`
+	Enjoyed *bool  `json:"enjoyed,omitempty"`
+}
+
+type UserCoffeeListResponse struct {
+	Coffees []UserCoffeeDetailResponse `json:"coffees"`
 }
 
 // --- Scraper ---

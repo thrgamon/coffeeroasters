@@ -77,6 +77,9 @@ func main() {
 				if err := authSvc.DeleteExpiredSessions(context.Background()); err != nil {
 					slog.Error("cleaning expired sessions", "error", err)
 				}
+				if err := authSvc.DeleteExpiredMagicLinks(context.Background()); err != nil {
+					slog.Error("cleaning expired magic links", "error", err)
+				}
 			case <-ctx.Done():
 				return
 			}

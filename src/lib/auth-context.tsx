@@ -6,8 +6,8 @@ import type { User } from '@/lib/types';
 interface AuthContextType {
 	user: User | null;
 	loading: boolean;
-	login: (email: string, password: string) => Promise<void>;
-	register: (email: string, password: string) => Promise<void>;
+	sendMagicLink: (email: string) => Promise<{ token?: string }>;
+	verifyMagicLink: (token: string) => Promise<void>;
 	logout: () => Promise<void>;
 }
 
@@ -41,27 +41,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			.finally(() => setLoading(false));
 	}, []);
 
-	const login = useCallback(async (email: string, password: string) => {
-		const res = await fetch('/api/auth/login', {
+	const sendMagicLink = useCallback(async (email: string) => {
+		const res = await fetch('/api/auth/magic-link', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			credentials: 'include',
-			body: JSON.stringify({ email, password }),
+			body: JSON.stringify({ email }),
 		});
 		const data = await res.json();
-		if (!res.ok) throw new Error(extractError(data, 'Login failed'));
-		setUser(data.user ?? data);
+		if (!res.ok) throw new Error(extractError(data, 'Failed to send magic link'));
+		return { token: data.token as string | undefined };
 	}, []);
 
-	const register = useCallback(async (email: string, password: string) => {
-		const res = await fetch('/api/auth/register', {
+	const verifyMagicLink = useCallback(async (token: string) => {
+		const res = await fetch('/api/auth/verify', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			credentials: 'include',
-			body: JSON.stringify({ email, password }),
+			body: JSON.stringify({ token }),
 		});
 		const data = await res.json();
-		if (!res.ok) throw new Error(extractError(data, 'Registration failed'));
+		if (!res.ok) throw new Error(extractError(data, 'Verification failed'));
 		setUser(data.user ?? data);
 	}, []);
 
@@ -70,7 +70,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		setUser(null);
 	}, []);
 
-	return <AuthContext value={{ user, loading, login, register, logout }}>{children}</AuthContext>;
+	return (
+		<AuthContext value={{ user, loading, sendMagicLink, verifyMagicLink, logout }}>{children}</AuthContext>
+	);
 }
 
 export function useAuth(): AuthContextType {

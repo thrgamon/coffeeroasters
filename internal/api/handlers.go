@@ -33,8 +33,8 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 
 	authGroup := rg.Group("/auth")
 	{
-		authGroup.POST("/register", h.Register)
-		authGroup.POST("/login", h.Login)
+		authGroup.POST("/magic-link", h.SendMagicLink)
+		authGroup.POST("/verify", h.VerifyMagicLink)
 		authGroup.POST("/logout", h.Logout)
 		authGroup.GET("/me", h.Me)
 	}
@@ -57,6 +57,10 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 	protected.Use(auth.RequireAuth(h.auth))
 	{
 		protected.GET("/dashboard", h.Dashboard)
+		protected.POST("/user/coffees", h.UpsertUserCoffee)
+		protected.DELETE("/user/coffees/:coffee_id", h.DeleteUserCoffee)
+		protected.GET("/user/coffees", h.ListUserCoffees)
+		protected.GET("/user/coffee-ids", h.ListUserCoffeeIDs)
 	}
 }
 
@@ -70,49 +74,55 @@ func (h *Handler) Health(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
-// Register godoc
-// @Summary Register a new user
+// SendMagicLink godoc
+// @Summary Request a magic link for passwordless login
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param body body domain.RegisterRequest true "Registration details"
-// @Success 201 {object} domain.AuthResponse
+// @Param body body domain.MagicLinkRequest true "Email address"
+// @Success 200 {object} domain.MagicLinkResponse
 // @Failure 400 {object} map[string]string
-// @Router /api/auth/register [post]
-func (h *Handler) Register(c *gin.Context) {
-	var req domain.RegisterRequest
+// @Router /api/auth/magic-link [post]
+func (h *Handler) SendMagicLink(c *gin.Context) {
+	var req domain.MagicLinkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	resp, token, err := h.auth.Register(c.Request.Context(), req.Email, req.Password)
+	token, err := h.auth.SendMagicLink(c.Request.Context(), req.Email)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to send magic link"})
 		return
 	}
 
-	h.setSessionCookie(c, token)
-	c.JSON(http.StatusCreated, resp)
+	resp := domain.MagicLinkResponse{
+		Message: "Check your email for a login link",
+	}
+	if token != "" {
+		// Development mode: return token directly
+		resp.Token = token
+	}
+	c.JSON(http.StatusOK, resp)
 }
 
-// Login godoc
-// @Summary Login with email and password
+// VerifyMagicLink godoc
+// @Summary Verify a magic link token and create a session
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param body body domain.LoginRequest true "Login credentials"
+// @Param body body domain.VerifyMagicLinkRequest true "Magic link token"
 // @Success 200 {object} domain.AuthResponse
 // @Failure 401 {object} map[string]string
-// @Router /api/auth/login [post]
-func (h *Handler) Login(c *gin.Context) {
-	var req domain.LoginRequest
+// @Router /api/auth/verify [post]
+func (h *Handler) VerifyMagicLink(c *gin.Context) {
+	var req domain.VerifyMagicLinkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	resp, token, err := h.auth.Login(c.Request.Context(), req.Email, req.Password)
+	resp, token, err := h.auth.VerifyMagicLink(c.Request.Context(), req.Token)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

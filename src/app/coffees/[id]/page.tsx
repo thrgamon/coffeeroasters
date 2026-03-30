@@ -37,7 +37,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 							<h1 className="text-3xl font-bold">{coffee.name}</h1>
 							{coffee.id && (
 								<div className="flex items-center gap-1">
-									<CoffeeTrackButton coffeeId={coffee.id} variant="like" size="md" />
+									<CoffeeTrackButton coffeeId={coffee.id} variant="wishlist" size="md" />
 									<CoffeeTrackButton coffeeId={coffee.id} variant="tried" size="md" />
 								</div>
 							)}

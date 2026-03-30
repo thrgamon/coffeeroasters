@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Link from 'next/link';
 import { MobileNav } from '@/components/MobileNav';
+import { UserNav } from '@/components/UserNav';
 import { AuthProvider } from '@/lib/auth-context';
 import { CoffeeTrackerProvider } from '@/lib/coffee-tracker';
 import { QueryProvider } from '@/lib/query-provider';
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 										<Link href="/my-coffees" className="hover:text-foreground">
 											My coffees
 										</Link>
+										<UserNav />
 									</div>
 									<div className="sm:hidden">
 										<MobileNav />
