@@ -2,6 +2,7 @@ import { Bean, Droplets, Flame, Globe, Layers, Sprout } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import BrewRecipes from '@/components/BrewRecipes';
 import CoffeeTrackButton from '@/components/CoffeeTrackButton';
 import TastingNotesVoter from '@/components/TastingNotesVoter';
 import { Badge } from '@/components/ui/badge';
@@ -190,6 +191,8 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 					) : null}
 				</div>
 			</div>
+
+			{coffee.id && <BrewRecipes coffeeId={coffee.id} brewRecipeRaw={coffee.brew_recipe_raw} />}
 
 			{coffee.similar_coffees && coffee.similar_coffees.length > 0 && (
 				<div className="space-y-3">

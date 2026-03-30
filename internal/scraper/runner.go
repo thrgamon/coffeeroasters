@@ -383,6 +383,7 @@ func (r *Runner) upsertRoasterAndCoffees(ctx context.Context, cfg domain.Roaster
 			PricePer100gMax: int4Val(int32(per100gMax)),
 			IsBlend:         raw.IsBlend,
 			Description:     textVal(raw.Description),
+			BrewRecipeRaw:   textVal(raw.BrewRecipeRaw),
 			SourceHash:      textVal(raw.SourceHash),
 			IsDecaf:         normalise.IsDecaf(raw.Name),
 		})
@@ -515,6 +516,7 @@ func sanitizeRawCoffee(raw *RawCoffee) {
 	raw.RoastRaw = stripNullBytes(raw.RoastRaw)
 	raw.TastingNotes = stripNullBytes(raw.TastingNotes)
 	raw.Description = stripNullBytes(raw.Description)
+	raw.BrewRecipeRaw = stripNullBytes(raw.BrewRecipeRaw)
 	raw.PriceRaw = stripNullBytes(raw.PriceRaw)
 	raw.Currency = stripNullBytes(raw.Currency)
 	raw.WeightRaw = stripNullBytes(raw.WeightRaw)

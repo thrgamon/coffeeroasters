@@ -21,6 +21,23 @@ type BlendComponent struct {
 	CreatedAt   time.Time   `json:"created_at"`
 }
 
+type BrewRecipe struct {
+	ID              int32          `json:"id"`
+	CoffeeID        int64          `json:"coffee_id"`
+	UserID          int32          `json:"user_id"`
+	Title           string         `json:"title"`
+	BrewMethod      string         `json:"brew_method"`
+	DoseGrams       pgtype.Numeric `json:"dose_grams"`
+	WaterMl         pgtype.Int4    `json:"water_ml"`
+	WaterTempC      pgtype.Int4    `json:"water_temp_c"`
+	GrindSize       pgtype.Text    `json:"grind_size"`
+	BrewTimeSeconds pgtype.Int4    `json:"brew_time_seconds"`
+	Notes           pgtype.Text    `json:"notes"`
+	IsPublic        bool           `json:"is_public"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+}
+
 type Cafe struct {
 	ID         int32              `json:"id"`
 	RoasterID  int32              `json:"roaster_id"`
@@ -82,6 +99,7 @@ type Coffee struct {
 	Embedding       []float64   `json:"embedding"`
 	SourceHash      pgtype.Text `json:"source_hash"`
 	IsDecaf         bool        `json:"is_decaf"`
+	BrewRecipeRaw   pgtype.Text `json:"brew_recipe_raw"`
 }
 
 type CoffeeAvailabilityLog struct {

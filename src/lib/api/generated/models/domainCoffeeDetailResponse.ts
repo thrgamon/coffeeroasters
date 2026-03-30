@@ -10,6 +10,7 @@ import type { DomainSimilarCoffee } from './domainSimilarCoffee';
 
 export interface DomainCoffeeDetailResponse {
   blend_components?: DomainBlendComponentResponse[];
+  brew_recipe_raw?: string;
   country_code?: string;
   country_name?: string;
   crowdsourced_notes?: DomainCrowdsourcedTastingNote[];

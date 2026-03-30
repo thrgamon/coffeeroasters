@@ -224,6 +224,9 @@ func fetchAndExtractProduct(ctx context.Context, cfg domain.RoasterConfig, clien
 	if product.Description != nil {
 		raw.Description = *product.Description
 	}
+	if product.BrewRecipe != nil {
+		raw.BrewRecipeRaw = *product.BrewRecipe
+	}
 
 	raw.IsBlend = product.IsBlend
 	if product.IsBlend && len(product.BlendComponents) > 0 {

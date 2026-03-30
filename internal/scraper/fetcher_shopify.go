@@ -225,6 +225,9 @@ func FetchShopify(ctx context.Context, cfg domain.RoasterConfig, client *http.Cl
 			if ep.Description != nil {
 				raw.Description = *ep.Description
 			}
+			if ep.BrewRecipe != nil {
+				raw.BrewRecipeRaw = *ep.BrewRecipe
+			}
 
 			raw.IsBlend = ep.IsBlend
 			if ep.IsBlend && len(ep.BlendComponents) > 0 {

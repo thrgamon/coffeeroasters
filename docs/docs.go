@@ -850,6 +850,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/domain.BlendComponentResponse"
                     }
                 },
+                "brew_recipe_raw": {
+                    "type": "string"
+                },
                 "country_code": {
                     "type": "string"
                 },
@@ -974,6 +977,9 @@ const docTemplate = `{
         "domain.CoffeeResponse": {
             "type": "object",
             "properties": {
+                "brew_recipe_raw": {
+                    "type": "string"
+                },
                 "country_code": {
                     "type": "string"
                 },

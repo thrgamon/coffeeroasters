@@ -113,6 +113,8 @@ definitions:
         items:
           $ref: '#/definitions/domain.BlendComponentResponse'
         type: array
+      brew_recipe_raw:
+        type: string
       country_code:
         type: string
       country_name:
@@ -195,6 +197,8 @@ definitions:
     type: object
   domain.CoffeeResponse:
     properties:
+      brew_recipe_raw:
+        type: string
       country_code:
         type: string
       country_name:

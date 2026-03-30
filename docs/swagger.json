@@ -843,6 +843,9 @@
                         "$ref": "#/definitions/domain.BlendComponentResponse"
                     }
                 },
+                "brew_recipe_raw": {
+                    "type": "string"
+                },
                 "country_code": {
                     "type": "string"
                 },
@@ -967,6 +970,9 @@
         "domain.CoffeeResponse": {
             "type": "object",
             "properties": {
+                "brew_recipe_raw": {
+                    "type": "string"
+                },
                 "country_code": {
                     "type": "string"
                 },

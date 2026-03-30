@@ -6,6 +6,7 @@
  */
 
 export interface DomainCoffeeResponse {
+  brew_recipe_raw?: string;
   country_code?: string;
   country_name?: string;
   description?: string;
