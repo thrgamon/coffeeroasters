@@ -1,4 +1,5 @@
 import { Bean, Droplets, Flame, Layers } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import CoffeeTrackButton from '@/components/CoffeeTrackButton';
 import { Badge } from '@/components/ui/badge';
@@ -99,8 +100,18 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 						<Link
 							href={`/roasters/${coffee.roaster_slug}`}
 							onClick={(e) => e.stopPropagation()}
-							className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+							className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
 						>
+							{coffee.roaster_logo_url && (
+								<Image
+									src={coffee.roaster_logo_url}
+									alt=""
+									width={16}
+									height={16}
+									className="size-4 rounded-sm object-contain"
+									unoptimized
+								/>
+							)}
 							{coffee.roaster_name}
 						</Link>
 					)}
