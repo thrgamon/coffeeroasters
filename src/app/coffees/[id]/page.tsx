@@ -1,9 +1,10 @@
-import { Bean, Droplets, Flame, Globe, Grape, Layers, Sprout } from 'lucide-react';
+import { Bean, Droplets, Flame, Globe, Layers, Sprout } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import BrewRecipes from '@/components/BrewRecipes';
 import CoffeeTrackButton from '@/components/CoffeeTrackButton';
+import TastingNotesVoter from '@/components/TastingNotesVoter';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import type { DomainCoffeeDetailResponse } from '@/lib/api/generated/models';
@@ -124,19 +125,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 					</Link>
 				)}
 
-				{coffee.tasting_notes && coffee.tasting_notes.length > 0 && (
-					<div>
-						<h3 className="mb-1 text-sm font-bold uppercase tracking-wider text-accent">Tasting notes</h3>
-						<div className="flex flex-wrap gap-1">
-							{coffee.tasting_notes.map((note) => (
-								<Badge key={note} variant="secondary" className="gap-1">
-									<Grape className="size-3" />
-									{note}
-								</Badge>
-							))}
-						</div>
-					</div>
-				)}
+				{coffee.id && <TastingNotesVoter coffeeId={coffee.id} roasterNotes={coffee.tasting_notes ?? []} />}
 
 				{coffee.description && (
 					<div>

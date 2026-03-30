@@ -220,6 +220,9 @@ LEFT JOIN producers p ON p.id = c.producer_id
 WHERE c.producer_id = $1 AND r.opted_out = false
 ORDER BY c.name;
 
+-- name: GetCoffeeByRoasterAndName :one
+SELECT id FROM coffees WHERE roaster_id = $1 AND name = $2;
+
 -- name: ListCoffeesNeedingBackfill :many
 SELECT c.id, c.origin_raw, c.region_raw
 FROM coffees c

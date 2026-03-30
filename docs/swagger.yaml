@@ -119,6 +119,10 @@ definitions:
         type: string
       country_name:
         type: string
+      crowdsourced_notes:
+        items:
+          $ref: '#/definitions/domain.CrowdsourcedTastingNote'
+        type: array
       description:
         type: string
       id:
@@ -284,6 +288,13 @@ definitions:
         type: integer
       name:
         type: string
+    type: object
+  domain.CrowdsourcedTastingNote:
+    properties:
+      note:
+        type: string
+      vote_count:
+        type: integer
     type: object
   domain.MagicLinkRequest:
     properties:

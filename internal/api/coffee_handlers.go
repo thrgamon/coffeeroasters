@@ -98,15 +98,26 @@ func (h *Handler) GetRoaster(c *gin.Context) {
 		return
 	}
 
-	coffeeRows, err := h.queries.ListCoffeesByRoaster(ctx, slug)
+	coffeeRows, err := h.queries.ListCoffeesByRoasterWithAvailability(ctx, slug)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list coffees"})
 		return
 	}
 
-	coffees := make([]domain.CoffeeResponse, 0, len(coffeeRows))
+	var available, unavailable []domain.CoffeeResponse
 	for _, row := range coffeeRows {
-		coffees = append(coffees, coffeeRowToResponse(row))
+		cr := availabilityRowToResponse(row)
+		if row.InStock {
+			available = append(available, cr)
+		} else {
+			unavailable = append(unavailable, cr)
+		}
+	}
+	if available == nil {
+		available = []domain.CoffeeResponse{}
+	}
+	if unavailable == nil {
+		unavailable = []domain.CoffeeResponse{}
 	}
 
 	cafeRows, err := h.queries.ListCafesByRoaster(ctx, roaster.ID)
@@ -118,7 +129,7 @@ func (h *Handler) GetRoaster(c *gin.Context) {
 		cafes = append(cafes, cafeByRoasterRowToResponse(row))
 	}
 
-	c.JSON(http.StatusOK, domain.RoasterDetailResponse{
+	c.JSON(http.StatusOK, domain.RoasterDetailWithAvailabilityResponse{
 		Roaster: domain.RoasterResponse{
 			ID:      roaster.ID,
 			Slug:    roaster.Slug,
@@ -127,9 +138,41 @@ func (h *Handler) GetRoaster(c *gin.Context) {
 			State:   roaster.State.String,
 			LogoURL: roaster.LogoUrl.String,
 		},
-		Coffees: coffees,
-		Cafes:   cafes,
+		AvailableCoffees:   available,
+		UnavailableCoffees: unavailable,
+		Cafes:              cafes,
 	})
+}
+
+func availabilityRowToResponse(row db.ListCoffeesByRoasterWithAvailabilityRow) domain.CoffeeResponse {
+	return domain.CoffeeResponse{
+		ID:              row.ID,
+		RoasterID:       row.RoasterID,
+		RoasterName:     row.RoasterName,
+		RoasterSlug:     row.RoasterSlug,
+		RoasterLogoURL:  row.RoasterLogoUrl.String,
+		Name:            row.Name,
+		ProductURL:      row.ProductUrl.String,
+		ImageURL:        row.ImageUrl.String,
+		CountryCode:     row.CountryCode.String,
+		CountryName:     row.CountryName.String,
+		RegionID:        row.CoffeeRegionID.Int32,
+		RegionName:      row.RegionName.String,
+		ProducerID:      row.CoffeeProducerID.Int32,
+		ProducerName:    row.ProducerName.String,
+		Process:         row.Process.String,
+		RoastLevel:      row.RoastLevel.String,
+		TastingNotes:    row.TastingNotes,
+		Variety:         row.Variety.String,
+		Species:         row.Species.String,
+		PriceCents:      row.PriceCents.Int32,
+		WeightGrams:     row.WeightGrams.Int32,
+		PricePer100gMin: row.PricePer100gMin.Int32,
+		PricePer100gMax: row.PricePer100gMax.Int32,
+		IsBlend:         row.IsBlend,
+		IsDecaf:         row.IsDecaf,
+		InStock:         row.InStock,
+	}
 }
 
 // ListCoffees godoc
@@ -415,6 +458,21 @@ func (h *Handler) GetCoffee(c *gin.Context) {
 		}
 	}
 
+	// Fetch crowdsourced tasting notes
+	crowdsourcedRows, err := h.queries.ListCrowdsourcedTastingNotes(ctx, id)
+	if err != nil {
+		slog.Warn("list crowdsourced tasting notes", "error", err)
+	} else if len(crowdsourcedRows) > 0 {
+		notes := make([]domain.CrowdsourcedTastingNote, 0, len(crowdsourcedRows))
+		for _, cn := range crowdsourcedRows {
+			notes = append(notes, domain.CrowdsourcedTastingNote{
+				Note:      cn.TastingNote,
+				VoteCount: cn.VoteCount,
+			})
+		}
+		resp.CrowdsourcedNotes = notes
+	}
+
 	// Build similar coffees
 	simRows, err := h.queries.ListCoffeesForSimilarity(ctx)
 	if err != nil {
@@ -681,38 +739,6 @@ func filteredRowToResponse(row db.ListCoffeesFilteredRow) domain.CoffeeResponse 
 		InStock:         row.InStock,
 	}
 }
-
-func coffeeRowToResponse(row db.ListCoffeesByRoasterRow) domain.CoffeeResponse {
-	return domain.CoffeeResponse{
-		ID:              row.ID,
-		RoasterID:       row.RoasterID,
-		RoasterName:     row.RoasterName,
-		RoasterSlug:     row.RoasterSlug,
-		RoasterLogoURL:  row.RoasterLogoUrl.String,
-		Name:            row.Name,
-		ProductURL:      row.ProductUrl.String,
-		ImageURL:        row.ImageUrl.String,
-		CountryCode:     row.CountryCode.String,
-		CountryName:     row.CountryName.String,
-		RegionID:        row.CoffeeRegionID.Int32,
-		RegionName:      row.RegionName.String,
-		ProducerID:      row.CoffeeProducerID.Int32,
-		ProducerName:    row.ProducerName.String,
-		Process:         row.Process.String,
-		RoastLevel:      row.RoastLevel.String,
-		TastingNotes:    row.TastingNotes,
-		Variety:         row.Variety.String,
-		Species:         row.Species.String,
-		PriceCents:      row.PriceCents.Int32,
-		WeightGrams:     row.WeightGrams.Int32,
-		PricePer100gMin: row.PricePer100gMin.Int32,
-		PricePer100gMax: row.PricePer100gMax.Int32,
-		IsBlend:         row.IsBlend,
-		IsDecaf:         row.IsDecaf,
-		InStock:         row.InStock,
-	}
-}
-
 
 // Helper for country/region/producer list row responses
 func countryListRowToResponse(row db.ListCoffeesByCountryRow) domain.CoffeeResponse {

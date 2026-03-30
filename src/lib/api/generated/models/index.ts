@@ -18,6 +18,7 @@ export * from './domainCoffeeResponse';
 export * from './domainCountryDetailResponse';
 export * from './domainCountryListResponse';
 export * from './domainCountryResponse';
+export * from './domainCrowdsourcedTastingNote';
 export * from './domainLoginRequest';
 export * from './domainMagicLinkRequest';
 export * from './domainMagicLinkResponse';

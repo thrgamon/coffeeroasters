@@ -859,6 +859,12 @@ const docTemplate = `{
                 "country_name": {
                     "type": "string"
                 },
+                "crowdsourced_notes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.CrowdsourcedTastingNote"
+                    }
+                },
                 "description": {
                     "type": "string"
                 },
@@ -1108,6 +1114,17 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "domain.CrowdsourcedTastingNote": {
+            "type": "object",
+            "properties": {
+                "note": {
+                    "type": "string"
+                },
+                "vote_count": {
+                    "type": "integer"
                 }
             }
         },

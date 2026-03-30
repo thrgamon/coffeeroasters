@@ -202,8 +202,27 @@ type BlendComponentResponse struct {
 // blend components for blend coffees.
 type CoffeeDetailResponse struct {
 	CoffeeResponse
-	BlendComponents []BlendComponentResponse `json:"blend_components,omitempty"`
-	SimilarCoffees  []SimilarCoffee          `json:"similar_coffees,omitempty"`
+	BlendComponents      []BlendComponentResponse      `json:"blend_components,omitempty"`
+	SimilarCoffees       []SimilarCoffee               `json:"similar_coffees,omitempty"`
+	CrowdsourcedNotes    []CrowdsourcedTastingNote      `json:"crowdsourced_notes,omitempty"`
+}
+
+// CrowdsourcedTastingNote represents a tasting note with its vote count from users.
+type CrowdsourcedTastingNote struct {
+	Note      string `json:"note"`
+	VoteCount int64  `json:"vote_count"`
+}
+
+// TastingNoteVoteRequest is the request body for voting on a tasting note.
+type TastingNoteVoteRequest struct {
+	CoffeeID    int64  `json:"coffee_id" binding:"required"`
+	TastingNote string `json:"tasting_note" binding:"required"`
+}
+
+// TastingNoteVotesResponse returns crowdsourced notes and which ones the current user has voted for.
+type TastingNoteVotesResponse struct {
+	CrowdsourcedNotes []CrowdsourcedTastingNote `json:"crowdsourced_notes"`
+	UserVotes         []string                  `json:"user_votes"`
 }
 
 // SimilarCoffee is a lightweight coffee representation for the similar coffees section.
@@ -274,6 +293,172 @@ type StatsResponse struct {
 	CoffeeCount  int64    `json:"coffee_count"`
 	CafeCount    int64    `json:"cafe_count"`
 	Origins      []string `json:"origins"`
+}
+
+// --- Admin CRUD ---
+
+type AdminRoasterRequest struct {
+	Slug        string `json:"slug" binding:"required"`
+	Name        string `json:"name" binding:"required"`
+	Website     string `json:"website" binding:"required"`
+	State       string `json:"state,omitempty"`
+	Description string `json:"description,omitempty"`
+	LogoURL     string `json:"logo_url,omitempty"`
+	Active      bool   `json:"active"`
+	OptedOut    bool   `json:"opted_out"`
+}
+
+type AdminRoasterResponse struct {
+	ID          int32  `json:"id"`
+	Slug        string `json:"slug"`
+	Name        string `json:"name"`
+	Website     string `json:"website"`
+	State       string `json:"state,omitempty"`
+	Description string `json:"description,omitempty"`
+	LogoURL     string `json:"logo_url,omitempty"`
+	Active      bool   `json:"active"`
+	OptedOut    bool   `json:"opted_out"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
+
+type AdminRoasterListResponse struct {
+	Roasters []AdminRoasterResponse `json:"roasters"`
+}
+
+type AdminCoffeeRequest struct {
+	RoasterID       int32    `json:"roaster_id" binding:"required"`
+	Name            string   `json:"name" binding:"required"`
+	ProductURL      string   `json:"product_url,omitempty"`
+	ImageURL        string   `json:"image_url,omitempty"`
+	CountryCode     string   `json:"country_code,omitempty"`
+	RegionID        int32    `json:"region_id,omitempty"`
+	ProducerID      int32    `json:"producer_id,omitempty"`
+	Process         string   `json:"process,omitempty"`
+	RoastLevel      string   `json:"roast_level,omitempty"`
+	TastingNotes    []string `json:"tasting_notes,omitempty"`
+	PriceCents      int32    `json:"price_cents,omitempty"`
+	WeightGrams     int32    `json:"weight_grams,omitempty"`
+	PricePer100gMin int32    `json:"price_per_100g_min,omitempty"`
+	PricePer100gMax int32    `json:"price_per_100g_max,omitempty"`
+	Variety         string   `json:"variety,omitempty"`
+	Species         string   `json:"species,omitempty"`
+	IsBlend         bool     `json:"is_blend"`
+	IsDecaf         bool     `json:"is_decaf"`
+	InStock         bool     `json:"in_stock"`
+	Description     string   `json:"description,omitempty"`
+}
+
+type AdminCoffeeResponse struct {
+	ID              int64    `json:"id"`
+	RoasterID       int32    `json:"roaster_id"`
+	RoasterName     string   `json:"roaster_name,omitempty"`
+	RoasterSlug     string   `json:"roaster_slug,omitempty"`
+	Name            string   `json:"name"`
+	ProductURL      string   `json:"product_url,omitempty"`
+	ImageURL        string   `json:"image_url,omitempty"`
+	CountryCode     string   `json:"country_code,omitempty"`
+	CountryName     string   `json:"country_name,omitempty"`
+	Process         string   `json:"process,omitempty"`
+	RoastLevel      string   `json:"roast_level,omitempty"`
+	TastingNotes    []string `json:"tasting_notes,omitempty"`
+	PriceCents      int32    `json:"price_cents,omitempty"`
+	WeightGrams     int32    `json:"weight_grams,omitempty"`
+	PricePer100gMin int32    `json:"price_per_100g_min,omitempty"`
+	PricePer100gMax int32    `json:"price_per_100g_max,omitempty"`
+	Variety         string   `json:"variety,omitempty"`
+	Species         string   `json:"species,omitempty"`
+	IsBlend         bool     `json:"is_blend"`
+	IsDecaf         bool     `json:"is_decaf"`
+	InStock         bool     `json:"in_stock"`
+	Description     string   `json:"description,omitempty"`
+	FirstSeenAt     string   `json:"first_seen_at,omitempty"`
+	LastSeenAt      string   `json:"last_seen_at,omitempty"`
+}
+
+type AdminCoffeeListResponse struct {
+	Coffees    []AdminCoffeeResponse `json:"coffees"`
+	TotalCount int64                 `json:"total_count"`
+	Page       int32                 `json:"page"`
+	PageSize   int32                 `json:"page_size"`
+}
+
+type AdminCafeRequest struct {
+	RoasterID  int32    `json:"roaster_id" binding:"required"`
+	Slug       string   `json:"slug" binding:"required"`
+	Name       string   `json:"name" binding:"required"`
+	Type       string   `json:"type" binding:"required"`
+	Address    string   `json:"address,omitempty"`
+	Suburb     string   `json:"suburb,omitempty"`
+	State      string   `json:"state,omitempty"`
+	Postcode   string   `json:"postcode,omitempty"`
+	Latitude   *float64 `json:"latitude,omitempty"`
+	Longitude  *float64 `json:"longitude,omitempty"`
+	Phone      string   `json:"phone,omitempty"`
+	Instagram  string   `json:"instagram,omitempty"`
+	WebsiteURL string   `json:"website_url,omitempty"`
+	ImageURL   string   `json:"image_url,omitempty"`
+	Active     bool     `json:"active"`
+}
+
+type AdminCafeResponse struct {
+	ID          int32    `json:"id"`
+	RoasterID   int32    `json:"roaster_id"`
+	RoasterName string   `json:"roaster_name,omitempty"`
+	RoasterSlug string   `json:"roaster_slug,omitempty"`
+	Slug        string   `json:"slug"`
+	Name        string   `json:"name"`
+	Type        string   `json:"type"`
+	Address     string   `json:"address,omitempty"`
+	Suburb      string   `json:"suburb,omitempty"`
+	State       string   `json:"state,omitempty"`
+	Postcode    string   `json:"postcode,omitempty"`
+	Latitude    *float64 `json:"latitude,omitempty"`
+	Longitude   *float64 `json:"longitude,omitempty"`
+	Phone       string   `json:"phone,omitempty"`
+	Instagram   string   `json:"instagram,omitempty"`
+	WebsiteURL  string   `json:"website_url,omitempty"`
+	ImageURL    string   `json:"image_url,omitempty"`
+	Active      bool     `json:"active"`
+}
+
+type AdminCafeListResponse struct {
+	Cafes []AdminCafeResponse `json:"cafes"`
+}
+
+type AdminScrapeRunResponse struct {
+	ID             int64  `json:"id"`
+	RoasterID      int32  `json:"roaster_id"`
+	RoasterName    string `json:"roaster_name"`
+	RoasterSlug    string `json:"roaster_slug"`
+	StartedAt      string `json:"started_at"`
+	FinishedAt     string `json:"finished_at,omitempty"`
+	Status         string `json:"status"`
+	CoffeesFound   int32  `json:"coffees_found"`
+	CoffeesAdded   int32  `json:"coffees_added"`
+	CoffeesUpdated int32  `json:"coffees_updated"`
+	CoffeesRemoved int32  `json:"coffees_removed"`
+	ErrorMessage   string `json:"error_message,omitempty"`
+	DurationMs     int32  `json:"duration_ms"`
+}
+
+type AdminScrapeRunListResponse struct {
+	Runs []AdminScrapeRunResponse `json:"runs"`
+}
+
+// --- Availability ---
+
+type RoasterDetailWithAvailabilityResponse struct {
+	Roaster            RoasterResponse  `json:"roaster"`
+	AvailableCoffees   []CoffeeResponse `json:"available_coffees"`
+	UnavailableCoffees []CoffeeResponse `json:"unavailable_coffees"`
+	Cafes              []CafeResponse   `json:"cafes,omitempty"`
+}
+
+type AvailabilityRecord struct {
+	InStock    bool   `json:"in_stock"`
+	PriceCents int32  `json:"price_cents,omitempty"`
+	RecordedAt string `json:"recorded_at"`
 }
 
 // --- Countries, Regions, Producers ---

@@ -102,6 +102,15 @@ type Coffee struct {
 	BrewRecipeRaw   pgtype.Text `json:"brew_recipe_raw"`
 }
 
+type CoffeeAvailabilityLog struct {
+	ID         int64       `json:"id"`
+	CoffeeID   int64       `json:"coffee_id"`
+	InStock    bool        `json:"in_stock"`
+	PriceCents pgtype.Int4 `json:"price_cents"`
+	RecordedAt pgtype.Date `json:"recorded_at"`
+	CreatedAt  time.Time   `json:"created_at"`
+}
+
 type Country struct {
 	Code   string      `json:"code"`
 	Name   string      `json:"name"`
@@ -189,4 +198,12 @@ type UserCoffee struct {
 	DrunkAt   pgtype.Date `json:"drunk_at"`
 	CreatedAt time.Time   `json:"created_at"`
 	UpdatedAt time.Time   `json:"updated_at"`
+}
+
+type UserTastingNote struct {
+	ID          int32     `json:"id"`
+	UserID      int32     `json:"user_id"`
+	CoffeeID    int64     `json:"coffee_id"`
+	TastingNote string    `json:"tasting_note"`
+	CreatedAt   time.Time `json:"created_at"`
 }

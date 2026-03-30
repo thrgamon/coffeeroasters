@@ -54,6 +54,9 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 	rg.GET("/regions/:id", h.GetRegion)
 	rg.GET("/producers/:id", h.GetProducer)
 
+	// Tasting note votes: public read (with optional auth enrichment), protected write
+	rg.GET("/coffees/:coffee_id/tasting-notes", h.OptionalAuth, h.GetTastingNoteVotes)
+
 	protected := rg.Group("")
 	protected.Use(auth.RequireAuth(h.auth))
 	{
@@ -66,12 +69,35 @@ func (h *Handler) Routes(rg *gin.RouterGroup) {
 		protected.PUT("/recipes/:id", h.UpdateBrewRecipe)
 		protected.DELETE("/recipes/:id", h.DeleteBrewRecipe)
 		protected.GET("/user/recipes", h.ListBrewRecipesByUser)
+		protected.POST("/user/tasting-notes", h.AddTastingNoteVote)
+		protected.DELETE("/user/tasting-notes", h.RemoveTastingNoteVote)
 	}
 
 	admin := rg.Group("/admin")
 	admin.Use(auth.RequireAuth(h.auth), auth.RequireAdmin())
 	{
 		admin.GET("", h.AdminDashboard)
+
+		// Roaster management
+		admin.GET("/roasters", h.AdminListRoasters)
+		admin.GET("/roasters/:id", h.AdminGetRoaster)
+		admin.POST("/roasters", h.AdminCreateRoaster)
+		admin.PUT("/roasters/:id", h.AdminUpdateRoaster)
+
+		// Coffee management
+		admin.GET("/coffees", h.AdminListCoffees)
+		admin.GET("/coffees/:id", h.AdminGetCoffee)
+		admin.POST("/coffees", h.AdminCreateCoffee)
+		admin.PUT("/coffees/:id", h.AdminUpdateCoffee)
+
+		// Cafe management
+		admin.GET("/cafes", h.AdminListCafes)
+		admin.GET("/cafes/:id", h.AdminGetCafe)
+		admin.POST("/cafes", h.AdminCreateCafe)
+		admin.PUT("/cafes/:id", h.AdminUpdateCafe)
+
+		// Scrape runs (read-only)
+		admin.GET("/scrape-runs", h.AdminListScrapeRuns)
 	}
 }
 
@@ -225,4 +251,24 @@ func (h *Handler) setSessionCookie(c *gin.Context, token string) {
 func (h *Handler) clearSessionCookie(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("session_token", "", -1, "/", h.cfg.CookieDomain, h.cfg.CookieSecure, true)
+}
+
+// OptionalAuth sets user context if a valid session exists, but does not block unauthenticated requests.
+func (h *Handler) OptionalAuth(c *gin.Context) {
+	token, err := c.Cookie("session_token")
+	if err != nil || token == "" {
+		c.Next()
+		return
+	}
+
+	session, err := h.auth.ValidateSession(c.Request.Context(), token)
+	if err != nil {
+		c.Next()
+		return
+	}
+
+	c.Set("user_id", session.UserID)
+	c.Set("user_email", session.UserEmail)
+	c.Set("user_is_admin", session.UserIsAdmin)
+	c.Next()
 }
