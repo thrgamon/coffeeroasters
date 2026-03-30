@@ -43,7 +43,7 @@ export default function CoffeeTrackButton({
 				}}
 				aria-label={active ? 'Remove from watchlist' : 'Add to watchlist'}
 				title={active ? 'Remove from watchlist' : 'Want to try'}
-				className={`inline-flex items-center gap-1 rounded-md p-1.5 text-xs transition-colors hover:bg-accent ${
+				className={`inline-flex items-center gap-1 rounded-md p-1.5 text-xs transition-colors hover:bg-secondary ${
 					active ? 'text-green-500' : 'text-muted-foreground'
 				}`}
 			>
@@ -69,7 +69,7 @@ export default function CoffeeTrackButton({
 							setShowLogModal(true);
 						}}
 						title="Edit log"
-						className="inline-flex items-center gap-1 rounded-md p-1.5 text-xs text-green-500 transition-colors hover:bg-accent"
+						className="inline-flex items-center gap-1 rounded-md p-1.5 text-xs text-green-500 transition-colors hover:bg-secondary"
 					>
 						<Eye className={`${iconSize} fill-current`} />
 						{size === 'md' && (
@@ -94,7 +94,7 @@ export default function CoffeeTrackButton({
 								removeCoffee(coffeeId);
 							}}
 							aria-label="Remove log"
-							className="rounded-md p-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+							className="rounded-md p-1 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
 						>
 							<X className="size-3" />
 						</button>
@@ -121,7 +121,7 @@ export default function CoffeeTrackButton({
 				}}
 				aria-label="Log this coffee"
 				title="Log this coffee"
-				className="inline-flex items-center gap-1 rounded-md p-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent"
+				className="inline-flex items-center gap-1 rounded-md p-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary"
 			>
 				<Eye className={iconSize} />
 				{size === 'md' && <span>Log</span>}

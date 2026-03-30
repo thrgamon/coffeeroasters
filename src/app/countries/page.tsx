@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { DomainCountryListResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
-export const metadata: Metadata = { title: 'Countries | Coffeeroasters' };
+export const metadata: Metadata = { title: 'Origins | COFFEEROASTERS' };
 export const dynamic = 'force-dynamic';
 
 export default async function CountriesPage() {
@@ -14,7 +14,7 @@ export default async function CountriesPage() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold">Origins</h1>
+				<h1 className="text-3xl font-bold uppercase tracking-wider text-foreground">Origins</h1>
 				<p className="mt-1 text-muted-foreground">
 					{countries.length} coffee-producing countries, sorted by number of coffees available.
 				</p>
@@ -26,10 +26,10 @@ export default async function CountriesPage() {
 						<Link
 							key={country.code}
 							href={`/countries/${country.code}`}
-							className="flex items-baseline justify-between gap-2 rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-muted/50"
+							className="flex items-baseline justify-between gap-2 border-2 border-border bg-card px-4 py-3 transition-all hover:border-accent"
 						>
-							<span className="font-medium">{country.name}</span>
-							<span className="text-sm text-muted-foreground tabular-nums">{country.coffee_count}</span>
+							<span className="font-medium text-foreground">{country.name}</span>
+							<span className="text-sm text-foreground font-mono tabular-nums">{country.coffee_count}</span>
 						</Link>
 					))}
 				</div>

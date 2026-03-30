@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DomainRoasterListResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
-export const metadata: Metadata = { title: 'Roasters | Coffeeroasters' };
+export const metadata: Metadata = { title: 'Roasters | COFFEEROASTERS' };
 
 interface RoastersPageProps {
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -25,7 +25,7 @@ export default async function RoastersPage({ searchParams }: RoastersPageProps) 
 
 	return (
 		<div className="space-y-6">
-			<h1 className="text-3xl font-bold">Roasters</h1>
+			<h1 className="text-3xl font-bold uppercase tracking-wider text-foreground">Roasters</h1>
 
 			<Suspense>
 				<RoasterFilters />
@@ -35,9 +35,9 @@ export default async function RoastersPage({ searchParams }: RoastersPageProps) 
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					{data.roasters.map((roaster) => (
 						<Link key={roaster.id} href={`/roasters/${roaster.slug}`}>
-							<Card className="shadow-sm transition-all hover:shadow-md hover:bg-muted/50">
+							<Card className="border-2 border-border bg-card transition-all hover:border-accent">
 								<CardHeader>
-									<CardTitle className="text-lg">{roaster.name}</CardTitle>
+									<CardTitle className="text-lg text-foreground">{roaster.name}</CardTitle>
 								</CardHeader>
 								<CardContent className="space-y-2">
 									<div className="flex items-center gap-2">
@@ -47,7 +47,7 @@ export default async function RoastersPage({ searchParams }: RoastersPageProps) 
 										)}
 									</div>
 									{roaster.coffee_count ? (
-										<p className="text-sm text-muted-foreground">
+										<p className="text-sm text-accent font-mono">
 											{roaster.coffee_count} coffee{roaster.coffee_count !== 1 ? 's' : ''} in stock
 										</p>
 									) : null}

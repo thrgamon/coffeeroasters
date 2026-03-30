@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DomainCafeListResponse, DomainCafeResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
-export const metadata: Metadata = { title: 'Cafes | Coffeeroasters' };
+export const metadata: Metadata = { title: 'Cafes | COFFEEROASTERS' };
 
 interface CafesPageProps {
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -29,7 +29,7 @@ export default async function CafesPage({ searchParams }: CafesPageProps) {
 
 	return (
 		<div className="space-y-6">
-			<h1 className="text-3xl font-bold">Cafes</h1>
+			<h1 className="text-3xl font-bold uppercase tracking-wider text-foreground">Cafes</h1>
 
 			<Suspense>
 				<CafeFilters />
@@ -78,12 +78,12 @@ function CafeSection({
 		return (
 			<section className="space-y-4">
 				<div>
-					<h2 className="text-xl font-semibold">{title}</h2>
+					<h2 className="text-xl font-bold uppercase tracking-wider text-accent">{title}</h2>
 					{description && <p className="text-sm text-muted-foreground">{description}</p>}
 				</div>
 				{Array.from(byState.entries()).map(([stateKey, stateCafes]) => (
 					<div key={stateKey} className="space-y-3">
-						<h3 className="text-lg font-medium">{stateKey}</h3>
+						<h3 className="text-lg font-medium text-foreground">{stateKey}</h3>
 						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 							{stateCafes.map((cafe) => (
 								<CafeCard key={cafe.id} cafe={cafe} />
@@ -98,7 +98,7 @@ function CafeSection({
 	return (
 		<section className="space-y-4">
 			<div>
-				<h2 className="text-xl font-semibold">{title}</h2>
+				<h2 className="text-xl font-bold uppercase tracking-wider text-accent">{title}</h2>
 				{description && <p className="text-sm text-muted-foreground">{description}</p>}
 			</div>
 			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -112,9 +112,9 @@ function CafeSection({
 
 function CafeCard({ cafe }: { cafe: DomainCafeResponse }) {
 	return (
-		<Card className="shadow-sm transition-all hover:shadow-md hover:bg-muted/50">
+		<Card className="border-2 border-border bg-card transition-all hover:border-accent">
 			<CardHeader>
-				<CardTitle className="text-lg">{cafe.name}</CardTitle>
+				<CardTitle className="text-lg text-foreground">{cafe.name}</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-2">
 				<div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ function CafeCard({ cafe }: { cafe: DomainCafeResponse }) {
 				{cafe.address && <p className="text-sm text-muted-foreground">{cafe.address}</p>}
 				{cafe.roaster_name && (
 					<p className="text-sm">
-						<Link href={`/roasters/${cafe.roaster_slug}`} className="text-primary hover:underline">
+						<Link href={`/roasters/${cafe.roaster_slug}`} className="text-accent hover:text-foreground">
 							{cafe.roaster_name}
 						</Link>
 					</p>

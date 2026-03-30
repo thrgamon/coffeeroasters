@@ -1,30 +1,54 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+	font-family: 'Space Grotesk';
+	font-style: normal;
+	font-weight: 300 700;
+	font-display: swap;
+	src: url('https://fonts.gstatic.com/s/spacegrotesk/v16/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Space Mono';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('https://fonts.gstatic.com/s/spacemono/v13/i7dPIFZifjKcF5UAWdDRYEF8RQ.woff2') format('woff2');
+}
+
 :root {
-	--background: oklch(0.985 0.002 90);
-	--foreground: oklch(0.20 0.02 55);
-	--card: oklch(0.995 0.001 90);
-	--card-foreground: oklch(0.20 0.02 55);
-	--popover: oklch(0.995 0.001 90);
-	--popover-foreground: oklch(0.20 0.02 55);
-	--primary: oklch(0.40 0.08 55);
-	--primary-foreground: oklch(0.985 0.005 90);
-	--secondary: oklch(0.95 0.01 80);
-	--secondary-foreground: oklch(0.30 0.04 55);
-	--muted: oklch(0.96 0.008 80);
-	--muted-foreground: oklch(0.50 0.02 55);
-	--accent: oklch(0.92 0.03 75);
-	--accent-foreground: oklch(0.25 0.04 55);
-	--destructive: oklch(0.577 0.245 27.325);
-	--destructive-foreground: oklch(0.577 0.245 27.325);
-	--border: oklch(0.91 0.01 80);
-	--input: oklch(0.91 0.01 80);
-	--ring: oklch(0.55 0.06 55);
-	--radius: 0.625rem;
+	--gold: #ffd500;
+	--grey-olive: #848586;
+	--dusty-rose: #c2847a;
+	--rich-mahogany: #280003;
+	--snow: #faf6f6;
+
+	--background: #f5f0e8;
+	--foreground: #280003;
+	--card: #faf6f6;
+	--card-foreground: #280003;
+	--popover: #faf6f6;
+	--popover-foreground: #280003;
+	--primary: #ffd500;
+	--primary-foreground: #280003;
+	--secondary: #ede8df;
+	--secondary-foreground: #280003;
+	--muted: #ede8df;
+	--muted-foreground: #848586;
+	--accent: #c2847a;
+	--accent-foreground: #280003;
+	--destructive: #c0392b;
+	--destructive-foreground: #faf6f6;
+	--border: #280003;
+	--input: #280003;
+	--ring: #ffd500;
+	--radius: 0px;
 }
 
 @theme inline {
+	--font-sans: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+	--font-mono: 'Space Mono', ui-monospace, monospace;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -44,17 +68,26 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) + 4px);
+	--color-gold: var(--gold);
+	--color-dusty-rose: var(--dusty-rose);
+	--color-grey-olive: var(--grey-olive);
+	--color-snow: var(--snow);
+	--color-rich-mahogany: var(--rich-mahogany);
+	--radius-sm: 0px;
+	--radius-md: 0px;
+	--radius-lg: 0px;
+	--radius-xl: 0px;
 }
 
 @layer base {
 	* {
-		@apply border-border transition-colors duration-150;
+		@apply border-border transition-colors duration-100;
 	}
 	body {
-		@apply bg-background text-foreground;
+		@apply bg-background text-foreground font-sans antialiased;
+	}
+	h1, h2, h3 {
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
 	}
 }
