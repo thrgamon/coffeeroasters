@@ -1,6 +1,6 @@
 'use client';
 
-import { BookmarkPlus, Check, Eye, Heart, Star, X } from 'lucide-react';
+import { BookmarkPlus, Eye, Heart, Star, X } from 'lucide-react';
 import { useState } from 'react';
 import LogCoffeeModal from '@/components/LogCoffeeModal';
 import { useCoffeeTracker } from '@/lib/coffee-tracker';
@@ -14,12 +14,7 @@ interface CoffeeTrackButtonProps {
 	size?: 'sm' | 'md';
 }
 
-export default function CoffeeTrackButton({
-	coffeeId,
-	coffeeName,
-	variant,
-	size = 'sm',
-}: CoffeeTrackButtonProps) {
+export default function CoffeeTrackButton({ coffeeId, coffeeName, variant, size = 'sm' }: CoffeeTrackButtonProps) {
 	const { hydrated, isWishlisted, isLogged, getCoffeeStatus, addToWishlist, removeFromWishlist, removeCoffee } =
 		useCoffeeTracker();
 	const [showLogModal, setShowLogModal] = useState(false);
@@ -126,12 +121,7 @@ export default function CoffeeTrackButton({
 				<Eye className={iconSize} />
 				{size === 'md' && <span>Log</span>}
 			</button>
-			<LogCoffeeModal
-				coffeeId={coffeeId}
-				coffeeName={coffeeName}
-				open={showLogModal}
-				onOpenChange={setShowLogModal}
-			/>
+			<LogCoffeeModal coffeeId={coffeeId} coffeeName={coffeeName} open={showLogModal} onOpenChange={setShowLogModal} />
 		</>
 	);
 }

@@ -100,7 +100,9 @@ export default function FindCoffeePage() {
 		return (
 			<div className="container mx-auto px-4 py-16 flex flex-col items-center gap-4">
 				<div className="h-8 w-8 animate-spin rounded-full border-4 border-foreground border-t-transparent" />
-				<p className="text-muted-foreground font-mono text-sm uppercase tracking-wider">Finding your perfect coffees...</p>
+				<p className="text-muted-foreground font-mono text-sm uppercase tracking-wider">
+					Finding your perfect coffees...
+				</p>
 			</div>
 		);
 	}
@@ -171,9 +173,7 @@ export default function FindCoffeePage() {
 							type="button"
 							onClick={() => handleSelect(question.key, option.value)}
 							className={`rounded border p-6 cursor-pointer transition-all text-left ${
-								selected
-									? 'border-foreground bg-foreground/5'
-									: 'border-2 border-border hover:border-accent'
+								selected ? 'border-foreground bg-foreground/5' : 'border-2 border-border hover:border-accent'
 							}`}
 						>
 							<p className="font-bold text-foreground">{option.label}</p>

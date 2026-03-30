@@ -18,7 +18,10 @@ export default async function RegionDetailPage({ params }: { params: Promise<{ i
 	return (
 		<div className="space-y-8">
 			<div className="space-y-2">
-				<Link href={`/countries/${data.country_code}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+				<Link
+					href={`/countries/${data.country_code}`}
+					className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+				>
 					&larr; {data.country_name}
 				</Link>
 				<h1 className="text-3xl font-bold text-foreground">{data.name}</h1>
@@ -61,7 +64,10 @@ export default async function RegionDetailPage({ params }: { params: Promise<{ i
 									<Badge variant="outline">{region.distance_km} km</Badge>
 								</Link>
 							) : (
-								<div key={region.id} className="flex items-center justify-between rounded border-2 border-border bg-card p-4">
+								<div
+									key={region.id}
+									className="flex items-center justify-between rounded border-2 border-border bg-card p-4"
+								>
 									<div>
 										<p className="font-medium text-muted-foreground">{region.name}</p>
 										<p className="text-sm text-muted-foreground">{region.country_name}</p>

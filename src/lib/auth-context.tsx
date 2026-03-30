@@ -70,9 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		setUser(null);
 	}, []);
 
-	return (
-		<AuthContext value={{ user, loading, sendMagicLink, verifyMagicLink, logout }}>{children}</AuthContext>
-	);
+	return <AuthContext value={{ user, loading, sendMagicLink, verifyMagicLink, logout }}>{children}</AuthContext>;
 }
 
 export function useAuth(): AuthContextType {

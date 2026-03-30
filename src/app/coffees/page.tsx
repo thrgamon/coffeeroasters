@@ -104,7 +104,10 @@ export default async function CoffeesPage({ searchParams }: CoffeesPageProps) {
 			{totalPages > 1 && (
 				<div className="flex justify-center gap-2">
 					{page > 1 ? (
-						<Link href={pageUrl(page - 1)} className="rounded border border-border px-3 py-1 text-sm text-foreground hover:border-accent hover:text-accent transition-colors">
+						<Link
+							href={pageUrl(page - 1)}
+							className="rounded border border-border px-3 py-1 text-sm text-foreground hover:border-accent hover:text-accent transition-colors"
+						>
 							Previous
 						</Link>
 					) : (
@@ -114,7 +117,10 @@ export default async function CoffeesPage({ searchParams }: CoffeesPageProps) {
 						{page} / {totalPages}
 					</span>
 					{page < totalPages ? (
-						<Link href={pageUrl(page + 1)} className="rounded border border-border px-3 py-1 text-sm text-foreground hover:border-accent hover:text-accent transition-colors">
+						<Link
+							href={pageUrl(page + 1)}
+							className="rounded border border-border px-3 py-1 text-sm text-foreground hover:border-accent hover:text-accent transition-colors"
+						>
 							Next
 						</Link>
 					) : (

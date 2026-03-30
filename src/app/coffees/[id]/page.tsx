@@ -190,7 +190,9 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 								: `$${(coffee.price_per_100g_min / 100).toFixed(2)} - $${((coffee.price_per_100g_max ?? coffee.price_per_100g_min) / 100).toFixed(2)} / 100g`}
 						</span>
 					) : coffee.price_cents ? (
-						<span className="text-lg font-bold text-foreground font-mono">${(coffee.price_cents / 100).toFixed(2)}</span>
+						<span className="text-lg font-bold text-foreground font-mono">
+							${(coffee.price_cents / 100).toFixed(2)}
+						</span>
 					) : null}
 					{coffee.price_cents ? (
 						<span className="text-muted-foreground font-mono">

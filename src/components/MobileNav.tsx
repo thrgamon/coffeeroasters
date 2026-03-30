@@ -39,9 +39,7 @@ export function MobileNav() {
 							onClick={() => setOpen(false)}
 							className={cn(
 								'px-3 py-2.5 text-sm font-bold uppercase tracking-[0.15em] transition-colors',
-								pathname === link.href
-									? 'bg-gold text-rich-mahogany'
-									: 'text-snow/70 hover:text-gold',
+								pathname === link.href ? 'bg-gold text-rich-mahogany' : 'text-snow/70 hover:text-gold',
 							)}
 						>
 							{link.label}

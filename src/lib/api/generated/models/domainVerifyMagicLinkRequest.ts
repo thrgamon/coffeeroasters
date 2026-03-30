@@ -5,8 +5,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface DomainUserResponse {
-  email: string;
-  id: number;
-  is_admin?: boolean;
+export interface DomainVerifyMagicLinkRequest {
+  token: string;
 }

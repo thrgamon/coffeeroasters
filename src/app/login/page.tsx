@@ -63,8 +63,8 @@ function LoginForm() {
 				<form onSubmit={handleVerify} className="w-full max-w-sm space-y-4">
 					<h1 className="text-2xl font-bold uppercase tracking-wider text-foreground">Check your email</h1>
 					<p className="text-sm text-muted-foreground">
-						We sent a login link to <strong className="text-foreground">{email}</strong>. Click the link in your email, or paste the
-						code below.
+						We sent a login link to <strong className="text-foreground">{email}</strong>. Click the link in your email,
+						or paste the code below.
 					</p>
 					{error && <ErrorBanner message={error} />}
 					<input
@@ -75,7 +75,10 @@ function LoginForm() {
 						required
 						className="w-full rounded border border-input bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
 					/>
-					<button type="submit" className="w-full rounded bg-foreground px-4 py-2 font-bold uppercase tracking-wider text-primary hover:bg-foreground/90 transition-colors">
+					<button
+						type="submit"
+						className="w-full rounded bg-foreground px-4 py-2 font-bold uppercase tracking-wider text-primary hover:bg-foreground/90 transition-colors"
+					>
 						Verify
 					</button>
 					<button
@@ -109,7 +112,10 @@ function LoginForm() {
 					required
 					className="w-full rounded border border-input bg-card px-3 py-2 text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
 				/>
-				<button type="submit" className="w-full rounded bg-foreground px-4 py-2 font-bold uppercase tracking-wider text-primary hover:bg-foreground/90 transition-colors">
+				<button
+					type="submit"
+					className="w-full rounded bg-foreground px-4 py-2 font-bold uppercase tracking-wider text-primary hover:bg-foreground/90 transition-colors"
+				>
 					Send login link
 				</button>
 			</form>

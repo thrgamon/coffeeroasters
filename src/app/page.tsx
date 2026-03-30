@@ -15,11 +15,11 @@ export default async function Home() {
 	return (
 		<div className="space-y-16">
 			<section className="text-center py-12">
-				<p className="text-xs font-bold tracking-[0.4em] uppercase text-accent mb-6">
-					Australian Specialty Coffee
-				</p>
+				<p className="text-xs font-bold tracking-[0.4em] uppercase text-accent mb-6">Australian Specialty Coffee</p>
 				<h1 className="text-7xl font-bold tracking-[0.08em] text-foreground sm:text-8xl leading-none">
-					COFFEE<br />ROASTERS
+					COFFEE
+					<br />
+					ROASTERS
 				</h1>
 				<div className="mx-auto mt-8 flex justify-center">
 					<div className="bg-primary px-10 py-4">

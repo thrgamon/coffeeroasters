@@ -9,10 +9,30 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DomainCoffeeResponse } from '@/lib/api/generated/models';
 
 const COUNTRIES = [
-	'ethiopia', 'colombia', 'kenya', 'brazil', 'guatemala', 'costa rica',
-	'el salvador', 'honduras', 'panama', 'nicaragua', 'mexico', 'peru',
-	'bolivia', 'ecuador', 'rwanda', 'burundi', 'tanzania', 'uganda',
-	'indonesia', 'india', 'papua new guinea', 'yemen', 'congo', 'malawi',
+	'ethiopia',
+	'colombia',
+	'kenya',
+	'brazil',
+	'guatemala',
+	'costa rica',
+	'el salvador',
+	'honduras',
+	'panama',
+	'nicaragua',
+	'mexico',
+	'peru',
+	'bolivia',
+	'ecuador',
+	'rwanda',
+	'burundi',
+	'tanzania',
+	'uganda',
+	'indonesia',
+	'india',
+	'papua new guinea',
+	'yemen',
+	'congo',
+	'malawi',
 ];
 
 const PROCESSES = ['natural', 'washed', 'honey', 'anaerobic', 'semi-washed'];
@@ -53,7 +73,9 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 			<Card className="h-full flex flex-col border-2 border-foreground/20 bg-card transition-all hover:border-foreground">
 				<CardHeader className="pb-1">
 					<div className="flex items-start justify-between gap-1">
-						<CardTitle className="text-base leading-snug text-foreground group-hover:text-accent transition-colors normal-case tracking-normal">{displayName}</CardTitle>
+						<CardTitle className="text-base leading-snug text-foreground group-hover:text-accent transition-colors normal-case tracking-normal">
+							{displayName}
+						</CardTitle>
 						{coffee.id && (
 							<div className="flex items-center gap-0.5">
 								<CoffeeTrackButton coffeeId={coffee.id} variant="wishlist" />
@@ -132,7 +154,9 @@ export default function CoffeeCard({ coffee }: { coffee: DomainCoffeeResponse })
 								<span className="font-bold text-foreground font-mono">${(coffee.price_cents / 100).toFixed(2)}</span>
 							) : null}
 						</div>
-						{coffee.weight_grams ? <span className="text-muted-foreground font-mono text-xs">{coffee.weight_grams}g</span> : null}
+						{coffee.weight_grams ? (
+							<span className="text-muted-foreground font-mono text-xs">{coffee.weight_grams}g</span>
+						) : null}
 					</div>
 					{coffee.similarity_score ? (
 						<p className="text-xs text-accent font-mono">{Math.round(coffee.similarity_score * 100)}% match</p>
