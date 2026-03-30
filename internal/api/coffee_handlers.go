@@ -724,38 +724,6 @@ func filteredRowToResponse(row db.ListCoffeesFilteredRow) domain.CoffeeResponse 
 	}
 }
 
-func coffeeRowToResponse(row db.ListCoffeesByRoasterRow) domain.CoffeeResponse {
-	return domain.CoffeeResponse{
-		ID:              row.ID,
-		RoasterID:       row.RoasterID,
-		RoasterName:     row.RoasterName,
-		RoasterSlug:     row.RoasterSlug,
-		RoasterLogoURL:  row.RoasterLogoUrl.String,
-		Name:            row.Name,
-		ProductURL:      row.ProductUrl.String,
-		ImageURL:        row.ImageUrl.String,
-		CountryCode:     row.CountryCode.String,
-		CountryName:     row.CountryName.String,
-		RegionID:        row.CoffeeRegionID.Int32,
-		RegionName:      row.RegionName.String,
-		ProducerID:      row.CoffeeProducerID.Int32,
-		ProducerName:    row.ProducerName.String,
-		Process:         row.Process.String,
-		RoastLevel:      row.RoastLevel.String,
-		TastingNotes:    row.TastingNotes,
-		Variety:         row.Variety.String,
-		Species:         row.Species.String,
-		PriceCents:      row.PriceCents.Int32,
-		WeightGrams:     row.WeightGrams.Int32,
-		PricePer100gMin: row.PricePer100gMin.Int32,
-		PricePer100gMax: row.PricePer100gMax.Int32,
-		IsBlend:         row.IsBlend,
-		IsDecaf:         row.IsDecaf,
-		InStock:         row.InStock,
-	}
-}
-
-
 // Helper for country/region/producer list row responses
 func countryListRowToResponse(row db.ListCoffeesByCountryRow) domain.CoffeeResponse {
 	return domain.CoffeeResponse{

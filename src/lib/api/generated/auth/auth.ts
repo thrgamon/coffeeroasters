@@ -25,12 +25,13 @@ import type {
 
 import type {
   DomainAuthResponse,
-  DomainLoginRequest,
+  DomainMagicLinkRequest,
+  DomainMagicLinkResponse,
   DomainMeResponse,
-  DomainRegisterRequest,
-  PostApiAuthLogin401,
+  DomainVerifyMagicLinkRequest,
   PostApiAuthLogout200,
-  PostApiAuthRegister400
+  PostApiAuthMagicLink400,
+  PostApiAuthVerify401
 } from '.././models';
 
 import { customFetch } from '../../mutator/custom-fetch';
@@ -39,70 +40,6 @@ import { customFetch } from '../../mutator/custom-fetch';
 
 
 /**
- * @summary Login with email and password
- */
-export const postApiAuthLogin = (
-    domainLoginRequest: DomainLoginRequest,
- signal?: AbortSignal
-) => {
-      
-      
-      return customFetch<DomainAuthResponse>(
-      {url: `/api/auth/login`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: domainLoginRequest, signal
-    },
-      );
-    }
-  
-
-
-export const getPostApiAuthLoginMutationOptions = <TError = PostApiAuthLogin401,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogin>>, TError,{data: DomainLoginRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogin>>, TError,{data: DomainLoginRequest}, TContext> => {
-
-const mutationKey = ['postApiAuthLogin'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthLogin>>, {data: DomainLoginRequest}> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiAuthLogin(data,)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiAuthLoginMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthLogin>>>
-    export type PostApiAuthLoginMutationBody = DomainLoginRequest
-    export type PostApiAuthLoginMutationError = PostApiAuthLogin401
-
-    /**
- * @summary Login with email and password
- */
-export const usePostApiAuthLogin = <TError = PostApiAuthLogin401,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogin>>, TError,{data: DomainLoginRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiAuthLogin>>,
-        TError,
-        {data: DomainLoginRequest},
-        TContext
-      > => {
-
-      const mutationOptions = getPostApiAuthLoginMutationOptions(options);
-
-      return useMutation(mutationOptions, queryClient);
-    }
-    /**
  * @summary Logout current session
  */
 export const postApiAuthLogout = (
@@ -161,6 +98,70 @@ export const usePostApiAuthLogout = <TError = unknown,
       > => {
 
       const mutationOptions = getPostApiAuthLogoutMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * @summary Request a magic link for passwordless login
+ */
+export const postApiAuthMagicLink = (
+    domainMagicLinkRequest: DomainMagicLinkRequest,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customFetch<DomainMagicLinkResponse>(
+      {url: `/api/auth/magic-link`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: domainMagicLinkRequest, signal
+    },
+      );
+    }
+  
+
+
+export const getPostApiAuthMagicLinkMutationOptions = <TError = PostApiAuthMagicLink400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthMagicLink>>, TError,{data: DomainMagicLinkRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthMagicLink>>, TError,{data: DomainMagicLinkRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthMagicLink'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthMagicLink>>, {data: DomainMagicLinkRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthMagicLink(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthMagicLinkMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthMagicLink>>>
+    export type PostApiAuthMagicLinkMutationBody = DomainMagicLinkRequest
+    export type PostApiAuthMagicLinkMutationError = PostApiAuthMagicLink400
+
+    /**
+ * @summary Request a magic link for passwordless login
+ */
+export const usePostApiAuthMagicLink = <TError = PostApiAuthMagicLink400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthMagicLink>>, TError,{data: DomainMagicLinkRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthMagicLink>>,
+        TError,
+        {data: DomainMagicLinkRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiAuthMagicLinkMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
@@ -257,29 +258,29 @@ export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>
 
 
 /**
- * @summary Register a new user
+ * @summary Verify a magic link token and create a session
  */
-export const postApiAuthRegister = (
-    domainRegisterRequest: DomainRegisterRequest,
+export const postApiAuthVerify = (
+    domainVerifyMagicLinkRequest: DomainVerifyMagicLinkRequest,
  signal?: AbortSignal
 ) => {
       
       
       return customFetch<DomainAuthResponse>(
-      {url: `/api/auth/register`, method: 'POST',
+      {url: `/api/auth/verify`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: domainRegisterRequest, signal
+      data: domainVerifyMagicLinkRequest, signal
     },
       );
     }
   
 
 
-export const getPostApiAuthRegisterMutationOptions = <TError = PostApiAuthRegister400,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthRegister>>, TError,{data: DomainRegisterRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthRegister>>, TError,{data: DomainRegisterRequest}, TContext> => {
+export const getPostApiAuthVerifyMutationOptions = <TError = PostApiAuthVerify401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthVerify>>, TError,{data: DomainVerifyMagicLinkRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthVerify>>, TError,{data: DomainVerifyMagicLinkRequest}, TContext> => {
 
-const mutationKey = ['postApiAuthRegister'];
+const mutationKey = ['postApiAuthVerify'];
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -289,10 +290,10 @@ const {mutation: mutationOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthRegister>>, {data: DomainRegisterRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthVerify>>, {data: DomainVerifyMagicLinkRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  postApiAuthRegister(data,)
+          return  postApiAuthVerify(data,)
         }
 
         
@@ -300,23 +301,23 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostApiAuthRegisterMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthRegister>>>
-    export type PostApiAuthRegisterMutationBody = DomainRegisterRequest
-    export type PostApiAuthRegisterMutationError = PostApiAuthRegister400
+    export type PostApiAuthVerifyMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthVerify>>>
+    export type PostApiAuthVerifyMutationBody = DomainVerifyMagicLinkRequest
+    export type PostApiAuthVerifyMutationError = PostApiAuthVerify401
 
     /**
- * @summary Register a new user
+ * @summary Verify a magic link token and create a session
  */
-export const usePostApiAuthRegister = <TError = PostApiAuthRegister400,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthRegister>>, TError,{data: DomainRegisterRequest}, TContext>, }
+export const usePostApiAuthVerify = <TError = PostApiAuthVerify401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthVerify>>, TError,{data: DomainVerifyMagicLinkRequest}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiAuthRegister>>,
+        Awaited<ReturnType<typeof postApiAuthVerify>>,
         TError,
-        {data: DomainRegisterRequest},
+        {data: DomainVerifyMagicLinkRequest},
         TContext
       > => {
 
-      const mutationOptions = getPostApiAuthRegisterMutationOptions(options);
+      const mutationOptions = getPostApiAuthVerifyMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
