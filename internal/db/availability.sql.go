@@ -7,29 +7,9 @@ package db
 
 import (
 	"context"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
-
-const upsertAvailabilityLog = `-- name: UpsertAvailabilityLog :exec
-INSERT INTO coffee_availability_log (coffee_id, in_stock, price_cents, recorded_at)
-VALUES ($1, $2, $3, CURRENT_DATE)
-ON CONFLICT (coffee_id, recorded_at) DO UPDATE SET
-    in_stock = EXCLUDED.in_stock,
-    price_cents = EXCLUDED.price_cents
-`
-
-type UpsertAvailabilityLogParams struct {
-	CoffeeID   int64       `json:"coffee_id"`
-	InStock    bool        `json:"in_stock"`
-	PriceCents pgtype.Int4 `json:"price_cents"`
-}
-
-func (q *Queries) UpsertAvailabilityLog(ctx context.Context, arg UpsertAvailabilityLogParams) error {
-	_, err := q.db.Exec(ctx, upsertAvailabilityLog, arg.CoffeeID, arg.InStock, arg.PriceCents)
-	return err
-}
 
 const listAvailabilityHistory = `-- name: ListAvailabilityHistory :many
 SELECT coffee_id, in_stock, price_cents, recorded_at
@@ -39,15 +19,20 @@ ORDER BY recorded_at DESC
 LIMIT $2
 `
 
+type ListAvailabilityHistoryParams struct {
+	CoffeeID int64 `json:"coffee_id"`
+	Limit    int32 `json:"limit"`
+}
+
 type ListAvailabilityHistoryRow struct {
 	CoffeeID   int64       `json:"coffee_id"`
 	InStock    bool        `json:"in_stock"`
 	PriceCents pgtype.Int4 `json:"price_cents"`
-	RecordedAt time.Time   `json:"recorded_at"`
+	RecordedAt pgtype.Date `json:"recorded_at"`
 }
 
-func (q *Queries) ListAvailabilityHistory(ctx context.Context, coffeeID int64, limit int32) ([]ListAvailabilityHistoryRow, error) {
-	rows, err := q.db.Query(ctx, listAvailabilityHistory, coffeeID, limit)
+func (q *Queries) ListAvailabilityHistory(ctx context.Context, arg ListAvailabilityHistoryParams) ([]ListAvailabilityHistoryRow, error) {
+	rows, err := q.db.Query(ctx, listAvailabilityHistory, arg.CoffeeID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +40,12 @@ func (q *Queries) ListAvailabilityHistory(ctx context.Context, coffeeID int64, l
 	items := []ListAvailabilityHistoryRow{}
 	for rows.Next() {
 		var i ListAvailabilityHistoryRow
-		if err := rows.Scan(&i.CoffeeID, &i.InStock, &i.PriceCents, &i.RecordedAt); err != nil {
+		if err := rows.Scan(
+			&i.CoffeeID,
+			&i.InStock,
+			&i.PriceCents,
+			&i.RecordedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -64,18 +54,6 @@ func (q *Queries) ListAvailabilityHistory(ctx context.Context, coffeeID int64, l
 		return nil, err
 	}
 	return items, nil
-}
-
-const markStaleCoffeesOutOfStock = `-- name: MarkStaleCoffeesOutOfStock :exec
-UPDATE coffees
-SET in_stock = false, updated_at = now()
-WHERE in_stock = true
-  AND last_seen_at < now() - interval '3 days'
-`
-
-func (q *Queries) MarkStaleCoffeesOutOfStock(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, markStaleCoffeesOutOfStock)
-	return err
 }
 
 const listCoffeesByRoasterWithAvailability = `-- name: ListCoffeesByRoasterWithAvailability :many
@@ -98,35 +76,34 @@ WHERE r.slug = $1 AND r.opted_out = false
 ORDER BY c.in_stock DESC, c.name
 `
 
-// ListCoffeesByRoasterWithAvailabilityRow is the same shape as ListCoffeesByRoasterRow.
 type ListCoffeesByRoasterWithAvailabilityRow struct {
-	ID              int64       `json:"id"`
-	RoasterID       int32       `json:"roaster_id"`
-	Name            string      `json:"name"`
-	ProductUrl      pgtype.Text `json:"product_url"`
-	ImageUrl        pgtype.Text `json:"image_url"`
-	CountryCode     pgtype.Text `json:"country_code"`
-	OriginRaw       pgtype.Text `json:"origin_raw"`
-	RegionRaw       pgtype.Text `json:"region_raw"`
-	Process         pgtype.Text `json:"process"`
-	RoastLevel      pgtype.Text `json:"roast_level"`
-	TastingNotes    []string    `json:"tasting_notes"`
-	PriceCents      pgtype.Int4 `json:"price_cents"`
-	WeightGrams     pgtype.Int4 `json:"weight_grams"`
-	InStock         bool        `json:"in_stock"`
-	Variety         pgtype.Text `json:"variety"`
-	Species         pgtype.Text `json:"species"`
-	PricePer100gMin pgtype.Int4 `json:"price_per_100g_min"`
-	PricePer100gMax pgtype.Int4 `json:"price_per_100g_max"`
-	IsBlend         bool        `json:"is_blend"`
-	IsDecaf         bool        `json:"is_decaf"`
-	RoasterName     string      `json:"roaster_name"`
-	RoasterSlug     string      `json:"roaster_slug"`
-	RoasterLogoUrl  pgtype.Text `json:"roaster_logo_url"`
-	CountryName     pgtype.Text `json:"country_name"`
-	RegionName      pgtype.Text `json:"region_name"`
-	CoffeeRegionID  pgtype.Int4 `json:"coffee_region_id"`
-	ProducerName    pgtype.Text `json:"producer_name"`
+	ID               int64       `json:"id"`
+	RoasterID        int32       `json:"roaster_id"`
+	Name             string      `json:"name"`
+	ProductUrl       pgtype.Text `json:"product_url"`
+	ImageUrl         pgtype.Text `json:"image_url"`
+	CountryCode      pgtype.Text `json:"country_code"`
+	OriginRaw        pgtype.Text `json:"origin_raw"`
+	RegionRaw        pgtype.Text `json:"region_raw"`
+	Process          pgtype.Text `json:"process"`
+	RoastLevel       pgtype.Text `json:"roast_level"`
+	TastingNotes     []string    `json:"tasting_notes"`
+	PriceCents       pgtype.Int4 `json:"price_cents"`
+	WeightGrams      pgtype.Int4 `json:"weight_grams"`
+	InStock          bool        `json:"in_stock"`
+	Variety          pgtype.Text `json:"variety"`
+	Species          pgtype.Text `json:"species"`
+	PricePer100gMin  pgtype.Int4 `json:"price_per_100g_min"`
+	PricePer100gMax  pgtype.Int4 `json:"price_per_100g_max"`
+	IsBlend          bool        `json:"is_blend"`
+	IsDecaf          bool        `json:"is_decaf"`
+	RoasterName      string      `json:"roaster_name"`
+	RoasterSlug      string      `json:"roaster_slug"`
+	RoasterLogoUrl   pgtype.Text `json:"roaster_logo_url"`
+	CountryName      pgtype.Text `json:"country_name"`
+	RegionName       pgtype.Text `json:"region_name"`
+	CoffeeRegionID   pgtype.Int4 `json:"coffee_region_id"`
+	ProducerName     pgtype.Text `json:"producer_name"`
 	CoffeeProducerID pgtype.Int4 `json:"coffee_producer_id"`
 }
 
@@ -140,15 +117,34 @@ func (q *Queries) ListCoffeesByRoasterWithAvailability(ctx context.Context, slug
 	for rows.Next() {
 		var i ListCoffeesByRoasterWithAvailabilityRow
 		if err := rows.Scan(
-			&i.ID, &i.RoasterID, &i.Name, &i.ProductUrl, &i.ImageUrl,
-			&i.CountryCode, &i.OriginRaw, &i.RegionRaw, &i.Process, &i.RoastLevel,
-			&i.TastingNotes, &i.PriceCents, &i.WeightGrams, &i.InStock,
-			&i.Variety, &i.Species,
-			&i.PricePer100gMin, &i.PricePer100gMax, &i.IsBlend, &i.IsDecaf,
-			&i.RoasterName, &i.RoasterSlug, &i.RoasterLogoUrl,
+			&i.ID,
+			&i.RoasterID,
+			&i.Name,
+			&i.ProductUrl,
+			&i.ImageUrl,
+			&i.CountryCode,
+			&i.OriginRaw,
+			&i.RegionRaw,
+			&i.Process,
+			&i.RoastLevel,
+			&i.TastingNotes,
+			&i.PriceCents,
+			&i.WeightGrams,
+			&i.InStock,
+			&i.Variety,
+			&i.Species,
+			&i.PricePer100gMin,
+			&i.PricePer100gMax,
+			&i.IsBlend,
+			&i.IsDecaf,
+			&i.RoasterName,
+			&i.RoasterSlug,
+			&i.RoasterLogoUrl,
 			&i.CountryName,
-			&i.RegionName, &i.CoffeeRegionID,
-			&i.ProducerName, &i.CoffeeProducerID,
+			&i.RegionName,
+			&i.CoffeeRegionID,
+			&i.ProducerName,
+			&i.CoffeeProducerID,
 		); err != nil {
 			return nil, err
 		}
@@ -158,4 +154,36 @@ func (q *Queries) ListCoffeesByRoasterWithAvailability(ctx context.Context, slug
 		return nil, err
 	}
 	return items, nil
+}
+
+const markStaleCoffeesOutOfStock = `-- name: MarkStaleCoffeesOutOfStock :exec
+UPDATE coffees
+SET in_stock = false, updated_at = now()
+WHERE in_stock = true
+  AND last_seen_at < now() - interval '3 days'
+`
+
+// Coffees not seen by the scraper in over 3 days are marked out of stock.
+func (q *Queries) MarkStaleCoffeesOutOfStock(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, markStaleCoffeesOutOfStock)
+	return err
+}
+
+const upsertAvailabilityLog = `-- name: UpsertAvailabilityLog :exec
+INSERT INTO coffee_availability_log (coffee_id, in_stock, price_cents, recorded_at)
+VALUES ($1, $2, $3, CURRENT_DATE)
+ON CONFLICT (coffee_id, recorded_at) DO UPDATE SET
+    in_stock = EXCLUDED.in_stock,
+    price_cents = EXCLUDED.price_cents
+`
+
+type UpsertAvailabilityLogParams struct {
+	CoffeeID   int64       `json:"coffee_id"`
+	InStock    bool        `json:"in_stock"`
+	PriceCents pgtype.Int4 `json:"price_cents"`
+}
+
+func (q *Queries) UpsertAvailabilityLog(ctx context.Context, arg UpsertAvailabilityLogParams) error {
+	_, err := q.db.Exec(ctx, upsertAvailabilityLog, arg.CoffeeID, arg.InStock, arg.PriceCents)
+	return err
 }

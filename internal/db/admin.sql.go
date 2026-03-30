@@ -12,220 +12,50 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const adminListRoasters = `-- name: AdminListRoasters :many
-SELECT id, slug, name, website, state, logo_url, description, active, opted_out, created_at, updated_at
-FROM roasters
-ORDER BY name
-`
-
-type AdminListRoastersRow struct {
-	ID          int32       `json:"id"`
-	Slug        string      `json:"slug"`
-	Name        string      `json:"name"`
-	Website     string      `json:"website"`
-	State       pgtype.Text `json:"state"`
-	LogoUrl     pgtype.Text `json:"logo_url"`
-	Description pgtype.Text `json:"description"`
-	Active      bool        `json:"active"`
-	OptedOut    bool        `json:"opted_out"`
-	CreatedAt   time.Time   `json:"created_at"`
-	UpdatedAt   time.Time   `json:"updated_at"`
-}
-
-func (q *Queries) AdminListRoasters(ctx context.Context) ([]AdminListRoastersRow, error) {
-	rows, err := q.db.Query(ctx, adminListRoasters)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []AdminListRoastersRow{}
-	for rows.Next() {
-		var i AdminListRoastersRow
-		if err := rows.Scan(
-			&i.ID, &i.Slug, &i.Name, &i.Website, &i.State,
-			&i.LogoUrl, &i.Description, &i.Active, &i.OptedOut,
-			&i.CreatedAt, &i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const adminGetRoaster = `-- name: AdminGetRoaster :one
-SELECT id, slug, name, website, state, logo_url, description, active, opted_out, created_at, updated_at
-FROM roasters
-WHERE id = $1
-`
-
-type AdminGetRoasterRow struct {
-	ID          int32       `json:"id"`
-	Slug        string      `json:"slug"`
-	Name        string      `json:"name"`
-	Website     string      `json:"website"`
-	State       pgtype.Text `json:"state"`
-	LogoUrl     pgtype.Text `json:"logo_url"`
-	Description pgtype.Text `json:"description"`
-	Active      bool        `json:"active"`
-	OptedOut    bool        `json:"opted_out"`
-	CreatedAt   time.Time   `json:"created_at"`
-	UpdatedAt   time.Time   `json:"updated_at"`
-}
-
-func (q *Queries) AdminGetRoaster(ctx context.Context, id int32) (AdminGetRoasterRow, error) {
-	row := q.db.QueryRow(ctx, adminGetRoaster, id)
-	var i AdminGetRoasterRow
-	err := row.Scan(
-		&i.ID, &i.Slug, &i.Name, &i.Website, &i.State,
-		&i.LogoUrl, &i.Description, &i.Active, &i.OptedOut,
-		&i.CreatedAt, &i.UpdatedAt,
-	)
-	return i, err
-}
-
-const adminCreateRoaster = `-- name: AdminCreateRoaster :one
-INSERT INTO roasters (slug, name, website, state, description, logo_url, active)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
+const adminCreateCafe = `-- name: AdminCreateCafe :one
+INSERT INTO cafes (roaster_id, slug, name, type, address, suburb, state, postcode,
+                   latitude, longitude, phone, instagram, website_url, image_url)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 RETURNING id
 `
 
-type AdminCreateRoasterParams struct {
-	Slug        string      `json:"slug"`
-	Name        string      `json:"name"`
-	Website     string      `json:"website"`
-	State       pgtype.Text `json:"state"`
-	Description pgtype.Text `json:"description"`
-	LogoUrl     pgtype.Text `json:"logo_url"`
-	Active      bool        `json:"active"`
+type AdminCreateCafeParams struct {
+	RoasterID  int32         `json:"roaster_id"`
+	Slug       string        `json:"slug"`
+	Name       string        `json:"name"`
+	Type       string        `json:"type"`
+	Address    pgtype.Text   `json:"address"`
+	Suburb     pgtype.Text   `json:"suburb"`
+	State      pgtype.Text   `json:"state"`
+	Postcode   pgtype.Text   `json:"postcode"`
+	Latitude   pgtype.Float8 `json:"latitude"`
+	Longitude  pgtype.Float8 `json:"longitude"`
+	Phone      pgtype.Text   `json:"phone"`
+	Instagram  pgtype.Text   `json:"instagram"`
+	WebsiteUrl pgtype.Text   `json:"website_url"`
+	ImageUrl   pgtype.Text   `json:"image_url"`
 }
 
-func (q *Queries) AdminCreateRoaster(ctx context.Context, arg AdminCreateRoasterParams) (int32, error) {
-	row := q.db.QueryRow(ctx, adminCreateRoaster,
-		arg.Slug, arg.Name, arg.Website, arg.State,
-		arg.Description, arg.LogoUrl, arg.Active,
+func (q *Queries) AdminCreateCafe(ctx context.Context, arg AdminCreateCafeParams) (int32, error) {
+	row := q.db.QueryRow(ctx, adminCreateCafe,
+		arg.RoasterID,
+		arg.Slug,
+		arg.Name,
+		arg.Type,
+		arg.Address,
+		arg.Suburb,
+		arg.State,
+		arg.Postcode,
+		arg.Latitude,
+		arg.Longitude,
+		arg.Phone,
+		arg.Instagram,
+		arg.WebsiteUrl,
+		arg.ImageUrl,
 	)
 	var id int32
 	err := row.Scan(&id)
 	return id, err
-}
-
-const adminUpdateRoaster = `-- name: AdminUpdateRoaster :exec
-UPDATE roasters SET
-    slug = $2,
-    name = $3,
-    website = $4,
-    state = $5,
-    description = $6,
-    logo_url = $7,
-    active = $8,
-    opted_out = $9,
-    updated_at = now()
-WHERE id = $1
-`
-
-type AdminUpdateRoasterParams struct {
-	ID          int32       `json:"id"`
-	Slug        string      `json:"slug"`
-	Name        string      `json:"name"`
-	Website     string      `json:"website"`
-	State       pgtype.Text `json:"state"`
-	Description pgtype.Text `json:"description"`
-	LogoUrl     pgtype.Text `json:"logo_url"`
-	Active      bool        `json:"active"`
-	OptedOut    bool        `json:"opted_out"`
-}
-
-func (q *Queries) AdminUpdateRoaster(ctx context.Context, arg AdminUpdateRoasterParams) error {
-	_, err := q.db.Exec(ctx, adminUpdateRoaster,
-		arg.ID, arg.Slug, arg.Name, arg.Website, arg.State,
-		arg.Description, arg.LogoUrl, arg.Active, arg.OptedOut,
-	)
-	return err
-}
-
-const adminListCoffees = `-- name: AdminListCoffees :many
-SELECT
-    c.id, c.roaster_id, c.name, c.product_url, c.image_url,
-    c.country_code, c.process, c.roast_level,
-    c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
-    c.variety, c.species,
-    c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
-    c.description, c.first_seen_at, c.last_seen_at,
-    r.name AS roaster_name, r.slug AS roaster_slug,
-    co.name AS country_name,
-    COUNT(*) OVER() AS total_count
-FROM coffees c
-JOIN roasters r ON r.id = c.roaster_id
-LEFT JOIN countries co ON co.code = c.country_code
-ORDER BY c.updated_at DESC
-LIMIT $1 OFFSET $2
-`
-
-type AdminListCoffeesParams struct {
-	Lim int32 `json:"lim"`
-	Off int32 `json:"off"`
-}
-
-type AdminListCoffeesRow struct {
-	ID              int64       `json:"id"`
-	RoasterID       int32       `json:"roaster_id"`
-	Name            string      `json:"name"`
-	ProductUrl      pgtype.Text `json:"product_url"`
-	ImageUrl        pgtype.Text `json:"image_url"`
-	CountryCode     pgtype.Text `json:"country_code"`
-	Process         pgtype.Text `json:"process"`
-	RoastLevel      pgtype.Text `json:"roast_level"`
-	TastingNotes    []string    `json:"tasting_notes"`
-	PriceCents      pgtype.Int4 `json:"price_cents"`
-	WeightGrams     pgtype.Int4 `json:"weight_grams"`
-	InStock         bool        `json:"in_stock"`
-	Variety         pgtype.Text `json:"variety"`
-	Species         pgtype.Text `json:"species"`
-	PricePer100gMin pgtype.Int4 `json:"price_per_100g_min"`
-	PricePer100gMax pgtype.Int4 `json:"price_per_100g_max"`
-	IsBlend         bool        `json:"is_blend"`
-	IsDecaf         bool        `json:"is_decaf"`
-	Description     pgtype.Text `json:"description"`
-	FirstSeenAt     time.Time   `json:"first_seen_at"`
-	LastSeenAt      time.Time   `json:"last_seen_at"`
-	RoasterName     string      `json:"roaster_name"`
-	RoasterSlug     string      `json:"roaster_slug"`
-	CountryName     pgtype.Text `json:"country_name"`
-	TotalCount      int64       `json:"total_count"`
-}
-
-func (q *Queries) AdminListCoffees(ctx context.Context, arg AdminListCoffeesParams) ([]AdminListCoffeesRow, error) {
-	rows, err := q.db.Query(ctx, adminListCoffees, arg.Lim, arg.Off)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []AdminListCoffeesRow{}
-	for rows.Next() {
-		var i AdminListCoffeesRow
-		if err := rows.Scan(
-			&i.ID, &i.RoasterID, &i.Name, &i.ProductUrl, &i.ImageUrl,
-			&i.CountryCode, &i.Process, &i.RoastLevel,
-			&i.TastingNotes, &i.PriceCents, &i.WeightGrams, &i.InStock,
-			&i.Variety, &i.Species,
-			&i.PricePer100gMin, &i.PricePer100gMax, &i.IsBlend, &i.IsDecaf,
-			&i.Description, &i.FirstSeenAt, &i.LastSeenAt,
-			&i.RoasterName, &i.RoasterSlug,
-			&i.CountryName,
-			&i.TotalCount,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const adminCreateCoffee = `-- name: AdminCreateCoffee :one
@@ -271,15 +101,504 @@ type AdminCreateCoffeeParams struct {
 
 func (q *Queries) AdminCreateCoffee(ctx context.Context, arg AdminCreateCoffeeParams) (int64, error) {
 	row := q.db.QueryRow(ctx, adminCreateCoffee,
-		arg.RoasterID, arg.Name, arg.ProductUrl, arg.ImageUrl,
-		arg.CountryCode, arg.RegionID, arg.ProducerID,
-		arg.Process, arg.RoastLevel, arg.TastingNotes,
-		arg.PriceCents, arg.WeightGrams, arg.PricePer100gMin, arg.PricePer100gMax,
-		arg.Variety, arg.Species, arg.IsBlend, arg.IsDecaf, arg.InStock, arg.Description,
+		arg.RoasterID,
+		arg.Name,
+		arg.ProductUrl,
+		arg.ImageUrl,
+		arg.CountryCode,
+		arg.RegionID,
+		arg.ProducerID,
+		arg.Process,
+		arg.RoastLevel,
+		arg.TastingNotes,
+		arg.PriceCents,
+		arg.WeightGrams,
+		arg.PricePer100gMin,
+		arg.PricePer100gMax,
+		arg.Variety,
+		arg.Species,
+		arg.IsBlend,
+		arg.IsDecaf,
+		arg.InStock,
+		arg.Description,
 	)
 	var id int64
 	err := row.Scan(&id)
 	return id, err
+}
+
+const adminCreateRoaster = `-- name: AdminCreateRoaster :one
+INSERT INTO roasters (slug, name, website, state, description, logo_url, active)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id
+`
+
+type AdminCreateRoasterParams struct {
+	Slug        string      `json:"slug"`
+	Name        string      `json:"name"`
+	Website     string      `json:"website"`
+	State       pgtype.Text `json:"state"`
+	Description pgtype.Text `json:"description"`
+	LogoUrl     pgtype.Text `json:"logo_url"`
+	Active      bool        `json:"active"`
+}
+
+func (q *Queries) AdminCreateRoaster(ctx context.Context, arg AdminCreateRoasterParams) (int32, error) {
+	row := q.db.QueryRow(ctx, adminCreateRoaster,
+		arg.Slug,
+		arg.Name,
+		arg.Website,
+		arg.State,
+		arg.Description,
+		arg.LogoUrl,
+		arg.Active,
+	)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
+}
+
+const adminGetCafe = `-- name: AdminGetCafe :one
+SELECT c.id, c.roaster_id, c.slug, c.name, c.type, c.address, c.suburb, c.state, c.postcode,
+       c.latitude, c.longitude, c.phone, c.instagram, c.website_url, c.image_url, c.active,
+       r.name AS roaster_name, r.slug AS roaster_slug
+FROM cafes c
+JOIN roasters r ON r.id = c.roaster_id
+WHERE c.id = $1
+`
+
+type AdminGetCafeRow struct {
+	ID          int32         `json:"id"`
+	RoasterID   int32         `json:"roaster_id"`
+	Slug        string        `json:"slug"`
+	Name        string        `json:"name"`
+	Type        string        `json:"type"`
+	Address     pgtype.Text   `json:"address"`
+	Suburb      pgtype.Text   `json:"suburb"`
+	State       pgtype.Text   `json:"state"`
+	Postcode    pgtype.Text   `json:"postcode"`
+	Latitude    pgtype.Float8 `json:"latitude"`
+	Longitude   pgtype.Float8 `json:"longitude"`
+	Phone       pgtype.Text   `json:"phone"`
+	Instagram   pgtype.Text   `json:"instagram"`
+	WebsiteUrl  pgtype.Text   `json:"website_url"`
+	ImageUrl    pgtype.Text   `json:"image_url"`
+	Active      pgtype.Bool   `json:"active"`
+	RoasterName string        `json:"roaster_name"`
+	RoasterSlug string        `json:"roaster_slug"`
+}
+
+func (q *Queries) AdminGetCafe(ctx context.Context, id int32) (AdminGetCafeRow, error) {
+	row := q.db.QueryRow(ctx, adminGetCafe, id)
+	var i AdminGetCafeRow
+	err := row.Scan(
+		&i.ID,
+		&i.RoasterID,
+		&i.Slug,
+		&i.Name,
+		&i.Type,
+		&i.Address,
+		&i.Suburb,
+		&i.State,
+		&i.Postcode,
+		&i.Latitude,
+		&i.Longitude,
+		&i.Phone,
+		&i.Instagram,
+		&i.WebsiteUrl,
+		&i.ImageUrl,
+		&i.Active,
+		&i.RoasterName,
+		&i.RoasterSlug,
+	)
+	return i, err
+}
+
+const adminGetRoaster = `-- name: AdminGetRoaster :one
+SELECT id, slug, name, website, state, logo_url, description, active, opted_out, created_at, updated_at
+FROM roasters
+WHERE id = $1
+`
+
+type AdminGetRoasterRow struct {
+	ID          int32       `json:"id"`
+	Slug        string      `json:"slug"`
+	Name        string      `json:"name"`
+	Website     string      `json:"website"`
+	State       pgtype.Text `json:"state"`
+	LogoUrl     pgtype.Text `json:"logo_url"`
+	Description pgtype.Text `json:"description"`
+	Active      bool        `json:"active"`
+	OptedOut    bool        `json:"opted_out"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
+}
+
+func (q *Queries) AdminGetRoaster(ctx context.Context, id int32) (AdminGetRoasterRow, error) {
+	row := q.db.QueryRow(ctx, adminGetRoaster, id)
+	var i AdminGetRoasterRow
+	err := row.Scan(
+		&i.ID,
+		&i.Slug,
+		&i.Name,
+		&i.Website,
+		&i.State,
+		&i.LogoUrl,
+		&i.Description,
+		&i.Active,
+		&i.OptedOut,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const adminListCafes = `-- name: AdminListCafes :many
+SELECT c.id, c.roaster_id, c.slug, c.name, c.type, c.address, c.suburb, c.state, c.postcode,
+       c.latitude, c.longitude, c.phone, c.instagram, c.website_url, c.image_url, c.active,
+       r.name AS roaster_name, r.slug AS roaster_slug
+FROM cafes c
+JOIN roasters r ON r.id = c.roaster_id
+ORDER BY r.name, c.name
+`
+
+type AdminListCafesRow struct {
+	ID          int32         `json:"id"`
+	RoasterID   int32         `json:"roaster_id"`
+	Slug        string        `json:"slug"`
+	Name        string        `json:"name"`
+	Type        string        `json:"type"`
+	Address     pgtype.Text   `json:"address"`
+	Suburb      pgtype.Text   `json:"suburb"`
+	State       pgtype.Text   `json:"state"`
+	Postcode    pgtype.Text   `json:"postcode"`
+	Latitude    pgtype.Float8 `json:"latitude"`
+	Longitude   pgtype.Float8 `json:"longitude"`
+	Phone       pgtype.Text   `json:"phone"`
+	Instagram   pgtype.Text   `json:"instagram"`
+	WebsiteUrl  pgtype.Text   `json:"website_url"`
+	ImageUrl    pgtype.Text   `json:"image_url"`
+	Active      pgtype.Bool   `json:"active"`
+	RoasterName string        `json:"roaster_name"`
+	RoasterSlug string        `json:"roaster_slug"`
+}
+
+func (q *Queries) AdminListCafes(ctx context.Context) ([]AdminListCafesRow, error) {
+	rows, err := q.db.Query(ctx, adminListCafes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []AdminListCafesRow{}
+	for rows.Next() {
+		var i AdminListCafesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.RoasterID,
+			&i.Slug,
+			&i.Name,
+			&i.Type,
+			&i.Address,
+			&i.Suburb,
+			&i.State,
+			&i.Postcode,
+			&i.Latitude,
+			&i.Longitude,
+			&i.Phone,
+			&i.Instagram,
+			&i.WebsiteUrl,
+			&i.ImageUrl,
+			&i.Active,
+			&i.RoasterName,
+			&i.RoasterSlug,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const adminListCoffees = `-- name: AdminListCoffees :many
+SELECT
+    c.id, c.roaster_id, c.name, c.product_url, c.image_url,
+    c.country_code, c.process, c.roast_level,
+    c.tasting_notes, c.price_cents, c.weight_grams, c.in_stock,
+    c.variety, c.species,
+    c.price_per_100g_min, c.price_per_100g_max, c.is_blend, c.is_decaf,
+    c.description, c.first_seen_at, c.last_seen_at,
+    r.name AS roaster_name, r.slug AS roaster_slug,
+    co.name AS country_name,
+    COUNT(*) OVER() AS total_count
+FROM coffees c
+JOIN roasters r ON r.id = c.roaster_id
+LEFT JOIN countries co ON co.code = c.country_code
+ORDER BY c.updated_at DESC
+LIMIT $2 OFFSET $1
+`
+
+type AdminListCoffeesParams struct {
+	Off int32 `json:"off"`
+	Lim int32 `json:"lim"`
+}
+
+type AdminListCoffeesRow struct {
+	ID              int64       `json:"id"`
+	RoasterID       int32       `json:"roaster_id"`
+	Name            string      `json:"name"`
+	ProductUrl      pgtype.Text `json:"product_url"`
+	ImageUrl        pgtype.Text `json:"image_url"`
+	CountryCode     pgtype.Text `json:"country_code"`
+	Process         pgtype.Text `json:"process"`
+	RoastLevel      pgtype.Text `json:"roast_level"`
+	TastingNotes    []string    `json:"tasting_notes"`
+	PriceCents      pgtype.Int4 `json:"price_cents"`
+	WeightGrams     pgtype.Int4 `json:"weight_grams"`
+	InStock         bool        `json:"in_stock"`
+	Variety         pgtype.Text `json:"variety"`
+	Species         pgtype.Text `json:"species"`
+	PricePer100gMin pgtype.Int4 `json:"price_per_100g_min"`
+	PricePer100gMax pgtype.Int4 `json:"price_per_100g_max"`
+	IsBlend         bool        `json:"is_blend"`
+	IsDecaf         bool        `json:"is_decaf"`
+	Description     pgtype.Text `json:"description"`
+	FirstSeenAt     time.Time   `json:"first_seen_at"`
+	LastSeenAt      time.Time   `json:"last_seen_at"`
+	RoasterName     string      `json:"roaster_name"`
+	RoasterSlug     string      `json:"roaster_slug"`
+	CountryName     pgtype.Text `json:"country_name"`
+	TotalCount      int64       `json:"total_count"`
+}
+
+func (q *Queries) AdminListCoffees(ctx context.Context, arg AdminListCoffeesParams) ([]AdminListCoffeesRow, error) {
+	rows, err := q.db.Query(ctx, adminListCoffees, arg.Off, arg.Lim)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []AdminListCoffeesRow{}
+	for rows.Next() {
+		var i AdminListCoffeesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.RoasterID,
+			&i.Name,
+			&i.ProductUrl,
+			&i.ImageUrl,
+			&i.CountryCode,
+			&i.Process,
+			&i.RoastLevel,
+			&i.TastingNotes,
+			&i.PriceCents,
+			&i.WeightGrams,
+			&i.InStock,
+			&i.Variety,
+			&i.Species,
+			&i.PricePer100gMin,
+			&i.PricePer100gMax,
+			&i.IsBlend,
+			&i.IsDecaf,
+			&i.Description,
+			&i.FirstSeenAt,
+			&i.LastSeenAt,
+			&i.RoasterName,
+			&i.RoasterSlug,
+			&i.CountryName,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const adminListRoasters = `-- name: AdminListRoasters :many
+
+SELECT id, slug, name, website, state, logo_url, description, active, opted_out, created_at, updated_at
+FROM roasters
+ORDER BY name
+`
+
+type AdminListRoastersRow struct {
+	ID          int32       `json:"id"`
+	Slug        string      `json:"slug"`
+	Name        string      `json:"name"`
+	Website     string      `json:"website"`
+	State       pgtype.Text `json:"state"`
+	LogoUrl     pgtype.Text `json:"logo_url"`
+	Description pgtype.Text `json:"description"`
+	Active      bool        `json:"active"`
+	OptedOut    bool        `json:"opted_out"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
+}
+
+// Admin queries for managing roasters, coffees, and cafes.
+func (q *Queries) AdminListRoasters(ctx context.Context) ([]AdminListRoastersRow, error) {
+	rows, err := q.db.Query(ctx, adminListRoasters)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []AdminListRoastersRow{}
+	for rows.Next() {
+		var i AdminListRoastersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Slug,
+			&i.Name,
+			&i.Website,
+			&i.State,
+			&i.LogoUrl,
+			&i.Description,
+			&i.Active,
+			&i.OptedOut,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const adminListScrapeRuns = `-- name: AdminListScrapeRuns :many
+SELECT sr.id, sr.roaster_id, sr.started_at, sr.finished_at, sr.status,
+       sr.coffees_found, sr.coffees_added, sr.coffees_updated, sr.coffees_removed,
+       sr.error_message, sr.duration_ms,
+       r.name AS roaster_name, r.slug AS roaster_slug
+FROM scrape_runs sr
+JOIN roasters r ON r.id = sr.roaster_id
+ORDER BY sr.started_at DESC
+LIMIT $2 OFFSET $1
+`
+
+type AdminListScrapeRunsParams struct {
+	Off int32 `json:"off"`
+	Lim int32 `json:"lim"`
+}
+
+type AdminListScrapeRunsRow struct {
+	ID             int64              `json:"id"`
+	RoasterID      int32              `json:"roaster_id"`
+	StartedAt      time.Time          `json:"started_at"`
+	FinishedAt     pgtype.Timestamptz `json:"finished_at"`
+	Status         string             `json:"status"`
+	CoffeesFound   pgtype.Int4        `json:"coffees_found"`
+	CoffeesAdded   pgtype.Int4        `json:"coffees_added"`
+	CoffeesUpdated pgtype.Int4        `json:"coffees_updated"`
+	CoffeesRemoved pgtype.Int4        `json:"coffees_removed"`
+	ErrorMessage   pgtype.Text        `json:"error_message"`
+	DurationMs     pgtype.Int4        `json:"duration_ms"`
+	RoasterName    string             `json:"roaster_name"`
+	RoasterSlug    string             `json:"roaster_slug"`
+}
+
+func (q *Queries) AdminListScrapeRuns(ctx context.Context, arg AdminListScrapeRunsParams) ([]AdminListScrapeRunsRow, error) {
+	rows, err := q.db.Query(ctx, adminListScrapeRuns, arg.Off, arg.Lim)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []AdminListScrapeRunsRow{}
+	for rows.Next() {
+		var i AdminListScrapeRunsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.RoasterID,
+			&i.StartedAt,
+			&i.FinishedAt,
+			&i.Status,
+			&i.CoffeesFound,
+			&i.CoffeesAdded,
+			&i.CoffeesUpdated,
+			&i.CoffeesRemoved,
+			&i.ErrorMessage,
+			&i.DurationMs,
+			&i.RoasterName,
+			&i.RoasterSlug,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const adminUpdateCafe = `-- name: AdminUpdateCafe :exec
+UPDATE cafes SET
+    roaster_id = $2,
+    slug = $3,
+    name = $4,
+    type = $5,
+    address = $6,
+    suburb = $7,
+    state = $8,
+    postcode = $9,
+    latitude = $10,
+    longitude = $11,
+    phone = $12,
+    instagram = $13,
+    website_url = $14,
+    image_url = $15,
+    active = $16,
+    updated_at = now()
+WHERE id = $1
+`
+
+type AdminUpdateCafeParams struct {
+	ID         int32         `json:"id"`
+	RoasterID  int32         `json:"roaster_id"`
+	Slug       string        `json:"slug"`
+	Name       string        `json:"name"`
+	Type       string        `json:"type"`
+	Address    pgtype.Text   `json:"address"`
+	Suburb     pgtype.Text   `json:"suburb"`
+	State      pgtype.Text   `json:"state"`
+	Postcode   pgtype.Text   `json:"postcode"`
+	Latitude   pgtype.Float8 `json:"latitude"`
+	Longitude  pgtype.Float8 `json:"longitude"`
+	Phone      pgtype.Text   `json:"phone"`
+	Instagram  pgtype.Text   `json:"instagram"`
+	WebsiteUrl pgtype.Text   `json:"website_url"`
+	ImageUrl   pgtype.Text   `json:"image_url"`
+	Active     pgtype.Bool   `json:"active"`
+}
+
+func (q *Queries) AdminUpdateCafe(ctx context.Context, arg AdminUpdateCafeParams) error {
+	_, err := q.db.Exec(ctx, adminUpdateCafe,
+		arg.ID,
+		arg.RoasterID,
+		arg.Slug,
+		arg.Name,
+		arg.Type,
+		arg.Address,
+		arg.Suburb,
+		arg.State,
+		arg.Postcode,
+		arg.Latitude,
+		arg.Longitude,
+		arg.Phone,
+		arg.Instagram,
+		arg.WebsiteUrl,
+		arg.ImageUrl,
+		arg.Active,
+	)
+	return err
 }
 
 const adminUpdateCoffee = `-- name: AdminUpdateCoffee :exec
@@ -334,253 +653,68 @@ type AdminUpdateCoffeeParams struct {
 
 func (q *Queries) AdminUpdateCoffee(ctx context.Context, arg AdminUpdateCoffeeParams) error {
 	_, err := q.db.Exec(ctx, adminUpdateCoffee,
-		arg.ID, arg.RoasterID, arg.Name, arg.ProductUrl, arg.ImageUrl,
-		arg.CountryCode, arg.RegionID, arg.ProducerID,
-		arg.Process, arg.RoastLevel, arg.TastingNotes,
-		arg.PriceCents, arg.WeightGrams, arg.PricePer100gMin, arg.PricePer100gMax,
-		arg.Variety, arg.Species, arg.IsBlend, arg.IsDecaf, arg.InStock, arg.Description,
+		arg.ID,
+		arg.RoasterID,
+		arg.Name,
+		arg.ProductUrl,
+		arg.ImageUrl,
+		arg.CountryCode,
+		arg.RegionID,
+		arg.ProducerID,
+		arg.Process,
+		arg.RoastLevel,
+		arg.TastingNotes,
+		arg.PriceCents,
+		arg.WeightGrams,
+		arg.PricePer100gMin,
+		arg.PricePer100gMax,
+		arg.Variety,
+		arg.Species,
+		arg.IsBlend,
+		arg.IsDecaf,
+		arg.InStock,
+		arg.Description,
 	)
 	return err
 }
 
-const adminListCafes = `-- name: AdminListCafes :many
-SELECT c.id, c.roaster_id, c.slug, c.name, c.type, c.address, c.suburb, c.state, c.postcode,
-       c.latitude, c.longitude, c.phone, c.instagram, c.website_url, c.image_url, c.active,
-       r.name AS roaster_name, r.slug AS roaster_slug
-FROM cafes c
-JOIN roasters r ON r.id = c.roaster_id
-ORDER BY r.name, c.name
-`
-
-type AdminListCafesRow struct {
-	ID          int32         `json:"id"`
-	RoasterID   int32         `json:"roaster_id"`
-	Slug        string        `json:"slug"`
-	Name        string        `json:"name"`
-	Type        string        `json:"type"`
-	Address     pgtype.Text   `json:"address"`
-	Suburb      pgtype.Text   `json:"suburb"`
-	State       pgtype.Text   `json:"state"`
-	Postcode    pgtype.Text   `json:"postcode"`
-	Latitude    pgtype.Float8 `json:"latitude"`
-	Longitude   pgtype.Float8 `json:"longitude"`
-	Phone       pgtype.Text   `json:"phone"`
-	Instagram   pgtype.Text   `json:"instagram"`
-	WebsiteUrl  pgtype.Text   `json:"website_url"`
-	ImageUrl    pgtype.Text   `json:"image_url"`
-	Active      pgtype.Bool   `json:"active"`
-	RoasterName string        `json:"roaster_name"`
-	RoasterSlug string        `json:"roaster_slug"`
-}
-
-func (q *Queries) AdminListCafes(ctx context.Context) ([]AdminListCafesRow, error) {
-	rows, err := q.db.Query(ctx, adminListCafes)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []AdminListCafesRow{}
-	for rows.Next() {
-		var i AdminListCafesRow
-		if err := rows.Scan(
-			&i.ID, &i.RoasterID, &i.Slug, &i.Name, &i.Type,
-			&i.Address, &i.Suburb, &i.State, &i.Postcode,
-			&i.Latitude, &i.Longitude, &i.Phone, &i.Instagram,
-			&i.WebsiteUrl, &i.ImageUrl, &i.Active,
-			&i.RoasterName, &i.RoasterSlug,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const adminGetCafe = `-- name: AdminGetCafe :one
-SELECT c.id, c.roaster_id, c.slug, c.name, c.type, c.address, c.suburb, c.state, c.postcode,
-       c.latitude, c.longitude, c.phone, c.instagram, c.website_url, c.image_url, c.active,
-       r.name AS roaster_name, r.slug AS roaster_slug
-FROM cafes c
-JOIN roasters r ON r.id = c.roaster_id
-WHERE c.id = $1
-`
-
-type AdminGetCafeRow struct {
-	ID          int32         `json:"id"`
-	RoasterID   int32         `json:"roaster_id"`
-	Slug        string        `json:"slug"`
-	Name        string        `json:"name"`
-	Type        string        `json:"type"`
-	Address     pgtype.Text   `json:"address"`
-	Suburb      pgtype.Text   `json:"suburb"`
-	State       pgtype.Text   `json:"state"`
-	Postcode    pgtype.Text   `json:"postcode"`
-	Latitude    pgtype.Float8 `json:"latitude"`
-	Longitude   pgtype.Float8 `json:"longitude"`
-	Phone       pgtype.Text   `json:"phone"`
-	Instagram   pgtype.Text   `json:"instagram"`
-	WebsiteUrl  pgtype.Text   `json:"website_url"`
-	ImageUrl    pgtype.Text   `json:"image_url"`
-	Active      pgtype.Bool   `json:"active"`
-	RoasterName string        `json:"roaster_name"`
-	RoasterSlug string        `json:"roaster_slug"`
-}
-
-func (q *Queries) AdminGetCafe(ctx context.Context, id int32) (AdminGetCafeRow, error) {
-	row := q.db.QueryRow(ctx, adminGetCafe, id)
-	var i AdminGetCafeRow
-	err := row.Scan(
-		&i.ID, &i.RoasterID, &i.Slug, &i.Name, &i.Type,
-		&i.Address, &i.Suburb, &i.State, &i.Postcode,
-		&i.Latitude, &i.Longitude, &i.Phone, &i.Instagram,
-		&i.WebsiteUrl, &i.ImageUrl, &i.Active,
-		&i.RoasterName, &i.RoasterSlug,
-	)
-	return i, err
-}
-
-const adminCreateCafe = `-- name: AdminCreateCafe :one
-INSERT INTO cafes (roaster_id, slug, name, type, address, suburb, state, postcode,
-                   latitude, longitude, phone, instagram, website_url, image_url)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-RETURNING id
-`
-
-type AdminCreateCafeParams struct {
-	RoasterID  int32         `json:"roaster_id"`
-	Slug       string        `json:"slug"`
-	Name       string        `json:"name"`
-	Type       string        `json:"type"`
-	Address    pgtype.Text   `json:"address"`
-	Suburb     pgtype.Text   `json:"suburb"`
-	State      pgtype.Text   `json:"state"`
-	Postcode   pgtype.Text   `json:"postcode"`
-	Latitude   pgtype.Float8 `json:"latitude"`
-	Longitude  pgtype.Float8 `json:"longitude"`
-	Phone      pgtype.Text   `json:"phone"`
-	Instagram  pgtype.Text   `json:"instagram"`
-	WebsiteUrl pgtype.Text   `json:"website_url"`
-	ImageUrl   pgtype.Text   `json:"image_url"`
-}
-
-func (q *Queries) AdminCreateCafe(ctx context.Context, arg AdminCreateCafeParams) (int32, error) {
-	row := q.db.QueryRow(ctx, adminCreateCafe,
-		arg.RoasterID, arg.Slug, arg.Name, arg.Type,
-		arg.Address, arg.Suburb, arg.State, arg.Postcode,
-		arg.Latitude, arg.Longitude, arg.Phone, arg.Instagram,
-		arg.WebsiteUrl, arg.ImageUrl,
-	)
-	var id int32
-	err := row.Scan(&id)
-	return id, err
-}
-
-const adminUpdateCafe = `-- name: AdminUpdateCafe :exec
-UPDATE cafes SET
-    roaster_id = $2,
-    slug = $3,
-    name = $4,
-    type = $5,
-    address = $6,
-    suburb = $7,
-    state = $8,
-    postcode = $9,
-    latitude = $10,
-    longitude = $11,
-    phone = $12,
-    instagram = $13,
-    website_url = $14,
-    image_url = $15,
-    active = $16,
+const adminUpdateRoaster = `-- name: AdminUpdateRoaster :exec
+UPDATE roasters SET
+    slug = $2,
+    name = $3,
+    website = $4,
+    state = $5,
+    description = $6,
+    logo_url = $7,
+    active = $8,
+    opted_out = $9,
     updated_at = now()
 WHERE id = $1
 `
 
-type AdminUpdateCafeParams struct {
-	ID         int32         `json:"id"`
-	RoasterID  int32         `json:"roaster_id"`
-	Slug       string        `json:"slug"`
-	Name       string        `json:"name"`
-	Type       string        `json:"type"`
-	Address    pgtype.Text   `json:"address"`
-	Suburb     pgtype.Text   `json:"suburb"`
-	State      pgtype.Text   `json:"state"`
-	Postcode   pgtype.Text   `json:"postcode"`
-	Latitude   pgtype.Float8 `json:"latitude"`
-	Longitude  pgtype.Float8 `json:"longitude"`
-	Phone      pgtype.Text   `json:"phone"`
-	Instagram  pgtype.Text   `json:"instagram"`
-	WebsiteUrl pgtype.Text   `json:"website_url"`
-	ImageUrl   pgtype.Text   `json:"image_url"`
-	Active     pgtype.Bool   `json:"active"`
+type AdminUpdateRoasterParams struct {
+	ID          int32       `json:"id"`
+	Slug        string      `json:"slug"`
+	Name        string      `json:"name"`
+	Website     string      `json:"website"`
+	State       pgtype.Text `json:"state"`
+	Description pgtype.Text `json:"description"`
+	LogoUrl     pgtype.Text `json:"logo_url"`
+	Active      bool        `json:"active"`
+	OptedOut    bool        `json:"opted_out"`
 }
 
-func (q *Queries) AdminUpdateCafe(ctx context.Context, arg AdminUpdateCafeParams) error {
-	_, err := q.db.Exec(ctx, adminUpdateCafe,
-		arg.ID, arg.RoasterID, arg.Slug, arg.Name, arg.Type,
-		arg.Address, arg.Suburb, arg.State, arg.Postcode,
-		arg.Latitude, arg.Longitude, arg.Phone, arg.Instagram,
-		arg.WebsiteUrl, arg.ImageUrl, arg.Active,
+func (q *Queries) AdminUpdateRoaster(ctx context.Context, arg AdminUpdateRoasterParams) error {
+	_, err := q.db.Exec(ctx, adminUpdateRoaster,
+		arg.ID,
+		arg.Slug,
+		arg.Name,
+		arg.Website,
+		arg.State,
+		arg.Description,
+		arg.LogoUrl,
+		arg.Active,
+		arg.OptedOut,
 	)
 	return err
-}
-
-const adminListScrapeRuns = `-- name: AdminListScrapeRuns :many
-SELECT sr.id, sr.roaster_id, sr.started_at, sr.finished_at, sr.status,
-       sr.coffees_found, sr.coffees_added, sr.coffees_updated, sr.coffees_removed,
-       sr.error_message, sr.duration_ms,
-       r.name AS roaster_name, r.slug AS roaster_slug
-FROM scrape_runs sr
-JOIN roasters r ON r.id = sr.roaster_id
-ORDER BY sr.started_at DESC
-LIMIT $1 OFFSET $2
-`
-
-type AdminListScrapeRunsParams struct {
-	Lim int32 `json:"lim"`
-	Off int32 `json:"off"`
-}
-
-type AdminListScrapeRunsRow struct {
-	ID             int64              `json:"id"`
-	RoasterID      int32              `json:"roaster_id"`
-	StartedAt      time.Time          `json:"started_at"`
-	FinishedAt     pgtype.Timestamptz `json:"finished_at"`
-	Status         string             `json:"status"`
-	CoffeesFound   pgtype.Int4        `json:"coffees_found"`
-	CoffeesAdded   pgtype.Int4        `json:"coffees_added"`
-	CoffeesUpdated pgtype.Int4        `json:"coffees_updated"`
-	CoffeesRemoved pgtype.Int4        `json:"coffees_removed"`
-	ErrorMessage   pgtype.Text        `json:"error_message"`
-	DurationMs     pgtype.Int4        `json:"duration_ms"`
-	RoasterName    string             `json:"roaster_name"`
-	RoasterSlug    string             `json:"roaster_slug"`
-}
-
-func (q *Queries) AdminListScrapeRuns(ctx context.Context, arg AdminListScrapeRunsParams) ([]AdminListScrapeRunsRow, error) {
-	rows, err := q.db.Query(ctx, adminListScrapeRuns, arg.Lim, arg.Off)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []AdminListScrapeRunsRow{}
-	for rows.Next() {
-		var i AdminListScrapeRunsRow
-		if err := rows.Scan(
-			&i.ID, &i.RoasterID, &i.StartedAt, &i.FinishedAt, &i.Status,
-			&i.CoffeesFound, &i.CoffeesAdded, &i.CoffeesUpdated, &i.CoffeesRemoved,
-			&i.ErrorMessage, &i.DurationMs,
-			&i.RoasterName, &i.RoasterSlug,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
