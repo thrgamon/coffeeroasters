@@ -2,21 +2,30 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import CoffeeCard from '@/components/CoffeeCard';
 import { Badge } from '@/components/ui/badge';
-import type { DomainRoasterDetailResponse } from '@/lib/api/generated/models';
+import type { DomainCafeResponse, DomainCoffeeResponse, DomainRoasterResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
+
+interface RoasterDetailData {
+	roaster: DomainRoasterResponse;
+	available_coffees?: DomainCoffeeResponse[];
+	unavailable_coffees?: DomainCoffeeResponse[];
+	coffees?: DomainCoffeeResponse[];
+	cafes?: DomainCafeResponse[];
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
 	const { slug } = await params;
-	const data = await apiFetch<DomainRoasterDetailResponse>(`/api/roasters/${slug}`);
+	const data = await apiFetch<RoasterDetailData>(`/api/roasters/${slug}`);
 	return { title: `${data.roaster?.name ?? 'Roaster'} | COFFEEROASTERS` };
 }
 
 export default async function RoasterDetailPage({ params }: { params: Promise<{ slug: string }> }) {
 	const { slug } = await params;
-	const data = await apiFetch<DomainRoasterDetailResponse>(`/api/roasters/${slug}`);
+	const data = await apiFetch<RoasterDetailData>(`/api/roasters/${slug}`);
 
 	const roaster = data.roaster;
-	const coffees = data.coffees ?? [];
+	const available = data.available_coffees ?? data.coffees ?? [];
+	const unavailable = data.unavailable_coffees ?? [];
 	const cafes = data.cafes ?? [];
 
 	return (
@@ -43,12 +52,12 @@ export default async function RoasterDetailPage({ params }: { params: Promise<{ 
 
 			{cafes.length > 0 && (
 				<section className="space-y-4">
-					<h2 className="text-xl font-bold uppercase tracking-wider text-accent">
+					<h3>
 						{cafes.length} cafe{cafes.length !== 1 ? 's' : ''}
-					</h2>
+					</h3>
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{cafes.map((cafe) => (
-							<div key={cafe.id} className="rounded-lg border-2 border-border bg-card p-4 space-y-1">
+							<div key={cafe.id} className="border border-border bg-card p-4 space-y-1">
 								<p className="font-medium text-foreground">{cafe.name}</p>
 								{cafe.address && <p className="text-sm text-muted-foreground">{cafe.address}</p>}
 								{cafe.phone && <p className="text-sm text-muted-foreground">{cafe.phone}</p>}
@@ -59,15 +68,30 @@ export default async function RoasterDetailPage({ params }: { params: Promise<{ 
 			)}
 
 			<section className="space-y-4">
-				<h2 className="text-xl font-bold uppercase tracking-wider text-accent">
-					{coffees.length} coffee{coffees.length !== 1 ? 's' : ''}
-				</h2>
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{coffees.map((coffee) => (
-						<CoffeeCard key={coffee.id} coffee={coffee} />
-					))}
-				</div>
+				<h3>
+					{available.length} coffee{available.length !== 1 ? 's' : ''} in stock
+				</h3>
+				{available.length > 0 ? (
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{available.map((coffee) => (
+							<CoffeeCard key={coffee.id} coffee={coffee} />
+						))}
+					</div>
+				) : (
+					<p className="text-muted-foreground">No coffees currently in stock.</p>
+				)}
 			</section>
+
+			{unavailable.length > 0 && (
+				<section className="space-y-4">
+					<h3 className="text-muted-foreground">{unavailable.length} unavailable</h3>
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 opacity-60">
+						{unavailable.map((coffee) => (
+							<CoffeeCard key={coffee.id} coffee={coffee} />
+						))}
+					</div>
+				</section>
+			)}
 		</div>
 	);
 }
