@@ -4,7 +4,7 @@ import Recommendations from '@/components/Recommendations';
 import type { DomainCoffeeListResponse, DomainStatsResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export default async function Home() {
 	const [stats, coffees] = await Promise.all([
