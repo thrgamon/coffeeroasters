@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Link from 'next/link';
 import { MobileNav } from '@/components/MobileNav';
+import { SearchButton, SearchPalette } from '@/components/SearchPalette';
 import { UserNav } from '@/components/UserNav';
 import { AuthProvider } from '@/lib/auth-context';
 import { CoffeeTrackerProvider } from '@/lib/coffee-tracker';
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 										<Link href="/my-coffees" className="text-paper/70 hover:text-gold transition-colors">
 											My Coffees
 										</Link>
+										<SearchButton />
 										<UserNav />
 									</div>
 									<div className="sm:hidden">
@@ -53,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 									</div>
 								</div>
 							</nav>
+							<SearchPalette />
 							<main className="mx-auto flex-1 max-w-6xl px-4 py-10">{children}</main>
 							<footer className="bg-ink">
 								<div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs tracking-[0.25em] uppercase font-bold text-warm-grey">
