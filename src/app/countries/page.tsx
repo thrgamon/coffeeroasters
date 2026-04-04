@@ -4,7 +4,7 @@ import type { DomainCountryListResponse } from '@/lib/api/generated/models';
 import { apiFetch } from '@/lib/api/server';
 
 export const metadata: Metadata = { title: 'Origins | COFFEEROASTERS' };
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export default async function CountriesPage() {
 	const data = await apiFetch<DomainCountryListResponse>('/api/countries');

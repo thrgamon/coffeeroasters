@@ -1,4 +1,5 @@
 -- +goose Up
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION coffees_search_vector_update() RETURNS trigger AS $$
 DECLARE
     roaster_name TEXT;
@@ -13,11 +14,12 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+-- +goose StatementEnd
 
--- Rebuild all search vectors to include roaster names
 UPDATE coffees SET updated_at = updated_at;
 
 -- +goose Down
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION coffees_search_vector_update() RETURNS trigger AS $$
 BEGIN
     NEW.search_vector :=
@@ -28,5 +30,6 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+-- +goose StatementEnd
 
 UPDATE coffees SET updated_at = updated_at;
