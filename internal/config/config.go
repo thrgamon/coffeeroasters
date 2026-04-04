@@ -33,7 +33,7 @@ func LoadConfig() Config {
 		environment = "development"
 	}
 
-	sessionMaxAge := 7 * 24 * time.Hour
+	sessionMaxAge := 365 * 24 * time.Hour
 	if v, ok := os.LookupEnv("SESSION_MAX_AGE"); ok {
 		if secs, err := strconv.Atoi(v); err == nil {
 			sessionMaxAge = time.Duration(secs) * time.Second
