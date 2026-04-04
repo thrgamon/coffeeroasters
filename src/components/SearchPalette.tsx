@@ -3,6 +3,7 @@
 import { Bean, MapPin, Search, Store, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { cleanCoffeeName } from '@/lib/clean-name';
 
 interface SearchResult {
 	type: 'coffee' | 'roaster' | 'cafe';
@@ -70,20 +71,9 @@ export function SearchPalette() {
 				]);
 
 				const items: SearchResult[] = [];
-
-				if (coffeeRes.status === 'fulfilled' && coffeeRes.value.coffees) {
-					for (const c of coffeeRes.value.coffees) {
-						items.push({
-							type: 'coffee',
-							id: c.id,
-							title: c.name,
-							subtitle: [c.roaster_name, c.country_name].filter(Boolean).join(' · '),
-							href: `/coffees/${c.id}`,
-						});
-					}
-				}
-
 				const q = query.toLowerCase();
+
+				// Roasters first so they appear at the top
 				if (roasterRes.status === 'fulfilled' && roasterRes.value.roasters) {
 					for (const r of roasterRes.value.roasters) {
 						if (r.name.toLowerCase().includes(q)) {
@@ -91,10 +81,22 @@ export function SearchPalette() {
 								type: 'roaster',
 								id: r.slug,
 								title: r.name,
-								subtitle: r.state || undefined,
+								subtitle: [r.state, r.coffee_count ? `${r.coffee_count} coffees` : ''].filter(Boolean).join(' · '),
 								href: `/roasters/${r.slug}`,
 							});
 						}
+					}
+				}
+
+				if (coffeeRes.status === 'fulfilled' && coffeeRes.value.coffees) {
+					for (const c of coffeeRes.value.coffees) {
+						items.push({
+							type: 'coffee',
+							id: c.id,
+							title: cleanCoffeeName(c.name ?? '', c.country_name),
+							subtitle: [c.roaster_name, c.country_name].filter(Boolean).join(' · '),
+							href: `/coffees/${c.id}`,
+						});
 					}
 				}
 
